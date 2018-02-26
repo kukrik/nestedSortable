@@ -1,0 +1,16 @@
+{
+    "name": "kukrik/nestedsortable",
+    "description": "QCubed plugin for NestedSortable.",
+    "type": "qcubed-library",
+    "keywords": ["qcubed", "nestedSortable"],
+    "license": "MIT",
+    "require": {
+        "php": ">=5.5"
+    },
+    "autoload": {
+      "psr-4": {"QCubed\\Plugin\\": "src/"}
+    },
+    "extra": {
+        "examples": ["menu.php"]
+    }
+}

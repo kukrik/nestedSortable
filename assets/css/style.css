@@ -1,0 +1,276 @@
+body {
+    background-color: #ebe7e2 !important;
+    font-size: 13px;
+}
+
+.panel-textarea {
+    display: none;
+}
+
+.page-content-wrapper {
+    float: left;
+    width: 100%;
+}
+
+.page-content {
+    margin: 0;
+    padding: 20px 20px 20px 20px;
+    min-height: 280px;
+    border-radius: 0;
+}
+
+.content-body {
+    background-color: #fff;
+    border-radius: 4px;
+}
+
+.panel-heading {
+    margin: 0;
+    padding: 20px 20px 5px 20px;
+    border-bottom-color: #ededed;
+}
+
+.panel-title {
+    padding: 0;
+    font-size: 26px;
+    display: block;
+    color: #f35b1c;
+    margin: 0 0 15px 0;
+    font-weight: 600;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.form-control {
+    display: block;
+    width: 100% !important;
+    height: 34px;
+    padding: 6px 12px;
+    font-size: 13px;
+    line-height: 1.42857143;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #bcd8db;
+    border-radius: 4px;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+    -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+}
+
+.btn-default {
+    color: #333;
+    background-color: #f3f3f3;
+    border-color: #ccc;
+}
+.btn-default:focus,
+.btn-default.focus,
+.btn-default:hover {
+    outline: none;
+}
+
+.btn-orange {
+    color: #fff;
+    background-color: #f36118;
+    border-color: #f36018;
+}
+
+.btn-orange:hover,
+.btn-orange:focus,
+.btn-orange.active {
+    color: #fff;
+    background-color: #e44c14;
+    border-color: #e44c14;
+}
+
+.btn-white {
+    color: #333;
+    background-color: #fff;
+    border-color: #ccc;
+}
+
+
+.panel-body {
+    display: inline-block;
+    padding: 20px;
+    width: 100%;
+}
+
+p, ol, ul {
+    margin-top: 0;
+    margin-bottom: 1em;
+}
+a, a:hover, a:focus {
+    text-decoration: none;
+    outline: none;
+}
+
+.parent {
+    color: #ff0000;
+    font-weight: bold;
+    padding-left: 5px;
+}
+
+/*-- NestedSortable CSS Start---*/
+
+.placeholder {
+    outline: 1px dashed #4183C4;
+    /*-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	margin: -1px;*/
+}
+
+.mjs-nestedSortable-error {
+    background: #fbe3e4;
+    border-color: transparent;
+}
+
+ul {
+    margin: 0;
+    padding: 0;
+    /*padding-left: 30px;*/
+}
+
+ul.sortable {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+ul.sortable ul {
+    margin: 0 0 0 39px;
+    padding: 0;
+    list-style-type: none;
+}
+
+.sortable li {
+    margin: 5px 0 0 0;
+    padding: 0;
+}
+
+.sortable li div.menu-row {
+    height: 38px;
+    line-height: 36px;
+    border: 1px solid #ddd;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    margin: 0;
+    padding: 0;
+    background: #f3f3f3;
+}
+
+.disclose {
+    display: inline-block;
+    color: #7d898d;
+    font-size: 10px;
+    width: 38px;
+    text-align: center;
+    vertical-align: middle;
+    margin-left: -3px;
+    padding: 0;
+    border-right: 1px solid #ddd;
+    cursor: pointer;
+}
+
+.sortable li.mjs-nestedSortable-collapsed > ul {
+    display: none;
+}
+
+.sortable li.mjs-nestedSortable-expanded > ul {
+    display: block;
+}
+
+.sortable li.mjs-nestedSortable-leaf > div.menu-row > .disclose {
+    display: none;
+}
+
+.sortable li.mjs-nestedSortable-collapsed > div.menu-row > .disclose,
+.sortable li.mjs-nestedSortable-expanded > div.menu-row > .disclose {
+    display: inline-block;
+}
+
+.sortable li .reorder {
+    display: inline-block;
+    color: #7d898d;
+    width: 38px;
+    text-align: center;
+    vertical-align: middle;
+    border-right: 1px solid #ddd;
+    cursor: move;
+}
+
+.sortable li.mjs-nestedSortable-collapsed > div.menu-row > .disclose span:before {
+    font-family: "FontAwesome";
+    content: "\f067";
+}
+
+.sortable li.mjs-nestedSortable-expanded > div.menu-row > .disclose span:before {
+    font-family: "FontAwesome";
+    content: "\f068";
+}
+
+.sortable li div.menu-row > .menu-body {
+    display: inline;
+    padding: 7px 7px;
+
+
+    /* If you want to remove a restriction, you can delete or shield these lines below. */
+    width: 70%;
+    word-wrap: break-word;
+    /*word-break: keep-all;*/
+}
+
+.sortable li div.menu-row > .menu-btn-body {
+    display: inline;
+    float: right;
+    padding:  0 7px;
+    line-height: 33px;
+}
+
+.sortable li div:hover {
+    background-color: #fffccc;
+}
+
+.sortable li div.disabled {
+    background-color: #ffe8e8 !important;
+}
+
+@media (max-width: 768px) {
+    li .menu-row,
+    .sortable li div.menu-row > .menu-body,
+    .sortable li div.menu-row > .menu-btn-body {
+        clear: both;
+        display: inline-table;
+        width: 100%;
+        border-top: 1px solid #ddd;
+     }
+
+    .sortable li div.menu-row > .menu-body {
+        display: block;
+        margin: 0;
+        padding:  0 10px;
+        width: 100%;
+    }
+
+    .sortable li div.menu-row > .menu-btn-body {
+        padding: 0 10px;
+        line-height: 37px
+    }
+
+    .menu-btn-body > button {
+        margin-top: -3px;
+    }
+}
+
+@media (max-width: 480px) {
+    h3, .center-button {
+        text-align: center !important;
+    }
+}
+
+/*-- End NestedSortable CSS ---*/
+
+
