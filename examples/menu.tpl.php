@@ -1,4 +1,4 @@
-<?php require(QCUBED_CONFIG_DIR . '/header.inc.php'); ?>
+<?php require('header.inc.php'); ?>
 
 <?php $this->RenderBegin(); ?>
 
@@ -84,4 +84,4 @@
 
 
 <?php $this->RenderEnd(); ?>
-<?php require(QCUBED_CONFIG_DIR . '/footer.inc.php'); ?>
+<?php require('footer.inc.php'); ?>

@@ -58,9 +58,9 @@ class NestedSortableBase extends NestedSortableGen
     {
         $jqOptions = parent::makeJqOptions();
 
-        // TODO: Put this in the qcubed.js file, or something like it.
+        // TODO: Put this in the qcubed.js file, or something like it. //("toArray", {startDepthCount: 0})
         $jqOptions['create'] = new Q\Js\Closure('
-					var ary = jQuery(this).nestedSortable("toArray", {startDepthCount: 0});
+					var ary = jQuery(this).nestedSortable("serialize");
 						var str = ary.join(",");
 			 			qcubed.recordControlModification("$this->ControlId", "_ItemArray", str);
 				');
@@ -73,7 +73,7 @@ class NestedSortableBase extends NestedSortableGen
 
         $strCtrlJs = <<<FUNC
 			;\$j('#{$this->ControlId}').on("sortstop", function (event, ui) {
-						var ary = jQuery(this).nestedSortable("toArray", {startDepthCount: 0});
+						var ary = jQuery(this).nestedSortable("serialize");
 						var str = ary.join(",");
 			 			qcubed.recordControlModification("$this->ControlId", "_ItemArray", str);
 					})
@@ -82,6 +82,10 @@ FUNC;
 
         return $strJS;
     }
+
+    /*			;\$j('#{$this->ControlId}')$(".disclose").on("click", function() {
+			\$j(this).closest("li").toggleClass("mjs-nestedSortable-expanded").toggleClass("mjs-nestedSortable-collapsed");
+					})*/
 
 
     public function __set($strName, $mixValue)

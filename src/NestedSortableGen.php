@@ -4,7 +4,7 @@ namespace QCubed\Plugin;
 use QCubed;
 use QCubed\Type;
 use QCubed\Project\Application;
-use QCubed\Project\Jqui\Sortable;
+//use QCubed\Project\Jqui\Sortable;
 use QCubed\Exception\InvalidCast;
 use QCubed\Exception\Caller;
 use QCubed\ModelConnector\Param as QModelConnectorParam;
@@ -12,7 +12,7 @@ use QCubed\ModelConnector\Param as QModelConnectorParam;
 /**
  * Class NestedSortableGen
  *
- * This is the SortableGen class which ..........
+ * This is the NestedSortableGen class which ..........
  *
  *
  *
@@ -23,7 +23,7 @@ use QCubed\ModelConnector\Param as QModelConnectorParam;
  *
  */
 
-class NestedSortableGen extends Sortable
+class NestedSortableGen extends \QCubed\Project\Jqui\Sortable
 {
     protected $strJavaScripts = QCUBED_JQUI_JS;
     protected $strStyleSheets = QCUBED_JQUI_CSS;
@@ -32,25 +32,25 @@ class NestedSortableGen extends Sortable
     /** @var boolean */
     protected $blnDoNotClear = null;
     /** @var integer */
-    protected $intExpandOnHover =  null;
+    protected $intExpandOnHover = null;
     /** @var boolean */
-    protected $blnIsTree =  null;
+    protected $blnIsTree = null;
     /** @var string */
-    protected $strListType =  null;
+    protected $strListType = null;
     /** @var integer */
-    protected $intMaxLevels =  null;
+    protected $intMaxLevels = null;
     /** @var boolean */
-    protected $blnProtectRoot =  null;
+    protected $blnProtectRoot = null;
     /** @var integer */
     protected $intRootId = null;
     /** @var boolean */
     protected $blnRTL = null;
     /** @var boolean */
-    protected $blnStartCollapsed =  null;
+    protected $blnStartCollapsed = null;
     /** @var integer */
-    protected $intTabSize =  null;
+    protected $intTabSize = null;
     /** @var string */
-    protected $strToleranceElement =  null;
+    protected $strToleranceElement = null;
     /** @var string */
     protected $strBranchClass = null;
     /** @var string */
@@ -73,8 +73,9 @@ class NestedSortableGen extends Sortable
      *
      * @return array key=>value array of options
      */
-    protected function MakeJqOptions() {
-        $jqOptions = null;
+
+    public function makeJqOptions() {
+        $jqOptions = parent::MakeJqOptions();
         if (!is_null($val = $this->DisableParentChange)) {$jqOptions['disableParentChange'] = $val;}
         if (!is_null($val = $this->DoNotClear)) {$jqOptions['doNotClear'] = $val;}
         if (!is_null($val = $this->ExpandOnHover)) {$jqOptions['expandOnHover'] = $val;}
@@ -208,7 +209,7 @@ class NestedSortableGen extends Sortable
             case 'IsTree': return $this->blnIsTree;
             case 'ListType': return $this->strListType;
             case 'MaxLevels': return $this->intMaxLevels;
-            case 'ProtectRoot ': return $this->blnProtectRoot;
+            case 'ProtectRoot': return $this->blnProtectRoot;
             case 'RootId': return $this->intRootId;
             case 'RTL': return $this->blnRTL;
             case 'StartCollapsed': return $this->blnStartCollapsed;

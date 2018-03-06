@@ -12,9 +12,13 @@ use QCubed\Exception\InvalidCast;
 use QCubed\Control\BlockControl;
 use QCubed\Type;
 use QCubed\QString;
+use QCubed\Project\Application;
+use QCubed\Project\Control;
 use QCubed\Html;
 use QCubed\Bootstrap as Bs;
-use QCubed\Plugin\NestedSortable;
+//use QCubed\Plugin\NestedSortable;
+
+use DataBinderTrait;
 
 // we need a better way of reconfiguring JS and CSS assets
 if (!defined('QCUBED_NESTEDSORTABLE_ASSETS_URL')) {
@@ -36,6 +40,7 @@ if (!defined('QCUBED_NESTEDSORTABLE_ASSETS_URL')) {
 class MenuPanelBase extends BlockControl
 {
 
+
     protected $blnUseWrapper = false; //If you do not have it turned on globally, then turn on locally.
     //protected $strTagName = 'ul';
     //protected $strIndicateClass = 'mjs-nestedSortable-leaf';
@@ -51,18 +56,20 @@ class MenuPanelBase extends BlockControl
     /** @var  integer Right */
     protected $intRight = null;
 
+    //protected $objMenuArrays;
 
-	public function __construct($objParentObject, $strControlId = null)
-    {
-		parent::__construct($objParentObject, $strControlId);
-		$this->registerFiles();
-	}
 
-	protected function registerFiles()
+    public function __construct($objParentObject, $strControlId = null)
     {
-        $this->AddCssFile(QCUBED_BOOTSTRAP_CSS); // make sure they know
-        $this->AddCssFile(QCUBED_FONT_AWESOME_CSS); // make sure they know
-        $this->addCssFile(QCUBED_NESTEDSORTABLE_ASSETS_URL . "/css/style.js");
+        parent::__construct($objParentObject, $strControlId);
+        $this->registerFiles();
+    }
+
+    protected function registerFiles()
+    {
+        //$this->AddCssFile(QCUBED_BOOTSTRAP_CSS); // make sure they know
+        //$this->AddCssFile(QCUBED_FONT_AWESOME_CSS); // make sure they know
+        //$this->addCssFile(QCUBED_NESTEDSORTABLE_ASSETS_URL . "/css/style.css");
         Bs\Bootstrap::loadJS($this);
     }
 
@@ -75,22 +82,24 @@ class MenuPanelBase extends BlockControl
         return $strToReturn;
     }
 
+
+
     /**
      * Returns the HTML formatted string for the control
      * @return string HTML string
      */
     protected function getControlHtml()
     {
-        $objMenuArrays = Menu::loadAll();
-        $data = array();
-        foreach ($objMenuArrays as $objMenuArray) {
-            $objParentsIds = $objMenuArray->ParentId;
-            $data[] = $objParentsIds;
-        }
 
-        $strText = QString::htmlEntities($this->Text);
+        /*$strHtml = '';
+        if ($this->hasDataBinder()) {
+            $this->callDataBinder();
+        }*/
+
+        $strText = Q\QString::htmlEntities($this->Text);
 
         $strInnerHtml = <<<TMPL
+
 <div class="menu-row enabled">
     <span class="reorder"><i class="fa fa-reorder"></i></span>
     <span class="disclose"><span></span></span>
@@ -105,8 +114,58 @@ class MenuPanelBase extends BlockControl
         </button>
     </section>
 </div>
+
 TMPL;
-        if(empty($this->ParentId)) {
+        if (!is_null($this->ParentId)) {
+            $strHtml =  $this->renderTag('li', ['id' => $this->strControlId . '_' . $this->intId], null, $strInnerHtml);
+            $strHtml = Html::renderTag($this->strTagName, null, $strHtml);
+            return $strHtml;
+        } else /*if (is_null($this->ParentId))*/ {
+            $strHtml = $this->renderTag('li', ['id' => $this->strControlId . '_' . $this->intId], null, $strInnerHtml);
+            //$strHtml = $this->renderTag('ul', null, $strHtml);
+            return $strHtml;
+        /*} else {
+            $strHtml = $this->renderTag('li', ['id' => $this->strControlId . '_' . $this->intId], null, $strInnerHtml);
+            //$strHtml .= Html::renderTag('ul', null, $strHtml);
+            return $strHtml;*/
+
+        }
+
+        //return $strHtml;
+
+}
+
+
+    public function getControlJavaScript()
+    {
+
+        $strJS = sprintf('$j( document ).on( "click", function( event ) {
+  $j( event.target ).closest( "li" ).css("background-color", "red");
+});',
+            //$this->getJqControlId(),
+            //$this->intId,
+            $this->getJqControlId(),
+            $this->intId);
+
+
+        /*$strJS = sprintf('$j("#%s_%s.disclose").on("click", function() {
+            $j(this).closest("li").toggleClass("mjs-nestedSortable-expanded").toggleClass("mjs-nestedSortable-collapsed");
+        })',
+            $this->getJqControlId(),
+            $this->intId,
+            $this->getJqControlId(),
+            $this->intId);*/
+        return $strJS;
+    }
+
+    /*public function getEndScript()
+    {
+        return  $this->getControlJavaScript() . '; ' . parent::getEndScript();
+    }*/
+
+
+
+        /*if(empty($this->ParentId)) {
             if (in_array($this->Id, $data)) {
                 return $this->renderTag('li', ['id'=>$this->strControlId . '_' . $this->intId, 'class' => 'mjs-nestedSortable-expanded'], null, $strInnerHtml);
             } else
@@ -119,20 +178,46 @@ TMPL;
                 $strInnerHtml = $this->renderTag('li', ['id' => $this->strControlId . '_' . $this->intId, 'class' => 'mjs-nestedSortable-leaf'], null, $strInnerHtml);
                 return Html::renderTag($this->TagName, null, null, $strInnerHtml);
             }
-        }
+        }*/
 
-    }
+    //} $j("#%s").
 
-    /*public function getControlJavaScript()
+
+
+    /*public function getEndScript()
     {
-        $strJS = sprintf('$j("#%s").counterUp({delay: 10, time: 1000})', $this->getJqControlId());
+        $strJS = parent::getEndScript();
+
+        $strCtrlJs = <<<FUNC
+			;\$j('(".disclose").on("click", function() {
+            $j(this).closest("li").toggleClass("mjs-nestedSortable-expanded").toggleClass("mjs-nestedSortable-collapsed");
+        })
+FUNC;
+        Application::executeJavaScript($strCtrlJs, Application::PRIORITY_HIGH);
+
         return $strJS;
-    }
+    }*/
 
-	public function getEndScript()
-    {
-        return  $this->getControlJavaScript() . '; ' . parent::getEndScript();
-	}*/
+
+    //public function renderScript(ControlBase $objControl)
+    //{
+        /*if ($this->blnDisplay === true) {
+            $strShowOrHide = 'show';
+        } else {
+            if ($this->blnDisplay === false) {
+                $strShowOrHide = 'hide';
+            } else {
+                $strShowOrHide = '';
+            }
+        }*/
+
+        //return sprintf('$j("#%s").(".disclose").on("click", function() {
+            //$j(this).closest("li").toggleClass("mjs-nestedSortable-expanded").toggleClass("mjs-nestedSortable-collapsed");
+        //})',
+            //$objControl->ControlId);
+    //}
+
+
 
     /////////////////////////
     // Public Properties: GET
