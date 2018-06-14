@@ -156,16 +156,16 @@ class MenuPanelBase extends ControlBase
         $this->strInnerHtml = <<<TMPL
 
 <div class="menu-row enabled">
-    <span class="reorder"><i class="fas fa-bars"></i></span>
+    <span class="reorder"><i class="fa fa-bars"></i></span>
     <span class="disclose"><span></span></span>
     <section class="menu-body">{$this->strText}</section>
     <section class="menu-btn-body center-button">
         <button title="Disable" class="btn btn-white btn-xs" data-toggle="tooltip" data-value="{$this->strControlId}" >Disable</button>
         <button title="Edit" class="btn btn-primary btn-xs" data-toggle="tooltip" data-value="{$this->strControlId}" >
-            <i class="fas fa-pencil-alt"></i>
+            <i class="fa fa-pencil"></i>
         </button>
         <button class="btn btn-danger btn-xs" data-toggle="tooltip" title="Delete" data-value="{$this->strControlId}">
-            <i class="far fa-trash-alt"></i>
+            <i class="fa fa-trash"></i>
         </button>
     </section>
 </div>
