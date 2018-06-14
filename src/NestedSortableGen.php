@@ -2,27 +2,16 @@
 namespace QCubed\Plugin;
 
 use QCubed;
-use QCubed\Type;
-use QCubed\Project\Application;
-//use QCubed\Project\Jqui\Sortable;
-use QCubed\Exception\InvalidCast;
 use QCubed\Exception\Caller;
+use QCubed\Exception\InvalidCast;
 use QCubed\ModelConnector\Param as QModelConnectorParam;
+use QCubed\Project\Application;
+use QCubed\Type;
 
 /**
  * Class NestedSortableGen
- *
- * This is the NestedSortableGen class which ..........
- *
- *
- *
- *
- *
- *
- *
- *
+ * @package QCubed\Plugin
  */
-
 class NestedSortableGen extends \QCubed\Project\Jqui\Sortable
 {
     protected $strJavaScripts = QCUBED_JQUI_JS;
@@ -74,28 +63,69 @@ class NestedSortableGen extends \QCubed\Project\Jqui\Sortable
      * @return array key=>value array of options
      */
 
-    public function makeJqOptions() {
+    public function makeJqOptions()
+    {
         $jqOptions = parent::MakeJqOptions();
-        if (!is_null($val = $this->DisableParentChange)) {$jqOptions['disableParentChange'] = $val;}
-        if (!is_null($val = $this->DoNotClear)) {$jqOptions['doNotClear'] = $val;}
-        if (!is_null($val = $this->ExpandOnHover)) {$jqOptions['expandOnHover'] = $val;}
-        if (!is_null($val = $this->IsTree)) {$jqOptions['isTree'] = $val;}
-        if (!is_null($val = $this->ListType)) {$jqOptions['listType'] = $val;}
-        if (!is_null($val = $this->MaxLevels)) {$jqOptions['maxLevels'] = $val;}
-        if (!is_null($val = $this->ProtectRoot)) {$jqOptions['protectRoot'] = $val;}
-        if (!is_null($val = $this->RootId)) {$jqOptions['rootID'] = $val;}
-        if (!is_null($val = $this->RTL)) {$jqOptions['rtl'] = $val;}
-        if (!is_null($val = $this->StartCollapsed)) {$jqOptions['startCollapsed'] = $val;}
-        if (!is_null($val = $this->TabSize)) {$jqOptions['tabSize'] = $val;}
-        if (!is_null($val = $this->ToleranceElement)) {$jqOptions['toleranceElement'] = $val;}
-        if (!is_null($val = $this->BranchClass)) {$jqOptions['branchClass'] = $val;}
-        if (!is_null($val = $this->CollapsedClass)) {$jqOptions['collapsedClass'] = $val;}
-        if (!is_null($val = $this->DisableNestingClass)) {$jqOptions['disableNestingClass'] = $val;}
-        if (!is_null($val = $this->ErrorClass)) {$jqOptions['errorClass'] = $val;}
-        if (!is_null($val = $this->ExpandedClass)) {$jqOptions['expandedClass'] = $val;}
-        if (!is_null($val = $this->HoveringClass)) {$jqOptions['hoveringClass'] = $val;}
-        if (!is_null($val = $this->LeafClass)) {$jqOptions['leafClass'] = $val;}
-        if (!is_null($val = $this->DisabledClass)) {$jqOptions['disabledClass'] = $val;}
+        if (!is_null($val = $this->DisableParentChange)) {
+            $jqOptions['disableParentChange'] = $val;
+        }
+        if (!is_null($val = $this->DoNotClear)) {
+            $jqOptions['doNotClear'] = $val;
+        }
+        if (!is_null($val = $this->ExpandOnHover)) {
+            $jqOptions['expandOnHover'] = $val;
+        }
+        if (!is_null($val = $this->IsTree)) {
+            $jqOptions['isTree'] = $val;
+        }
+        if (!is_null($val = $this->ListType)) {
+            $jqOptions['listType'] = $val;
+        }
+        if (!is_null($val = $this->MaxLevels)) {
+            $jqOptions['maxLevels'] = $val;
+        }
+        if (!is_null($val = $this->ProtectRoot)) {
+            $jqOptions['protectRoot'] = $val;
+        }
+        if (!is_null($val = $this->RootId)) {
+            $jqOptions['rootID'] = $val;
+        }
+        if (!is_null($val = $this->RTL)) {
+            $jqOptions['rtl'] = $val;
+        }
+        if (!is_null($val = $this->StartCollapsed)) {
+            $jqOptions['startCollapsed'] = $val;
+        }
+        if (!is_null($val = $this->TabSize)) {
+            $jqOptions['tabSize'] = $val;
+        }
+        if (!is_null($val = $this->ToleranceElement)) {
+            $jqOptions['toleranceElement'] = $val;
+        }
+        if (!is_null($val = $this->BranchClass)) {
+            $jqOptions['branchClass'] = $val;
+        }
+        if (!is_null($val = $this->CollapsedClass)) {
+            $jqOptions['collapsedClass'] = $val;
+        }
+        if (!is_null($val = $this->DisableNestingClass)) {
+            $jqOptions['disableNestingClass'] = $val;
+        }
+        if (!is_null($val = $this->ErrorClass)) {
+            $jqOptions['errorClass'] = $val;
+        }
+        if (!is_null($val = $this->ExpandedClass)) {
+            $jqOptions['expandedClass'] = $val;
+        }
+        if (!is_null($val = $this->HoveringClass)) {
+            $jqOptions['hoveringClass'] = $val;
+        }
+        if (!is_null($val = $this->LeafClass)) {
+            $jqOptions['leafClass'] = $val;
+        }
+        if (!is_null($val = $this->DisabledClass)) {
+            $jqOptions['disabledClass'] = $val;
+        }
         return $jqOptions;
     }
 
@@ -119,6 +149,7 @@ class NestedSortableGen extends \QCubed\Project\Jqui\Sortable
     {
         Application::executeControlCommand($this->getJqControlId(), $this->getJqSetupFunction(), "change", Application::PRIORITY_LOW);
     }
+
     /**
      * Fires when the item is dragged.
      *
@@ -128,6 +159,7 @@ class NestedSortableGen extends \QCubed\Project\Jqui\Sortable
     {
         Application::executeControlCommand($this->getJqControlId(), $this->getJqSetupFunction(), "sort", Application::PRIORITY_LOW);
     }
+
     /**
      * Fires once the object has moved if the new location is invalid.
      *
@@ -137,6 +169,7 @@ class NestedSortableGen extends \QCubed\Project\Jqui\Sortable
     {
         Application::executeControlCommand($this->getJqControlId(), $this->getJqSetupFunction(), "revert", Application::PRIORITY_LOW);
     }
+
     /**
      * Only fires once when the item is done bing moved at its final location.
      *
@@ -146,41 +179,44 @@ class NestedSortableGen extends \QCubed\Project\Jqui\Sortable
     {
         Application::executeControlCommand($this->getJqControlId(), $this->getJqSetupFunction(), "relocate", Application::PRIORITY_LOW);
     }
+
     /**
      * Gets the value currently associated with the specified optionName.
-     * 
+     *
      * Note: For options that have objects as their value, you can get the
      * value of a specific key by using dot notation. For example, "foo.bar"
      * would get the value of the bar property on the foo option.
-     * 
-     * 	* optionName Type: String The name of the option to get.
+     *
+     *    * optionName Type: String The name of the option to get.
      * @param $optionName
      */
     public function option($optionName)
     {
         Application::executeControlCommand($this->getJqControlId(), $this->getJqSetupFunction(), "option", $optionName, Application::PRIORITY_LOW);
     }
+
     /**
      * Gets an object containing key/value pairs representing the current
      * sortable options hash.
-     * 
-     * 	* This signature does not accept any arguments.
+     *
+     *    * This signature does not accept any arguments.
      */
     public function option1()
     {
         Application::executeControlCommand($this->getJqControlId(), $this->getJqSetupFunction(), "option", Application::PRIORITY_LOW);
     }
+
     /**
      * Sets the value of the sortable option associated with the specified
      * optionName.
-     * 
+     *
      * Note: For options that have objects as their value, you can set the
      * value of just one property by using dot notation for optionName. For
      * example, "foo.bar" would update only the bar property of the foo
      * option.
-     * 
-     * 	* optionName Type: String The name of the option to set.
-     * 	* value Type: Object A value to set for the option.
+     *
+     *    * optionName Type: String The name of the option to set.
+     *    * value Type: Object A value to set for the option.
      * @param $optionName
      * @param $value
      */
@@ -188,10 +224,11 @@ class NestedSortableGen extends \QCubed\Project\Jqui\Sortable
     {
         Application::executeControlCommand($this->getJqControlId(), $this->getJqSetupFunction(), "option", $optionName, $value, Application::PRIORITY_LOW);
     }
+
     /**
      * Sets one or more options for the sortable.
-     * 
-     * 	* options Type: Object A map of option-value pairs to set.
+     *
+     *    * options Type: Object A map of option-value pairs to set.
      * @param $options
      */
     public function option3($options)
@@ -203,27 +240,47 @@ class NestedSortableGen extends \QCubed\Project\Jqui\Sortable
     public function __get($strName)
     {
         switch ($strName) {
-            case 'DisableParentChange': return $this->blnDisableParentChange;
-            case 'DoNotClear': return $this->blnDoNotClear;
-            case 'ExpandOnHover': return $this->intExpandOnHover;
-            case 'IsTree': return $this->blnIsTree;
-            case 'ListType': return $this->strListType;
-            case 'MaxLevels': return $this->intMaxLevels;
-            case 'ProtectRoot': return $this->blnProtectRoot;
-            case 'RootId': return $this->intRootId;
-            case 'RTL': return $this->blnRTL;
-            case 'StartCollapsed': return $this->blnStartCollapsed;
-            case 'TabSize': return $this->intTabSize;
-            case 'ToleranceElement': return $this->strToleranceElement;
+            case 'DisableParentChange':
+                return $this->blnDisableParentChange;
+            case 'DoNotClear':
+                return $this->blnDoNotClear;
+            case 'ExpandOnHover':
+                return $this->intExpandOnHover;
+            case 'IsTree':
+                return $this->blnIsTree;
+            case 'ListType':
+                return $this->strListType;
+            case 'MaxLevels':
+                return $this->intMaxLevels;
+            case 'ProtectRoot':
+                return $this->blnProtectRoot;
+            case 'RootId':
+                return $this->intRootId;
+            case 'RTL':
+                return $this->blnRTL;
+            case 'StartCollapsed':
+                return $this->blnStartCollapsed;
+            case 'TabSize':
+                return $this->intTabSize;
+            case 'ToleranceElement':
+                return $this->strToleranceElement;
 
-            case 'BranchClass': return $this->strBranchClass;
-            case 'CollapsedClass': return $this->strCollapsedClass;
-            case 'DisableNestingClass': return $this->strDisableNestingClass;
-            case 'ErrorClass': return $this->strErrorClass;
-            case 'ExpandedClass': return $this->strExpandedClass;
-            case 'HoveringClass': return $this->strHoveringClass;
-            case 'LeafClass': return $this->strLeafClass;
-            case 'DisabledClass': return $this->strDisabledClass;
+            case 'BranchClass':
+                return $this->strBranchClass;
+            case 'CollapsedClass':
+                return $this->strCollapsedClass;
+            case 'DisableNestingClass':
+                return $this->strDisableNestingClass;
+            case 'ErrorClass':
+                return $this->strErrorClass;
+            case 'ExpandedClass':
+                return $this->strExpandedClass;
+            case 'HoveringClass':
+                return $this->strHoveringClass;
+            case 'LeafClass':
+                return $this->strLeafClass;
+            case 'DisabledClass':
+                return $this->strDisabledClass;
             default:
                 try {
                     return parent::__get($strName);
@@ -238,14 +295,14 @@ class NestedSortableGen extends \QCubed\Project\Jqui\Sortable
     {
         switch ($strName) {
             case 'DisableParentChange':
-            try {
-                $this->blnDisableParentChange = Type::Cast($mixValue, Type::BOOLEAN);
-                $this->addAttributeScript($this->getJqSetupFunction(), 'option', 'disableParentChange', $this->blnDisableParentChange);
-                break;
-            } catch (InvalidCast $objExc) {
-                $objExc->incrementOffset();
-                throw $objExc;
-            }
+                try {
+                    $this->blnDisableParentChange = Type::Cast($mixValue, Type::BOOLEAN);
+                    $this->addAttributeScript($this->getJqSetupFunction(), 'option', 'disableParentChange', $this->blnDisableParentChange);
+                    break;
+                } catch (InvalidCast $objExc) {
+                    $objExc->incrementOffset();
+                    throw $objExc;
+                }
 
             case 'DoNotClear':
                 try {
@@ -449,10 +506,10 @@ class NestedSortableGen extends \QCubed\Project\Jqui\Sortable
     }
 
     /**
-    * If this control is attachable to a codegenerated control in a ModelConnector, this function will be
-    * used by the ModelConnector designer dialog to display a list of options for the control.
-    * @return QModelConnectorParam[]
-    **/
+     * If this control is attachable to a codegenerated control in a ModelConnector, this function will be
+     * used by the ModelConnector designer dialog to display a list of options for the control.
+     * @return QModelConnectorParam[]
+     **/
     public static function getModelConnectorParams()
     {
         return array_merge(parent::GetModelConnectorParams(), array());

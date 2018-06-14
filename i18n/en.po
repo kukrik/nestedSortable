@@ -1,0 +1,12 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: 4.0\n"
+"Report-Msgid-Bugs-To: QCubed\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+# For QCubed\nestedSortable
+msgid "Welcome to use nestedSortable!"
+msgstr "Welcome to use nestedSortable!"

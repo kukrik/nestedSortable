@@ -6,15 +6,15 @@
  */
 $dirpath = dirname(__FILE__);
 do {
-	$dirpath = $dirpath . '/../';
-	$dirpath = realpath($dirpath);
-	if ($dirpath == '/') {
-		$filepath = '/qcubed.inc.php';
-	} else {
-		$filepath = $dirpath . '/qcubed.inc.php';
-	}
-	$blnFound = file_exists($filepath);
+    $dirpath = $dirpath . '/../';
+    $dirpath = realpath($dirpath);
+    if ($dirpath == '/') {
+        $filepath = '/qcubed.inc.php';
+    } else {
+        $filepath = $dirpath . '/qcubed.inc.php';
+    }
+    $blnFound = file_exists($filepath);
 } while (!$blnFound && $dirpath != '/');
 if ($blnFound) {
-	require_once($filepath);
+    require_once($filepath);
 }

@@ -7,18 +7,14 @@
 namespace QCubed\Plugin;
 
 use QCubed as Q;
+use QCubed\Bootstrap as Bs;
 use QCubed\Exception\Caller;
 use QCubed\Exception\InvalidCast;
-use QCubed\Control\BlockControl;
-use QCubed\Type;
-use QCubed\QString;
+use QCubed\Js;
 use QCubed\Project\Application;
 use QCubed\Project\Control;
-use QCubed\Html;
-use QCubed\Bootstrap as Bs;
-//use QCubed\Plugin\NestedSortable;
-
-use DataBinderTrait;
+use QCubed\Project\Control\ControlBase;
+use QCubed\Type;
 
 // we need a better way of reconfiguring JS and CSS assets
 if (!defined('QCUBED_NESTEDSORTABLE_ASSETS_URL')) {
@@ -26,25 +22,30 @@ if (!defined('QCUBED_NESTEDSORTABLE_ASSETS_URL')) {
 }
 
 /**
- * Class MenuPanel: ..................
- *
+ * Class MenuPanelBase
  * @property integer $Id
  * @property integer $ParentId
  * @property integer $Depth
  * @property integer $Left
- * @property Integer $Right
+ * @property integer $Right
+ * @property string $Text
  *
  * @package QCubed\Plugin
  */
-
-class MenuPanelBase extends BlockControl
+class MenuPanelBase extends ControlBase
 {
 
-
+    /** @var bool UseWrapper */
     protected $blnUseWrapper = false; //If you do not have it turned on globally, then turn on locally.
-    //protected $strTagName = 'ul';
-    //protected $strIndicateClass = 'mjs-nestedSortable-leaf';
-
+    /** @var string TagName */
+    protected $strTagName;
+    /**
+     * @var
+     */
+    protected $objNodes;
+    protected $strInnerHtml;
+    protected $intCurrentDepth = 0;
+    protected $intCounter = 0;
     /** @var  integer Id */
     protected $intId = null;
     /** @var  integer ParentId */
@@ -55,25 +56,129 @@ class MenuPanelBase extends BlockControl
     protected $intLeft = null;
     /** @var  integer Right */
     protected $intRight = null;
-
-    //protected $objMenuArrays;
-
+    /** @var  string Text */
+    protected $strText = null;
 
     public function __construct($objParentObject, $strControlId = null)
     {
-        parent::__construct($objParentObject, $strControlId);
+        try {
+            parent::__construct($objParentObject, $strControlId);
+        } catch (Caller  $objExc) {
+            $objExc->incrementOffset();
+            throw $objExc;
+        }
         $this->registerFiles();
     }
 
+    /**
+     * @throws Caller
+     */
     protected function registerFiles()
     {
-        //$this->AddCssFile(QCUBED_BOOTSTRAP_CSS); // make sure they know
-        //$this->AddCssFile(QCUBED_FONT_AWESOME_CSS); // make sure they know
-        //$this->addCssFile(QCUBED_NESTEDSORTABLE_ASSETS_URL . "/css/style.css");
+        $this->AddCssFile(QCUBED_BOOTSTRAP_CSS); // make sure they know
+        $this->AddCssFile(QCUBED_FONT_AWESOME_CSS); // make sure they know
+        $this->addCssFile(QCUBED_NESTEDSORTABLE_ASSETS_URL . "/css/style.css");
         Bs\Bootstrap::loadJS($this);
     }
 
-    public static function createFaHtml($strIcon, $strDescription = null)
+    public function validate()
+    {
+        return true;
+    }
+
+    public function parsePostData()
+    {
+    }
+
+    /**
+     * Returns the HTML for the control.
+     * @return string
+     */
+    protected function getControlHtml()
+    {
+        $this->getInnerHtml();
+        foreach ($this->objChildControlArray as $objChildControl) {
+            $this->objNodes[] = [
+                'id' => $objChildControl->intId,
+                'depth' => $objChildControl->intDepth,
+                'left' => $objChildControl->intLeft,
+                'right' => $objChildControl->intRight,
+                'text' => $objChildControl->strText
+            ];
+        };
+
+        $this->varExport($this->objNodes);
+        //var_dump($this->objNodes);
+        //$this->renderMenuTree([$this->objNodes]);
+    }
+
+    /**
+     * @param array $objTree
+     * @return string
+     */
+    function renderMenuTree($objTree = array(array('id' => '', 'depth' => '', 'left' => '', 'right' => '')))
+    {
+        $strHtml = '';
+        foreach ($objTree as $params) {
+            $this->intId = $params['id'];
+            $this->intDepth = $params['depth'];
+            $this->intLeft = $params['left'];
+            $this->intRight = $params['right'];
+
+            if ($this->intDepth == $this->intCurrentDepth) {
+                if ($this->intCounter > 0)
+                    $strHtml .= '</li>';
+            } elseif ($this->intDepth > $this->intCurrentDepth) {
+                $strHtml .= '<' . $this->strTagName . '>';
+                $this->intCurrentDepth = $this->intCurrentDepth + ($this->intDepth - $this->intCurrentDepth);
+            } elseif ($this->intDepth < $this->intCurrentDepth) {
+                $strHtml .= str_repeat('</li>' . '</' . $this->strTagName . '>', $this->intCurrentDepth - $this->intDepth) . '</li>';
+                $this->intCurrentDepth = $this->intCurrentDepth - ($this->intCurrentDepth - $this->intDepth);
+            }
+            $strHtml .= _nl() . '<li id="' /*. $this->strControlId . '_' */ . $this->intId . '"';
+            if ($this->intLeft + 1 == $this->intRight) {
+                $strHtml .= ' class="mjs-nestedSortable-leaf"';
+            } else {
+                $strHtml .= ' class="mjs-nestedSortable-expanded"';
+            }
+            $strHtml .= '>' . $this->strInnerHtml;
+            ++$this->intCounter;
+        }
+        $strHtml .= str_repeat('</li>' . '</' . $this->strTagName . '>', $this->intDepth) . '</li>';
+        return $strHtml;
+    }
+
+    /**
+     *
+     */
+    protected function getInnerHtml()
+    {
+        $this->strInnerHtml = <<<TMPL
+
+<div class="menu-row enabled">
+    <span class="reorder"><i class="fas fa-bars"></i></span>
+    <span class="disclose"><span></span></span>
+    <section class="menu-body">{$this->strText}</section>
+    <section class="menu-btn-body center-button">
+        <button title="Disable" class="btn btn-white btn-xs" data-toggle="tooltip" data-value="{$this->strControlId}" >Disable</button>
+        <button title="Edit" class="btn btn-primary btn-xs" data-toggle="tooltip" data-value="{$this->strControlId}" >
+            <i class="fas fa-pencil-alt"></i>
+        </button>
+        <button class="btn btn-danger btn-xs" data-toggle="tooltip" title="Delete" data-value="{$this->strControlId}">
+            <i class="far fa-trash-alt"></i>
+        </button>
+    </section>
+</div>
+
+TMPL;
+    }
+
+    /**
+     * @param $strIcon
+     * @param null $strDescription
+     * @return string
+     */
+    public function createFaHtml($strIcon, $strDescription = null)
     {
         $strToReturn = sprintf('<i class="fa %s"></i>', $strIcon);
         if ($strDescription) {
@@ -82,153 +187,27 @@ class MenuPanelBase extends BlockControl
         return $strToReturn;
     }
 
-
-
-    /**
-     * Returns the HTML formatted string for the control
-     * @return string HTML string
-     */
-    protected function getControlHtml()
-    {
-
-        /*$strHtml = '';
-        if ($this->hasDataBinder()) {
-            $this->callDataBinder();
-        }*/
-
-        $strText = Q\QString::htmlEntities($this->Text);
-
-        $strInnerHtml = <<<TMPL
-
-<div class="menu-row enabled">
-    <span class="reorder"><i class="fa fa-reorder"></i></span>
-    <span class="disclose"><span></span></span>
-    <section class="menu-body">{$strText}</section>
-    <section class="menu-btn-body center-button">
-        <button title="Disable" class="btn btn-white btn-xs" data-toggle="tooltip" data-value="103" >Disable</button>
-        <button title="Edit" class="btn btn-primary btn-xs" data-toggle="tooltip" value="103" >
-            <i class="fa fa-pencil"></i>
-        </button>
-        <button class="btn btn-danger btn-xs" data-toggle="tooltip" title="Delete" data-value="103">
-            <i class="fa fa-trash-o"></i>
-        </button>
-    </section>
-</div>
-
-TMPL;
-        if (!is_null($this->ParentId)) {
-            $strHtml =  $this->renderTag('li', ['id' => $this->strControlId . '_' . $this->intId], null, $strInnerHtml);
-            $strHtml = Html::renderTag($this->strTagName, null, $strHtml);
-            return $strHtml;
-        } else /*if (is_null($this->ParentId))*/ {
-            $strHtml = $this->renderTag('li', ['id' => $this->strControlId . '_' . $this->intId], null, $strInnerHtml);
-            //$strHtml = $this->renderTag('ul', null, $strHtml);
-            return $strHtml;
-        /*} else {
-            $strHtml = $this->renderTag('li', ['id' => $this->strControlId . '_' . $this->intId], null, $strInnerHtml);
-            //$strHtml .= Html::renderTag('ul', null, $strHtml);
-            return $strHtml;*/
-
-        }
-
-        //return $strHtml;
-
-}
-
-
-    public function getControlJavaScript()
-    {
-
-        $strJS = sprintf('$j( document ).on( "click", function( event ) {
-  $j( event.target ).closest( "li" ).css("background-color", "red");
-});',
-            //$this->getJqControlId(),
-            //$this->intId,
-            $this->getJqControlId(),
-            $this->intId);
-
-
-        /*$strJS = sprintf('$j("#%s_%s.disclose").on("click", function() {
-            $j(this).closest("li").toggleClass("mjs-nestedSortable-expanded").toggleClass("mjs-nestedSortable-collapsed");
-        })',
-            $this->getJqControlId(),
-            $this->intId,
-            $this->getJqControlId(),
-            $this->intId);*/
-        return $strJS;
-    }
-
-    /*public function getEndScript()
-    {
-        return  $this->getControlJavaScript() . '; ' . parent::getEndScript();
-    }*/
-
-
-
-        /*if(empty($this->ParentId)) {
-            if (in_array($this->Id, $data)) {
-                return $this->renderTag('li', ['id'=>$this->strControlId . '_' . $this->intId, 'class' => 'mjs-nestedSortable-expanded'], null, $strInnerHtml);
-            } else
-                return $this->renderTag('li', ['id'=>$this->strControlId . '_' . $this->intId, 'class' => 'mjs-nestedSortable-leaf'], null, $strInnerHtml);
-        } elseif ($this->ParentId) {
-            if (in_array($this->Id, $data)) {
-                $strInnerHtml = $this->renderTag('li', ['id' => $this->strControlId . '_' . $this->intId, 'class' => 'mjs-nestedSortable-expanded'], null, $strInnerHtml);
-                return Html::renderTag($this->TagName, null, null, $strInnerHtml);
-            } else {
-                $strInnerHtml = $this->renderTag('li', ['id' => $this->strControlId . '_' . $this->intId, 'class' => 'mjs-nestedSortable-leaf'], null, $strInnerHtml);
-                return Html::renderTag($this->TagName, null, null, $strInnerHtml);
-            }
-        }*/
-
-    //} $j("#%s").
-
-
-
-    /*public function getEndScript()
-    {
-        $strJS = parent::getEndScript();
-
-        $strCtrlJs = <<<FUNC
-			;\$j('(".disclose").on("click", function() {
-            $j(this).closest("li").toggleClass("mjs-nestedSortable-expanded").toggleClass("mjs-nestedSortable-collapsed");
-        })
-FUNC;
-        Application::executeJavaScript($strCtrlJs, Application::PRIORITY_HIGH);
-
-        return $strJS;
-    }*/
-
-
-    //public function renderScript(ControlBase $objControl)
-    //{
-        /*if ($this->blnDisplay === true) {
-            $strShowOrHide = 'show';
-        } else {
-            if ($this->blnDisplay === false) {
-                $strShowOrHide = 'hide';
-            } else {
-                $strShowOrHide = '';
-            }
-        }*/
-
-        //return sprintf('$j("#%s").(".disclose").on("click", function() {
-            //$j(this).closest("li").toggleClass("mjs-nestedSortable-expanded").toggleClass("mjs-nestedSortable-collapsed");
-        //})',
-            //$objControl->ControlId);
-    //}
-
-
-
     /////////////////////////
     // Public Properties: GET
     /////////////////////////
-    public function __get($strName) {
+
+    public function __get($strName)
+    {
         switch ($strName) {
-            case "Id": return $this->intId;
-            case "ParentId": return $this->intParentId;
-            case "Depth": return $this->intDepth;
-            case "Left": return $this->intLeft;
-            case "Right": return $this->intRight;
+            case "Id":
+                return $this->intId;
+            case "ParentId":
+                return $this->intParentId;
+            case "Depth":
+                return $this->intDepth;
+            case "Left":
+                return $this->intLeft;
+            case "Right":
+                return $this->intRight;
+            case "Text":
+                return $this->strText;
+            case "TagName":
+                return $this->strTagName;
 
             default:
                 try {
@@ -243,9 +222,10 @@ FUNC;
     /////////////////////////
     // Public Properties: SET
     /////////////////////////
-	public function __set($strName, $mixValue) {
-		switch ($strName) {
 
+    public function __set($strName, $mixValue)
+    {
+        switch ($strName) {
             case "Id":
                 try {
                     //$this->blnModified = true;
@@ -255,7 +235,6 @@ FUNC;
                     throw $objExc;
                 }
                 break;
-
             case "ParentId":
                 try {
                     $this->blnModified = true;
@@ -265,7 +244,6 @@ FUNC;
                     throw $objExc;
                 }
                 break;
-
             case "Depth":
                 try {
                     $this->blnModified = true;
@@ -275,7 +253,6 @@ FUNC;
                     throw $objExc;
                 }
                 break;
-
             case "Left":
                 try {
                     $this->blnModified = true;
@@ -285,11 +262,28 @@ FUNC;
                     throw $objExc;
                 }
                 break;
-
             case "Right":
                 try {
                     $this->blnModified = true;
                     $this->intRight = Type::Cast($mixValue, Type::INTEGER);
+                } catch (InvalidCast $objExc) {
+                    $objExc->IncrementOffset();
+                    throw $objExc;
+                }
+                break;
+            case "Text":
+                try {
+                    $this->blnModified = true;
+                    $this->strText = Type::Cast($mixValue, Type::STRING);
+                } catch (InvalidCast $objExc) {
+                    $objExc->IncrementOffset();
+                    throw $objExc;
+                }
+                break;
+            case "TagName":
+                try {
+                    $this->blnModified = true;
+                    $this->strTagName = Type::Cast($mixValue, Type::STRING);
                 } catch (InvalidCast $objExc) {
                     $objExc->IncrementOffset();
                     throw $objExc;
@@ -306,3 +300,4 @@ FUNC;
         }
     }
 }
+

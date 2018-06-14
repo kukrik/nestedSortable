@@ -13,5 +13,4 @@ namespace QCubed\Plugin;
 
 class MenuPanel extends MenuPanelBase
 {
-
 }

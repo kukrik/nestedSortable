@@ -63,10 +63,10 @@
 			border-color: transparent;
 		}
 		
-		#tree {
-			/*width: 550px;
-			margin: 0;*/
-		}
+		/*#tree {
+			width: 550px;
+			margin: 0;
+		}*/
 		
 		ul {
 			 /*max-width: 450px;*/
@@ -154,10 +154,10 @@
 			margin: 1em 0 .3em;
 		}
 		
-		p,ol,ul,pre,form {
-			/*margin-top: 0;
-			margin-bottom: 1em;*/
-		}
+		/*p,ol,ul,pre,form {
+			margin-top: 0;
+			margin-bottom: 1em;
+		}*/
 		
 		dl {
 			margin: 0;
@@ -214,7 +214,7 @@
 				disabledClass: "mjs-nestedSortable-disabled",
 
 				change: function(){
-					console.log('Relocated item');
+					console.log($('#toArrayOutput'));
 				}
 			});
 			
@@ -251,7 +251,7 @@
 			})
 	
 			$('#toArray').click(function(e){
-				arraied = $('ul.sortable').nestedSortable('toArray'/*, {startDepthCount: 0}*/);
+				arraied = $('ul.sortable').nestedSortable('toArray', {startDepthCount: 0});
 				arraied = dump(arraied);
 				(typeof($('#toArrayOutput')[0].textContent) != 'undefined') ?
 				$('#toArrayOutput')[0].textContent = arraied : $('#toArrayOutput')[0].innerText = arraied;
@@ -264,23 +264,22 @@
 				$('ul.sortable').nestedSortable('refresh');
 			});
 
-		});			
-	
+		});
+
 		function dump(arr,level) {
 			var dumped_text = "";
-			//if(!level) level = 0;
-	
+			if(!level) level = 0;
+
 			//The padding given at the beginning of the line.
 			var level_padding = "";
 			for(var j=0;j<level+1;j++) level_padding += "    ";
-	
+
 			if(typeof(arr) == 'object') { //Array/Hashes/Objects
 				for(var item in arr) {
 					var value = arr[item];
-	
+
 					if(typeof(value) == 'object') { //If it is an array,
-						//dumped_text += /*level_padding +*/ "'" + item + "' [NULL]\n";
-						dumped_text +=   "'" + item + "' => [NULL]\n";
+						dumped_text += level_padding + "'" + item + "' ...\n";
 						dumped_text += dump(value,level+1);
 					} else {
 						dumped_text += level_padding + "'" + item + "' => \"" + value + "\"\n";
@@ -370,5 +369,7 @@
 
         <p>&copy; 2010&dash;2014 Manuele J Sarfatti</p>
     </section><!-- END #documentation -->
+
+
 </body>
 </html>

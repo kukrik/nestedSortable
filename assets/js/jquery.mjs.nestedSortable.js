@@ -781,7 +781,9 @@
 											.parent(o.items)
 											.attr(o.attribute || "id"))
 											.match(o.expression || (/(.+)[-=_](.+)/));
+					//if (parentItem[2] === null) {
 					pid = parentItem[2];
+					//}
 				}
 
 				if (id) {
