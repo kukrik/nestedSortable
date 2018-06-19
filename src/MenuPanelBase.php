@@ -136,7 +136,7 @@ class MenuPanelBase extends ControlBase
     }
 
     /**
-     * Uses HTML callback to get each loop in the original array. Relies on the ItemParamsCallback
+     * Uses HTML callback to get each loop in the original array. Relies on the NodeParamsCallback
      * to return information on how to draw each item.
      *
      * @param mixed $objItem
