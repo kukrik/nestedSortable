@@ -213,7 +213,7 @@ class MenuPanelBase extends ControlBase
     }
 
     /**
-     * @param array $Params
+     * @param array $arrParams
      * @return string
      */
     protected function renderMenuTree($arrParams)
