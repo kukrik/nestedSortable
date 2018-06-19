@@ -17,6 +17,7 @@ use QCubed\Project\Control\FormBase as Form;
 class SampleForm extends Form
 {
     protected $dlgSorterTable;
+    protected $pnl;
 
     protected function formCreate()
     {
@@ -24,7 +25,6 @@ class SampleForm extends Form
 
         // NestedSortable
         $this->dlgSorterTable = new NestedSortable($this);
-
         $this->dlgSorterTable->ForcePlaceholderSize = true;
         $this->dlgSorterTable->Handle = 'div';
         $this->dlgSorterTable->Helper = 'clone';
@@ -45,20 +45,28 @@ class SampleForm extends Form
         $this->dlgSorterTable->CssClass = 'sortable ui-sortable';
         $this->dlgSorterTable->TagName = 'ul'; // Please make sure TagName and ListType tags are the same!
 
+        $this->pnl = new MenuPanel($this->dlgSorterTable);
+        $this->pnl->CssClass = 'sortable ui-sortable';
+        $this->pnl->TagName = 'ul';
+        $this->pnl->setDataBinder('Menu_Bind');
+        $this->pnl->setNodeParamsCallback([$this, 'Menu_Draw']);
+
         $this->dlgSorterTable->addAction(new \QCubed\Jqui\Event\SortableStop(), new \QCubed\Action\Ajax('sortable_stop'));
+    }
 
-        $objMenuArray = Menu::loadAll([\QCubed\Query\QQ::expand(QQN::menu()->Content)]);
+    protected function Menu_Bind()
+    {
+        $this->pnl->DataSource = Menu::loadAll([\QCubed\Query\QQ::expand(QQN::menu()->Content)]);;
+    }
 
-        foreach ($objMenuArray as $objMenu) {
-            $pnl = new MenuPanel($this->dlgSorterTable);
-            $pnl->TagName = 'ul';
-            $pnl->Id = $objMenu->getId();
-            $pnl->Depth = $objMenu->getDepth();
-            $pnl->Left = $objMenu->getLeft();
-            $pnl->Right = $objMenu->getRight();
-            $pnl->Text = \QCubed\QString::htmlEntities($objMenu->Content->getMenuText());
-        }
-
+    public function Menu_Draw(Menu $objMenu)
+    {
+        $a['id'] = $objMenu->Id;
+        $a['depth'] = $objMenu->Depth;
+        $a['left'] = $objMenu->Left;
+        $a['right'] = $objMenu->Right;
+        $a['text'] = \QCubed\QString::htmlEntities($objMenu->Content->MenuText);
+        return $a;
     }
 
     public function sortable_stop($strFormId, $strControlId, $strParameter)

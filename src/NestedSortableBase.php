@@ -12,6 +12,8 @@ namespace QCubed\Plugin;
 use QCubed as Q;
 use QCubed\Exception\Caller;
 use QCubed\Exception\InvalidCast;
+use QCubed\Control\FormBase;
+use QCubed\Project\Control\ControlBase;
 use QCubed\Project\Application;
 use QCubed\Type;
 

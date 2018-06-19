@@ -38,10 +38,12 @@
 
                         <div class="row">
                             <div class="form-group col-md-6 center-button">
+
                                 <a href="#" id="collapse-all" class="btn btn-default center-button" title=""
-                                   role="button"><i class="fas fa-minus"></i> Collapse All</a>
+                                   role="button"><i class="fa fa-minus"></i> Collapse All</a>
+
                                 <a href="#" id="expand-all" class="btn btn-default center-button" title=""
-                                   role="button"><i class="fas fa-plus"></i> Expand All</a>
+                                   role="button"><i class="fa fa-plus"></i> Expand All</a>
                             </div>
                         </div>
                     </div>
@@ -59,7 +61,6 @@
                         </div>
 
                         <!-- MENU BEGIN -->
-                        <!-- SIIA TULEB MENUU  -->
 
                         <?php $this->dlgSorterTable->render(); ?>
 
