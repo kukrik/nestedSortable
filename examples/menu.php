@@ -46,7 +46,6 @@ class SampleForm extends Form
         $this->dlgSorterTable->TagName = 'ul'; // Please make sure TagName and ListType tags are the same!
 
         $this->pnl = new MenuPanel($this->dlgSorterTable);
-        $this->pnl->CssClass = 'sortable ui-sortable';
         $this->pnl->TagName = 'ul';
         $this->pnl->setDataBinder('Menu_Bind');
         $this->pnl->setNodeParamsCallback([$this, 'Menu_Draw']);
@@ -56,7 +55,10 @@ class SampleForm extends Form
 
     protected function Menu_Bind()
     {
-        $this->pnl->DataSource = Menu::loadAll([\QCubed\Query\QQ::expand(QQN::menu()->Content)]);;
+        $this->pnl->DataSource = Menu::loadAll(
+            \QCubed\Query\QQ::Clause(\QCubed\Query\QQ::OrderBy(QQN::menu()->Left),
+                \QCubed\Query\QQ::expand(QQN::menu()->Content)
+            ));
     }
 
     public function Menu_Draw(Menu $objMenu)
