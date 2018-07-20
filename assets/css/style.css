@@ -59,6 +59,26 @@ body {
     transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
 }
 
+.form-control:focus {
+    border-color: #66afe9;
+    outline: 0;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+}
+
+
+.has-success .form-control {
+    border-color: #bcd8db;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+.has-success .form-control:focus {
+    border-color: #66afe9;
+    outline: 0;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+}
+
 .btn-default {
     color: #333;
     background-color: #f3f3f3;
@@ -250,6 +270,10 @@ ul.sortable ul {
 
 .sortable li div.disabled {
     background-color: #ffe8e8 !important;
+}
+
+.sortable li div.disabled:hover {
+    background-color: #ffdde2 !important;
 }
 
 @media (max-width: 768px) {

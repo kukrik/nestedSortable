@@ -62,6 +62,7 @@ class NestedSortableBase extends NestedSortableGen
         $jqOptions['create'] = new Q\Js\Closure('
                         var arr = jQuery(this).nestedSortable("toArray", {startDepthCount: 0});
                         var str = JSON.stringify(arr);
+                        console.log(str);
                         qcubed.recordControlModification("$this->ControlId", "_ItemArray", str);
          ');
         return $jqOptions;
@@ -75,6 +76,7 @@ class NestedSortableBase extends NestedSortableGen
                     ;\$j('#{$this->ControlId}').on("sortstop", function (event, ui) {
                         var arr = jQuery(this).nestedSortable("toArray", {startDepthCount: 0});
                         var str = JSON.stringify(arr);
+                        console.log(str);
                         qcubed.recordControlModification("$this->ControlId", "_ItemArray", str);
         })
 FUNC;
@@ -95,6 +97,7 @@ FUNC;
                     $objExc->incrementOffset();
                     throw $objExc;
                 }
+
             default:
                 try {
                     parent::__set($strName, $mixValue);

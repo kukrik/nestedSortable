@@ -7,15 +7,14 @@
 namespace QCubed\Plugin;
 
 use QCubed as Q;
-use QCubed\Application;
 use QCubed\Bootstrap as Bs;
 use QCubed\Control\FormBase;
+use QCubed\Project\Control\ControlBase;
+use QCubed\Project\Control;
+use QCubed\Project\Application;
 use QCubed\Exception\Caller;
 use QCubed\Exception\InvalidCast;
 use QCubed\Js;
-use QCubed\Plugin\NestedSortable as Ns;
-use QCubed\Project\Control;
-use QCubed\Project\Control\ControlBase;
 use QCubed\Type;
 
 // we need a better way of reconfiguring JS and CSS assets
@@ -31,6 +30,7 @@ if (!defined('QCUBED_NESTEDSORTABLE_ASSETS_URL')) {
  * @property integer $Left
  * @property integer $Right
  * @property string $MenuText
+ * @property integer $Status
  *
  * // Unfinished work!!!
  *
@@ -56,6 +56,7 @@ class MenuPanelBase extends ControlBase
 
     protected $intCurrentDepth = 0;
     protected $intCounter = 0;
+    protected $strInnerHtml;
 
     /** @var  integer Id */
     protected $intId = null;
@@ -68,7 +69,9 @@ class MenuPanelBase extends ControlBase
     /** @var  integer Right */
     protected $intRight = null;
     /** @var  string MenuText */
-    protected $strMenuText = null;
+    protected $strMenuText;
+    /** @var  int Status */
+    protected $intStatus;
 
     public function __construct($objParentObject, $strControlId = null)
     {
@@ -92,14 +95,9 @@ class MenuPanelBase extends ControlBase
         Bs\Bootstrap::loadJS($this);
     }
 
-    public function validate()
-    {
-        return true;
-    }
+    public function validate() {return true;}
 
-    public function parsePostData()
-    {
-    }
+    public function parsePostData() {}
 
     /**
      * Returns the HTML for the control.
@@ -137,7 +135,7 @@ class MenuPanelBase extends ControlBase
 
     /**
      * Uses HTML callback to get each loop in the original array. Relies on the NodeParamsCallback
-     * to return information on how to draw each item.
+     * to return information on how to draw each node.
      *
      * @param mixed $objItem
      * @return string
@@ -171,8 +169,19 @@ class MenuPanelBase extends ControlBase
         if (isset($params['text'])) {
             $strText = $params['text'];
         }
+        $intStatus = '';
+        if (isset($params['status'])) {
+            $intStatus = $params['status'];
+        }
 
-        $vars = ['id' => $intId, 'depth' => $intDepth, 'left' => $intLeft, 'right' => $intRight, 'text' => $strText];
+        $vars = [
+            'id' => $intId,
+            'depth' => $intDepth,
+            'left' => $intLeft,
+            'right' => $intRight,
+            'text' => $strText,
+            'status' => $intStatus
+        ];
         return $vars;
     }
 
@@ -186,6 +195,7 @@ class MenuPanelBase extends ControlBase
      *  left - the left for the node tag
      *  right - the right for the node tag
      *  text - the text for the node tag
+     *  status - the status for the node tag
      *
      *  The callback is a callable, so can be of the form [$objControl, "func"]
      *
@@ -213,12 +223,11 @@ class MenuPanelBase extends ControlBase
     }
 
     /**
-     * @param array $arrParams
+     * @param $arrParams
      * @return string
      */
     protected function renderMenuTree($arrParams)
     {
-
         $strHtml = '';
         foreach ($arrParams as $arrParam) {
             $this->intId = $arrParam['id'];
@@ -226,6 +235,9 @@ class MenuPanelBase extends ControlBase
             $this->intLeft = $arrParam['left'];
             $this->intRight = $arrParam['right'];
             $this->strMenuText = $arrParam['text'];
+            $this->intStatus = $arrParam['status'];
+
+            $this->getInnerHtml();
 
             if ($this->intDepth == $this->intCurrentDepth) {
                 if ($this->intCounter > 0)
@@ -243,10 +255,19 @@ class MenuPanelBase extends ControlBase
             } else {
                 $strHtml .= ' class="mjs-nestedSortable-expanded"';
             }
-            $strHtml .= '>';
-            $strHtml .= <<<TMPL
+            $strHtml .= '>' . $this->strInnerHtml;
+            ++$this->intCounter;
+        }
+        $strHtml .= str_repeat('</li>' . '</' . $this->strTagName . '>', $this->intDepth) . '</li>';
+        return $strHtml;
+    }
 
-<div class="menu-row enabled">
+    protected function getInnerHtml()
+    {
+        $strCheckStatus = $this->intStatus == 1 ? 'enabled' : 'disabled';
+        $this->strInnerHtml = <<<TMPL
+
+<div class="menu-row $strCheckStatus">
     <span class="reorder"><i class="fa fa-bars"></i></span>
     <span class="disclose"><span></span></span>
     <section class="menu-body">{$this->strMenuText}</section>
@@ -262,24 +283,25 @@ class MenuPanelBase extends ControlBase
 </div>
 
 TMPL;
-            ++$this->intCounter;
-        }
-        $strHtml .= str_repeat('</li>' . '</' . $this->strTagName . '>', $this->intDepth) . '</li>';
-        return $strHtml;
     }
 
-    /**
-     * @param $strIcon
-     * @param null $strDescription
-     * @return string
-     */
-    public function createFaHtml($strIcon, $strDescription = null) // Unfinished work. It is necessary to re-do.
+    public function makeJqWidget()
     {
-        $strToReturn = sprintf('<i class="fa %s"></i>', $strIcon);
-        if ($strDescription) {
-            $strToReturn .= sprintf(' %s', $strDescription);
-        }
-        return $strToReturn;
+        Application::executeSelectorFunction(".disclose" , "on", "click",
+            new Js\Closure("jQuery(this).closest(\"li\").toggleClass(\"mjs-nestedSortable-expanded\").toggleClass(\"mjs-nestedSortable-collapsed\")"),
+            Application::PRIORITY_HIGH);
+
+        Application::executeSelectorFunction(".collapse-all" , "on", "click",
+            new Js\Closure("jQuery(\"ul.sortable\").find(\"li.mjs-nestedSortable-expanded\").removeClass(\"mjs-nestedSortable-expanded\").addClass(\"mjs-nestedSortable-collapsed\")"),
+            Application::PRIORITY_HIGH);
+
+        Application::executeSelectorFunction(".expand-all" , "on", "click",
+            new Js\Closure("jQuery(\"ul.sortable\").find(\"li.mjs-nestedSortable-collapsed\").removeClass(\"mjs-nestedSortable-collapsed\").addClass(\"mjs-nestedSortable-expanded\")"), Application::PRIORITY_HIGH);
+
+        Application::executeSelectorFunction(".alert" , "on", "click",
+            new Js\Closure("jQuery(\".alert\").removeClass(\"fade in\").fadeIn(1000); setTimeout(function() {
+            jQuery(\".alert\").fadeOut(1000);}, 5000)"),
+            Application::PRIORITY_HIGH);
     }
 
     /////////////////////////
@@ -301,6 +323,8 @@ TMPL;
                 return $this->intRight;
             case "MenuText":
                 return $this->strMenuText;
+            case "Status":
+                return $this->intStatus;
             case "TagName":
                 return $this->strTagName;
             case "DataSource":
@@ -325,7 +349,7 @@ TMPL;
         switch ($strName) {
             case "Id":
                 try {
-                    //$this->blnModified = true;
+                    $this->blnModified = true;
                     $this->intId = Type::Cast($mixValue, Type::INTEGER);
                 } catch (InvalidCast $objExc) {
                     $objExc->IncrementOffset();
@@ -372,6 +396,15 @@ TMPL;
                 try {
                     $this->blnModified = true;
                     $this->strMenuText = Type::Cast($mixValue, Type::STRING);
+                } catch (InvalidCast $objExc) {
+                    $objExc->IncrementOffset();
+                    throw $objExc;
+                }
+                break;
+            case "Status":
+                try {
+                    $this->blnModified = true;
+                    $this->intStatus = Type::Cast($mixValue, Type::INTEGER);
                 } catch (InvalidCast $objExc) {
                     $objExc->IncrementOffset();
                     throw $objExc;

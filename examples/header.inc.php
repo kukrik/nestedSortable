@@ -10,10 +10,9 @@ use QCubed as Q;
 	<meta charset="<?php echo(QCUBED_ENCODING); ?>"/>
 	<?php if (isset($strPageTitle)) { ?><title><?php _p(Q\QString::htmlEntities($strPageTitle)); ?></title>
 	<?php } ?>
+	<link href="http://ead.ee/img/icons/favicon.ico" rel="shortcut icon" />
 
 	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
-	<!--<link href="https://opensource.keycdn.com/fontawesome/4.7.0/font-awesome.min.css" rel="stylesheet"/>-->
-	<!--<link href="/qcubed-4/project/assets/css/font-awesome.css" rel="stylesheet" />-->
 	<link href="../assets/css/font-awesome.min.css" rel="stylesheet"/>
 	<link href="../assets/css/style.css" rel="stylesheet"/>
 	<link href="../../../qcubed/application/assets/css/jquery-ui.css" rel="stylesheet"/>
