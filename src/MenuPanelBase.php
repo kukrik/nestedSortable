@@ -296,9 +296,6 @@ TMPL;
             Application::PRIORITY_HIGH);
 
         Application::executeSelectorFunction(".expand-all" , "on", "click",
-            new Js\Closure("jQuery(\"ul.sortable\").find(\"li.mjs-nestedSortable-collapsed\").removeClass(\"mjs-nestedSortable-collapsed\").addClass(\"mjs-nestedSortable-expanded\")"), Application::PRIORITY_HIGH);
-
-            jQuery(\".alert\").fadeOut(1000);}, 5000)"),
             new Js\Closure("jQuery(\"ul.sortable\").find(\"li.mjs-nestedSortable-collapsed\").removeClass(\"mjs-nestedSortable-collapsed\").addClass(\"mjs-nestedSortable-expanded\")"),
             Application::PRIORITY_HIGH);
     }
