@@ -298,9 +298,8 @@ TMPL;
         Application::executeSelectorFunction(".expand-all" , "on", "click",
             new Js\Closure("jQuery(\"ul.sortable\").find(\"li.mjs-nestedSortable-collapsed\").removeClass(\"mjs-nestedSortable-collapsed\").addClass(\"mjs-nestedSortable-expanded\")"), Application::PRIORITY_HIGH);
 
-        Application::executeSelectorFunction(".alert" , "on", "click",
-            new Js\Closure("jQuery(\".alert\").removeClass(\"fade in\").fadeIn(1000); setTimeout(function() {
             jQuery(\".alert\").fadeOut(1000);}, 5000)"),
+            new Js\Closure("jQuery(\"ul.sortable\").find(\"li.mjs-nestedSortable-collapsed\").removeClass(\"mjs-nestedSortable-collapsed\").addClass(\"mjs-nestedSortable-expanded\")"),
             Application::PRIORITY_HIGH);
     }
 
