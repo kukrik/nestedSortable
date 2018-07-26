@@ -7,11 +7,12 @@ ini_set('log_errors', TRUE); // Error logging
 
 
 use QCubed as Q;
-use QCubed\Control\Panel;
+use QCubed\Bootstrap as Bs;
+//use QCubed\Control\Panel;
 use QCubed\Plugin\NestedSortable;
 use QCubed\Plugin\MenuPanel;
-use QCubed\Bootstrap as Bs;
 use QCubed\Plugin\Button;
+use QCubed\Plugin\Alert;
 use QCubed\Project\Application;
 use QCubed\Project\HtmlAttributeManager;
 use QCubed\Project\Control\ControlBase;
@@ -43,6 +44,11 @@ class SampleForm extends Form
     {
         parent::formCreate();
 
+        // Alerts
+
+        $this->lblMessage = new Alert($this);
+        $this->lblMessage->Display = false;
+
         // Menu item creation group (buttons and text box)
 
         $this->btnAddMenuItem = new Q\Plugin\Button($this);
@@ -54,11 +60,8 @@ class SampleForm extends Form
         $this->btnAddMenuItem->CausesValidation = false;
         $this->btnAddMenuItem->addAction(new Q\Event\Click(), new Q\Action\Ajax('btnAddMenuItem_Click'));
 
-
         $this->txtMenuText = new Bs\TextBox($this);
         $this->txtMenuText->Placeholder = t('Menu text');
-        //$this->txtMenuText->CausesValidation = true;
-        //$this->txtMenuText->Required = true;
         $this->txtMenuText->AddAction(new Q\Event\EscapeKey(), new Q\Action\Ajax('btnMenuCancel_Click'));
         $this->txtMenuText->addAction(new Q\Event\EscapeKey(), new Q\Action\Terminate());
         $this->txtMenuText->Visible = false;
@@ -68,10 +71,11 @@ class SampleForm extends Form
         $this->btnSave->removeCssClass('btn-default');
         $this->btnSave->addCssClass('btn btn-orange');
         $this->btnSave->addWrapperCssClass('center-button');
+        $this->btnSave->PrimaryButton = true;
         $this->btnSave->CausesValidation = true;
         $this->btnSave->addAction(new Q\Event\Click(), new Q\Action\Ajax('btnMenuSave_Click'));
+        $this->btnSave->addAction(new Q\Event\Click(), new Q\Jqui\Action\Show($this->lblMessage));
         $this->btnSave->Visible = false;
-        $this->btnSave->FullEffect= true;
 
         $this->btnCancel = new Q\Plugin\Button($this);
         $this->btnCancel->Text = t('Cancel');
@@ -79,7 +83,6 @@ class SampleForm extends Form
         $this->btnCancel->CausesValidation = false;
         $this->btnCancel->addAction(new Q\Event\Click(), new Q\Action\Ajax('btnMenuCancel_Click'));
         $this->btnCancel->Visible = false;
-
 
         // Menu entries to hide and display buttons group
 
@@ -92,12 +95,6 @@ class SampleForm extends Form
         $this->btnExpandAll->Text = t(' Expand All');
         $this->btnExpandAll->Glyph = 'fa fa-plus';
         $this->btnExpandAll->addCssClass('btn btn-default center-button expand-all');
-
-
-        // Alerts
-
-        $this->lblMessage = new Bs\Alert($this);
-        $this->lblMessage->setCssBoxValue("display", "none");
 
         // NestedSortable
 
@@ -130,14 +127,13 @@ class SampleForm extends Form
         $this->tblSorterTable->addAction(new \QCubed\Jqui\Event\SortableStop(), new \QCubed\Action\Ajax('sortable_stop'));
     }
 
-
     ///////////////////////////////////////////////////////////////////////////////////////////
 
 
     protected function formPreRender()
     {
-        //$this->pnl = $this->tblSorterTable;
-        //$this->pnl = $this->tblSorterTable->refresh();
+        //$this->tblSorterTable->refresh(); // It does not fit here because it only refreshed NestedSortable...
+        $this->pnl->refresh(); // This should refresh MenuPanel because it draws a menu. But it works wrong...
 
         if ($this->intEditMenuId) {
             $this->btnAddMenuItem->Enabled = false;
@@ -166,9 +162,7 @@ class SampleForm extends Form
         );
         $this->objMaxValue = $this->objMenu->getVirtualAttribute('max');
 
-        if ($this->intEditMenuId == -1) {
-            if ($this->txtMenuText->Text != '') {
-
+        if (($this->intEditMenuId == -1) && ($this->txtMenuText->Text !== '')) {
                 $this->objMenu = new Menu();
                 $this->objMenu->setParentId('');
                 $this->objMenu->setDepth('0');
@@ -186,20 +180,6 @@ class SampleForm extends Form
                 $this->txtMenuText->Visible = false;
                 $this->btnSave->Visible = false;
                 $this->btnCancel->Visible = false;
-
-
-                $this->lblMessage->Text = t('<strong>Well done!</strong> To add a new item to the database is successful.');
-                $this->lblMessage->addCssClass(QCubed\Bootstrap\Bootstrap::ALERT_SUCCESS);
-                $this->lblMessage->Dismissable = true;
-                $this->lblMessage->Display = true;
-            } else {
-                $this->lblMessage->Text = t('<strong>Notice!</strong> Menu text is required.');
-                $this->lblMessage->addCssClass(QCubed\Bootstrap\Bootstrap::ALERT_WARNING);
-                $this->lblMessage->Dismissable = true;
-                $this->lblMessage->Display = true;
-
-            }
-
         }
     }
 
@@ -208,16 +188,49 @@ class SampleForm extends Form
         $this->txtMenuText->Visible = false;
         $this->btnSave->Visible = false;
         $this->btnCancel->Visible = false;
-        $this->txtMenuText->Text = null;
         $this->intEditMenuId = null;
+    }
+
+    public function formValidate()
+    {
+        if ($this->txtMenuText->Text == '') {
+
+            $this->txtMenuText->Text = null;
+            $this->txtMenuText->focus();
+
+            $this->lblMessage->Display = true;
+            $this->lblMessage->Dismissable = true;
+            $this->lblMessage->removeCssClass(Bs\Bootstrap::ALERT_SUCCESS);
+            $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_WARNING);
+            $this->lblMessage->Text = t('<strong>Sorry</strong>, the menu text is at least mandatory.');
+            return false;
+        }
+        $this->lblMessage->Display = true;
+        $this->lblMessage->Dismissable = true;
+        $this->lblMessage->removeCssClass(Bs\Bootstrap::ALERT_WARNING);
+        $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_SUCCESS);
+        $this->lblMessage->Text = t('<strong>Well done!</strong> To add a new item to the database is successful.');
+        return true;
     }
 
     protected function Menu_Bind()
     {
-        $this->pnl->DataSource = Menu::loadAll(
+        $objMenuArray = $this->pnl->DataSource = Menu::loadAll(
             \QCubed\Query\QQ::Clause(\QCubed\Query\QQ::OrderBy(QQN::menu()->Left),
                 \QCubed\Query\QQ::expand(QQN::menu()->Content)
             ));
+
+        if ($this->intEditMenuId == -1) {
+            array_push($objMenuArray, new Menu);
+
+            $this->pnl->DataSource = $objMenuArray;
+
+        }
+
+        /*$this->pnl->DataSource = Menu::loadAll(
+            \QCubed\Query\QQ::Clause(\QCubed\Query\QQ::OrderBy(QQN::menu()->Left),
+                \QCubed\Query\QQ::expand(QQN::menu()->Content)
+            ));*/
     }
 
     public function Menu_Draw(Menu $objMenu)
@@ -248,7 +261,6 @@ class SampleForm extends Form
             $objMenu->Right = $value["right"];
             $objMenu->save();
         }
-        //$this->tblSorterTable->refresh();
     }
 
 }

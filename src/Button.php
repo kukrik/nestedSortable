@@ -34,27 +34,12 @@ class Button extends Bs\Button
 {
     protected $strGlyph;
     protected $blnTip = false;
-    protected $blnFullEffect = false;
-    protected $blnHalfEffect = false;
 
     protected function makeJqWidget()
     {
         if ($this->blnTip) {
             Application::executeControlCommand($this->ControlId, "bootstrapTooltip", Application::PRIORITY_HIGH);
         }
-
-        if ($this->blnFullEffect) {
-        Application::executeSelectorFunction("#" . $this->ControlId, "on", "click",
-            new Js\Closure("jQuery(\".alert\"); setTimeout(function() {jQuery(\".alert\").removeClass(\"fade in\").fadeIn(1000);
-        }, 100); setTimeout(function() {jQuery(\".alert\").fadeOut(1000);}, 5000)"),
-            Application::PRIORITY_HIGH);
-        }
-        if ($this->blnHalfEffect) {
-            Application::executeSelectorFunction("#" . $this->ControlId, "on", "click",
-                new Js\Closure("jQuery(\".alert\"); setTimeout(function() {jQuery(\".alert\").removeClass(\"fade in\").fadeIn(1000);}, 100)"),
-                Application::PRIORITY_HIGH);
-        }
-
     }
 
     public function __set($strName, $mixValue)
@@ -65,12 +50,6 @@ class Button extends Bs\Button
                 break;
             case "Tip":
                 $this->blnTip = Type::cast($mixValue, Type::BOOLEAN);
-                break;
-            case "FullEffect":
-                $this->blnFullEffect = Type::cast($mixValue, Type::BOOLEAN);
-                break;
-            case "HalfEffect":
-                $this->blnHalfEffect = Type::cast($mixValue, Type::BOOLEAN);
                 break;
 
             default:
