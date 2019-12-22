@@ -236,6 +236,17 @@ class NestedSortableGen extends \QCubed\Project\Jqui\Sortable
         Application::executeControlCommand($this->getJqControlId(), $this->getJqSetupFunction(), "option", $options, Application::PRIORITY_LOW);
     }
 
+    /**
+     * Refresh the sortable items. Triggers the reloading of all sortable
+     * items, causing new items to be recognized.
+     *
+     * 	* This method does not accept any arguments.
+     */
+    public function refresh()
+    {
+        Application::executeControlCommand($this->getJqControlId(), $this->getJqSetupFunction(), "refresh", Application::PRIORITY_LOW);
+    }
+
 
     public function __get($strName)
     {

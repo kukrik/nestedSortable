@@ -1,19 +1,11 @@
 <?php
-/**
- *
- * Part of the QCubed PHP framework.
- *
- * @license MIT
- *
- */
 
 namespace QCubed\Plugin;
 
 use QCubed as Q;
 use QCubed\Exception\Caller;
 use QCubed\Exception\InvalidCast;
-use QCubed\Control\FormBase;
-use QCubed\Project\Control\ControlBase;
+use QCubed\Control\ControlBase;
 use QCubed\Project\Application;
 use QCubed\Type;
 
@@ -62,7 +54,7 @@ class NestedSortableBase extends NestedSortableGen
         $jqOptions['create'] = new Q\Js\Closure('
                         var arr = jQuery(this).nestedSortable("toArray", {startDepthCount: 0});
                         var str = JSON.stringify(arr);
-                        console.log(str);
+                        //console.log(str);
                         qcubed.recordControlModification("$this->ControlId", "_ItemArray", str);
          ');
         return $jqOptions;
@@ -76,13 +68,24 @@ class NestedSortableBase extends NestedSortableGen
                     ;\$j('#{$this->ControlId}').on("sortstop", function (event, ui) {
                         var arr = jQuery(this).nestedSortable("toArray", {startDepthCount: 0});
                         var str = JSON.stringify(arr);
-                        console.log(str);
+                        //console.log(str);
                         qcubed.recordControlModification("$this->ControlId", "_ItemArray", str);
         })
 FUNC;
         Application::executeJavaScript($strCtrlJs, Application::PRIORITY_HIGH);
 
         return $strJS;
+    }
+
+    /**
+     * Generated method overrides the built-in Control method, causing it to not redraw completely. We restore
+     * its functionality here.
+     */
+
+    public function refresh()
+    {
+        parent::refresh();
+        ControlBase::refresh();
     }
 
     public function __set($strName, $mixValue)

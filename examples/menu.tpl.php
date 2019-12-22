@@ -66,5 +66,6 @@
 
 
 <?php $this->RenderEnd(); ?>
+
 <?php require('footer.inc.php'); ?>
 <?php // require(QCUBED_CONFIG_DIR . '/footer.inc.php'); ?>

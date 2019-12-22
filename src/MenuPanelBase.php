@@ -14,8 +14,10 @@ use QCubed\Project\Control;
 use QCubed\Project\Application;
 use QCubed\Exception\Caller;
 use QCubed\Exception\InvalidCast;
+use QCubed\Html;
 use QCubed\Js;
 use QCubed\Type;
+
 
 // we need a better way of reconfiguring JS and CSS assets
 if (!defined('QCUBED_NESTEDSORTABLE_ASSETS_URL')) {
@@ -43,20 +45,26 @@ class MenuPanelBase extends ControlBase
     /** @var bool UseWrapper */
     protected $blnUseWrapper = false; //If you do not have it turned on globally, then turn on locally.
     /** @var string TagName */
-    protected $strTagName;
+    protected $strTagName = null;
+    /** @var string SectionClass */
+    protected $strSectionClass = null;
+
 
     /** @var  callable */
     protected $nodeParamsCallback = null;
-
-    /** @var integer */
-    protected $strEvalledItems = null;
+    /** @var  callable */
+    protected $cellParamsCallback = null;
 
     /** @var array DataSource from which the items are picked and rendered */
     protected $objDataSource;
+    /** @var  integer Used during rendering to report which visible menu item is being drawn. */
+    protected $intCurrentRowIndex;
 
     protected $intCurrentDepth = 0;
     protected $intCounter = 0;
-    protected $strInnerHtml;
+
+    /** @var null */
+    protected $strRenderCellHtml = null;
 
     /** @var  integer Id */
     protected $intId = null;
@@ -73,6 +81,12 @@ class MenuPanelBase extends ControlBase
     /** @var  int Status */
     protected $intStatus;
 
+
+    /**
+     * MenuPanelBase constructor.
+     * @param Q\Control\ControlBase|FormBase $objParentObject
+     * @param null $strControlId
+     */
     public function __construct($objParentObject, $strControlId = null)
     {
         try {
@@ -83,6 +97,7 @@ class MenuPanelBase extends ControlBase
         }
         $this->registerFiles();
     }
+
 
     /**
      * @throws Caller
@@ -100,37 +115,65 @@ class MenuPanelBase extends ControlBase
     public function parsePostData() {}
 
     /**
-     * Returns the HTML for the control.
-     * @return string
+     * Set the node params callback. The callback should be of the form:
+     * func($objItem)
+     * The callback will be give the raw node from the data source, and the item's index.
+     * The function should return a key/value array with the following possible items:
+     * id - the id for the node tag
+     * parent_id - the parent_id for the node tag
+     * depth - the depth for the node tag
+     * left - the left for the node tag
+     * right - the right for the node tag
+     * text - the text for the node tag
+     * status - the status for the node tag
+     *
+     * The callback is a callable, so can be of the form [$objControl, "func"]
+     *
+     * @param callable $callback
      */
-    protected function getControlHtml()
+    public function createNodeParams(callable $callback)
     {
-        $this->dataBind();
-
-        if ($this->objDataSource) {
-            foreach ($this->objDataSource as $objObject) {
-                $this->strEvalledItems[] = $this->getItemHtml($objObject);
-            }
-        }
-        $strToReturn = $this->renderMenuTree($this->strEvalledItems);
-        $this->objDataSource = null;
-        return $strToReturn;
+        $this->nodeParamsCallback = $callback;
     }
 
     /**
-     * @throws Caller
+     * @param callable $callback
      */
-    public function dataBind()
+    public function createRenderButtons(callable $callback)
     {
-        // Run the DataBinder (if applicable)
-        if (($this->objDataSource === null) && ($this->hasDataBinder()) && (!$this->blnRendered)) {
-            try {
-                $this->callDataBinder();
-            } catch (Caller $objExc) {
-                $objExc->incrementOffset();
-                throw $objExc;
-            }
+        $this->cellParamsCallback = $callback;
+    }
+
+    /**
+     * Render a cell.
+     * Called by data menu for each cell.
+     *
+     * @param mixed $objItem
+     *
+     * @return string
+     */
+
+    public function renderCell($objItem)
+    {
+        $cellValue = $this->getItemRaw($objItem);
+
+        if ($this->nodeParamsCallback) {
+            //$cellValue = $this->getObjectDraw($objItem); // For testing purposes, delete slashes and errors will show immediately
         }
+
+        if ($cellValue === null) {
+            return '';
+        }
+
+        if (is_object($cellValue)) {
+            $cellValue = (string)$cellValue;
+        }
+
+        if ($cellValue == '' && Application::instance()->context()->isBrowser(Q\Context::INTERNET_EXPLORER)) {
+            $cellValue = '&nbsp;';
+        }
+
+        return $cellValue;
     }
 
     /**
@@ -141,17 +184,20 @@ class MenuPanelBase extends ControlBase
      * @return string
      * @throws \Exception
      */
-    protected function getItemHtml($objItem)
+    public function getItemRaw($objItem)
     {
         if (!$this->nodeParamsCallback) {
             throw new \Exception("Must provide an nodeParamsCallback");
         }
-
         $params = call_user_func($this->nodeParamsCallback, $objItem);
 
         $intId = '';
         if (isset($params['id'])) {
             $intId = $params['id'];
+        }
+        $intParentId = '';
+        if (isset($params['parent_id'])) {
+            $intParentId = $params['parent_id'];
         }
         $intDepth = '';
         if (isset($params['depth'])) {
@@ -176,39 +222,34 @@ class MenuPanelBase extends ControlBase
 
         $vars = [
             'id' => $intId,
+            'parent_id' => $intParentId,
             'depth' => $intDepth,
             'left' => $intLeft,
             'right' => $intRight,
             'text' => $strText,
             'status' => $intStatus
-        ];
+            ];
+
         return $vars;
     }
 
-    /**
-     *  Set the node params callback. The callback should be of the form:
-     *  func($objItem)
-     *  The callback will be give the raw node from the data source, and the item's index.
-     *  The function should return a key/value array with the following possible items:
-     *  id - the id for the node tag
-     *  depth - the depth for the node tag
-     *  left - the left for the node tag
-     *  right - the right for the node tag
-     *  text - the text for the node tag
-     *  status - the status for the node tag
-     *
-     *  The callback is a callable, so can be of the form [$objControl, "func"]
-     *
-     * @param callable $callback
-     */
-    public function setNodeParamsCallback(callable $callback)
+    public function getObjectDraw($objItem)
     {
-        $this->nodeParamsCallback = $callback;
+        if (!$this->cellParamsCallback) {
+            throw new \Exception("Must provide an cellParamsCallback");
+        }
+        $mixButtons = call_user_func($this->cellParamsCallback, $objItem);
+
+        return $mixButtons;
     }
 
+    /**
+     * Fix up possible embedded reference to the form.
+     */
     public function sleep()
     {
         $this->nodeParamsCallback = Q\Project\Control\ControlBase::sleepHelper($this->nodeParamsCallback);
+        $this->cellParamsCallback = Q\Project\Control\ControlBase::sleepHelper($this->cellParamsCallback);
         parent::sleep();
     }
 
@@ -220,6 +261,7 @@ class MenuPanelBase extends ControlBase
     {
         parent::wakeup($objForm);
         $this->nodeParamsCallback = Q\Project\Control\ControlBase::wakeupHelper($objForm, $this->nodeParamsCallback);
+        $this->cellParamsCallback = Q\Project\Control\ControlBase::wakeupHelper($objForm, $this->cellParamsCallback);
     }
 
     /**
@@ -229,15 +271,17 @@ class MenuPanelBase extends ControlBase
     protected function renderMenuTree($arrParams)
     {
         $strHtml = '';
+
         foreach ($arrParams as $arrParam) {
             $this->intId = $arrParam['id'];
+            $this->intParentId = $arrParam['parent_id'];
             $this->intDepth = $arrParam['depth'];
             $this->intLeft = $arrParam['left'];
             $this->intRight = $arrParam['right'];
             $this->strMenuText = $arrParam['text'];
             $this->intStatus = $arrParam['status'];
 
-            $this->getInnerHtml();
+            $strRenderCellHtml = $this->getRenderCellHtml();
 
             if ($this->intDepth == $this->intCurrentDepth) {
                 if ($this->intCounter > 0)
@@ -255,34 +299,95 @@ class MenuPanelBase extends ControlBase
             } else {
                 $strHtml .= ' class="mjs-nestedSortable-expanded"';
             }
-            $strHtml .= '>' . $this->strInnerHtml;
+            $strHtml .= '>';
+
+            $strCheckStatus = $this->intStatus == 1 ? 'enabled' : 'disabled';
+            $strHtml .= <<<TMPL
+
+    <div class="menu-row $strCheckStatus">
+        <span class="reorder"><i class="fa fa-bars"></i></span>
+        <span class="disclose"><span></span></span>
+        <section class="menu-body">{$this->strMenuText}</section>
+                $strRenderCellHtml
+    </div>
+
+TMPL;
             ++$this->intCounter;
         }
         $strHtml .= str_repeat('</li>' . '</' . $this->strTagName . '>', $this->intDepth) . '</li>';
+
         return $strHtml;
     }
 
-    protected function getInnerHtml()
+    protected function getRenderCellHtml()
     {
-        $strCheckStatus = $this->intStatus == 1 ? 'enabled' : 'disabled';
-        $this->strInnerHtml = <<<TMPL
+        $strHtml = '';
+        $attributes = [];
 
-<div class="menu-row $strCheckStatus">
-    <span class="reorder"><i class="fa fa-bars"></i></span>
-    <span class="disclose"><span></span></span>
-    <section class="menu-body">{$this->strMenuText}</section>
-    <section class="menu-btn-body center-button">
-        <button title="Disable" class="btn btn-white btn-xs" data-toggle="tooltip" data-value="{$this->strControlId}_{$this->intId}" >Disable</button>
-        <button title="Edit" class="btn btn-primary btn-xs" data-toggle="tooltip" data-value="{$this->strControlId}_{$this->intId}" >
-            <i class="fa fa-pencil"></i>
-        </button>
-        <button class="btn btn-danger btn-xs" data-toggle="tooltip" title="Delete" data-value="{$this->strControlId}_{$this->intId}">
-            <i class="fa fa-trash"></i>
-        </button>
-    </section>
-</div>
+        if ($this->strSectionClass) {
+            $attributes['class'] = $this->strSectionClass;
+        }
 
-TMPL;
+        // $strHtml .= '???????'; // Here should be a drawing of buttons,
+                        // data maybe pulled from the getObjectDraw() function or whatever...
+
+        // If the button drawing works at the top, the manually drawn buttons below will be deleted
+
+        $strHtml .= '<button title="Enable" class="btn btn-success btn-xs" data-toggle="tooltip" data-value="103">Enable</button>&nbsp;';
+        $strHtml .= '<button title="Disable" class="btn btn-white btn-xs" data-toggle="tooltip" data-value="103">Disable</button>&nbsp;';
+        $strHtml .= '<button title="Edit" class="btn btn-darkblue btn-xs" data-toggle="tooltip" value="103"><i class="fa fa-pencil"></i></button>&nbsp;';
+        $strHtml .= '<button class="btn btn-danger btn-xs" data-toggle="tooltip" title="Delete" data-value="103"><i class="fa fa-trash"></i></button>';
+
+        $strHtml = Html::renderTag('section', $attributes, $strHtml);
+
+        return $strHtml;
+    }
+
+
+    /**
+     * Returns the HTML for the control.
+     * @return string
+     */
+    protected function getControlHtml()
+    {
+        $this->dataBind();
+
+        if (empty($this->objDataSource)) {
+            $this->objDataSource = null;
+            $strEmptyMenuText = sprintf(t('<strong>Empty menu!</strong> Create the first menu item!'));
+            return "<li><div class='alert alert-info alert-dismissible' role='alert' style='display: block;'>
+    $strEmptyMenuText
+</div></li>";
+        }
+
+        $strRows = [];
+        $this->intCurrentRowIndex = 0;
+        if ($this->objDataSource) {
+            foreach ($this->objDataSource as $objObject) {
+                $strRows[] = $this->renderCell($objObject);  //$this->getItemRaw //$this->renderCell
+                $this->intCurrentRowIndex++;
+            }
+        }
+
+        $strHtml = $this->renderMenuTree($strRows);
+        $this->objDataSource = null;
+        return $strHtml;
+    }
+
+    /**
+     * @throws Caller
+     */
+    public function dataBind()
+    {
+        // Run the DataBinder (if applicable)
+        if (($this->objDataSource === null) && ($this->hasDataBinder()) && (!$this->blnRendered)) {
+            try {
+                $this->callDataBinder();
+            } catch (Caller $objExc) {
+                $objExc->incrementOffset();
+                throw $objExc;
+            }
+        }
     }
 
     public function makeJqWidget()
@@ -291,11 +396,11 @@ TMPL;
             new Js\Closure("jQuery(this).closest(\"li\").toggleClass(\"mjs-nestedSortable-expanded\").toggleClass(\"mjs-nestedSortable-collapsed\")"),
             Application::PRIORITY_HIGH);
 
-        Application::executeSelectorFunction(".collapse-all" , "on", "click",
+        Application::executeSelectorFunction(".js-collapse-all" , "on", "click",
             new Js\Closure("jQuery(\"ul.sortable\").find(\"li.mjs-nestedSortable-expanded\").removeClass(\"mjs-nestedSortable-expanded\").addClass(\"mjs-nestedSortable-collapsed\")"),
             Application::PRIORITY_HIGH);
 
-        Application::executeSelectorFunction(".expand-all" , "on", "click",
+        Application::executeSelectorFunction(".js-expand-all" , "on", "click",
             new Js\Closure("jQuery(\"ul.sortable\").find(\"li.mjs-nestedSortable-collapsed\").removeClass(\"mjs-nestedSortable-collapsed\").addClass(\"mjs-nestedSortable-expanded\")"),
             Application::PRIORITY_HIGH);
     }
@@ -323,6 +428,8 @@ TMPL;
                 return $this->intStatus;
             case "TagName":
                 return $this->strTagName;
+            case "SectionClass":
+                return $this->strSectionClass;
             case "DataSource":
                 return $this->objDataSource;
 
@@ -347,6 +454,8 @@ TMPL;
                 try {
                     $this->blnModified = true;
                     $this->intId = Type::Cast($mixValue, Type::INTEGER);
+                    $this->blnModified = true;
+                    break;
                 } catch (InvalidCast $objExc) {
                     $objExc->IncrementOffset();
                     throw $objExc;
@@ -415,18 +524,18 @@ TMPL;
                     throw $objExc;
                 }
                 break;
+            case "SectionClass":
+                try {
+                    $this->blnModified = true;
+                    $this->strSectionClass = Type::Cast($mixValue, Type::STRING);
+                } catch (InvalidCast $objExc) {
+                    $objExc->IncrementOffset();
+                    throw $objExc;
+                }
+                break;
             case "DataSource":
                 $this->objDataSource = $mixValue;
                 $this->blnModified = true;
-                break;
-            case 'nodeParamsCallback':
-                try {
-                    $this->blnModified = true;
-                    $this->nodeParamsCallback = Type::cast($mixValue, Type::CALLABLE_TYPE);
-                } catch (InvalidCast $objExc) {
-                    $objExc->incrementOffset();
-                    throw $objExc;
-                }
                 break;
 
             default:
@@ -438,5 +547,5 @@ TMPL;
                 }
         }
     }
-}
 
+}

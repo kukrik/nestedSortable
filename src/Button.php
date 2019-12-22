@@ -24,7 +24,6 @@ use QCubed\Type;
  *
  * Here has been implemented Bootstrap tooltip function. Where appropriate, you can activate Tooltip as follows:
  * $objButton->Tip = true;
- * $objButton->->setDataAttribute('toggle', 'tooltip');
  * $objButton->ToolTip = t('$strtext');
  *
  * @package QCubed\Plugin
@@ -38,6 +37,7 @@ class Button extends Bs\Button
     protected function makeJqWidget()
     {
         if ($this->blnTip) {
+            $this->setDataAttribute('toggle', 'tooltip');
             Application::executeControlCommand($this->ControlId, "bootstrapTooltip", Application::PRIORITY_HIGH);
         }
     }

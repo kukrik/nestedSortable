@@ -44,6 +44,9 @@ class Alert extends Panel {
 
 	protected $blnDismissable = false;
 
+	protected $blnFullEffect = false;
+	protected $blnHalfEffect = false;
+
     /**
      * Alert constructor.
      * @param ControlBase|FormBase $objParent
@@ -87,6 +90,15 @@ class Alert extends Panel {
 				new Js\Closure("qcubed.recordControlModification ('{$this->ControlId}', '_Display', false)"), Application::PRIORITY_HIGH);
 		}
 
+		if ($this->blnFullEffect) {
+			Application::executeJavaScript(sprintf('window.setTimeout(function() {$j("#%s").fadeIn(1000);}, 100); window.setTimeout(function() {$j("#%s").fadeOut(1000);}, 5000)',
+				$this->ControlId, $this->ControlId));
+		}
+
+		if ($this->blnHalfEffect) {
+			Application::executeJavaScript(sprintf('window.setTimeout(function() {$j("#%s").fadeIn(1000);}, 100)',
+				$this->ControlId));
+		}
 	}
 
 	/**
@@ -145,6 +157,12 @@ class Alert extends Panel {
 
 			case '_Display':	// Private attribute to record the visible state of the alert
 				$this->blnDisplay = $mixValue;
+				break;
+			case "FullEffect":
+				$this->blnFullEffect = Type::cast($mixValue, Type::BOOLEAN);
+				break;
+			case "HalfEffect":
+				$this->blnHalfEffect = Type::cast($mixValue, Type::BOOLEAN);
 				break;
 
 
