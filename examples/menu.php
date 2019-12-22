@@ -224,7 +224,7 @@ class SampleForm extends Form
         $this->lblMessage->Dismissable = true;
         $this->lblMessage->removeCssClass(Bs\Bootstrap::ALERT_WARNING);
         $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_SUCCESS);
-        $this->lblMessage->Text = t('<strong>Well done!</strong> To add a new item to the database is successful.');
+        $this->lblMessage->Text = t('<strong>Well done!</strong> To add a new item of menu to the database is successful.');
         return true;
     }
 
@@ -302,14 +302,14 @@ class SampleForm extends Form
             $this->lblMessage->Dismissable = true;
             $this->lblMessage->removeCssClass(Bs\Bootstrap::ALERT_SUCCESS);
             $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_WARNING);
-            $this->lblMessage->Text = t('<strong>Sorry</strong>, the new order could not be saved.');
+            $this->lblMessage->Text = t('<strong>Sorry</strong>, the order could not be edit or saved.');
             return false;
         }
         $this->lblMessage->Display = true;
         $this->lblMessage->Dismissable = true;
         $this->lblMessage->removeCssClass(Bs\Bootstrap::ALERT_WARNING);
         $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_SUCCESS);
-        $this->lblMessage->Text = t('<strong>Well done!</strong> The new order has been saved.');
+        $this->lblMessage->Text = t('<strong>Well done!</strong> Order have been changed and saved.');
         return true;
     }
 
