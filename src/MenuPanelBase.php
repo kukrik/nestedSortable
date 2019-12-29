@@ -55,6 +55,8 @@ class MenuPanelBase extends ControlBase
     /** @var  callable */
     protected $cellParamsCallback = null;
 
+    protected $mixButtons;
+
     /** @var array DataSource from which the items are picked and rendered */
     protected $objDataSource;
     /** @var  integer Used during rendering to report which visible menu item is being drawn. */
@@ -97,7 +99,6 @@ class MenuPanelBase extends ControlBase
         }
         $this->registerFiles();
     }
-
 
     /**
      * @throws Caller
@@ -142,38 +143,6 @@ class MenuPanelBase extends ControlBase
     public function createRenderButtons(callable $callback)
     {
         $this->cellParamsCallback = $callback;
-    }
-
-    /**
-     * Render a cell.
-     * Called by data menu for each cell.
-     *
-     * @param mixed $objItem
-     *
-     * @return string
-     */
-
-    public function renderCell($objItem)
-    {
-        $cellValue = $this->getItemRaw($objItem);
-
-        if ($this->nodeParamsCallback) {
-            //$cellValue = $this->getObjectDraw($objItem); // For testing purposes, delete slashes and errors will show immediately
-        }
-
-        if ($cellValue === null) {
-            return '';
-        }
-
-        if (is_object($cellValue)) {
-            $cellValue = (string)$cellValue;
-        }
-
-        if ($cellValue == '' && Application::instance()->context()->isBrowser(Q\Context::INTERNET_EXPLORER)) {
-            $cellValue = '&nbsp;';
-        }
-
-        return $cellValue;
     }
 
     /**
@@ -238,9 +207,11 @@ class MenuPanelBase extends ControlBase
         if (!$this->cellParamsCallback) {
             throw new \Exception("Must provide an cellParamsCallback");
         }
-        $mixButtons = call_user_func($this->cellParamsCallback, $objItem);
-
-        return $mixButtons;
+        $this->mixButtons = call_user_func($this->cellParamsCallback, $objItem);
+        //print '<pre>';
+        //print_r($this->mixButtons . "***");
+        //print '</pre>';
+        return $this->mixButtons;
     }
 
     /**
@@ -271,17 +242,18 @@ class MenuPanelBase extends ControlBase
     protected function renderMenuTree($arrParams)
     {
         $strHtml = '';
-
         foreach ($arrParams as $arrParam) {
-            $this->intId = $arrParam['id'];
-            $this->intParentId = $arrParam['parent_id'];
-            $this->intDepth = $arrParam['depth'];
-            $this->intLeft = $arrParam['left'];
-            $this->intRight = $arrParam['right'];
-            $this->strMenuText = $arrParam['text'];
-            $this->intStatus = $arrParam['status'];
 
-            $strRenderCellHtml = $this->getRenderCellHtml();
+            if ($this->nodeParamsCallback) {
+                $this->intId = $arrParam['id'];
+                $this->intParentId = $arrParam['parent_id'];
+                $this->intDepth = $arrParam['depth'];
+                $this->intLeft = $arrParam['left'];
+                $this->intRight = $arrParam['right'];
+                $this->strMenuText = $arrParam['text'];
+                $this->intStatus = $arrParam['status'];
+            }
+            $strRenderCellHtml = $this->getRenderCellHtml($arrParam);
 
             if ($this->intDepth == $this->intCurrentDepth) {
                 if ($this->intCounter > 0)
@@ -308,7 +280,7 @@ class MenuPanelBase extends ControlBase
         <span class="reorder"><i class="fa fa-bars"></i></span>
         <span class="disclose"><span></span></span>
         <section class="menu-body">{$this->strMenuText}</section>
-                $strRenderCellHtml
+        $strRenderCellHtml
     </div>
 
 TMPL;
@@ -319,30 +291,22 @@ TMPL;
         return $strHtml;
     }
 
-    protected function getRenderCellHtml()
+    protected function getRenderCellHtml($values)
     {
+        if ($this->cellParamsCallback) {
         $strHtml = '';
         $attributes = [];
 
         if ($this->strSectionClass) {
             $attributes['class'] = $this->strSectionClass;
         }
-
-        // $strHtml .= '???????'; // Here should be a drawing of buttons,
-                        // data maybe pulled from the getObjectDraw() function or whatever...
-
-        // If the button drawing works at the top, the manually drawn buttons below will be deleted
-
-        $strHtml .= '<button title="Enable" class="btn btn-success btn-xs" data-toggle="tooltip" data-value="103">Enable</button>&nbsp;';
-        $strHtml .= '<button title="Disable" class="btn btn-white btn-xs" data-toggle="tooltip" data-value="103">Disable</button>&nbsp;';
-        $strHtml .= '<button title="Edit" class="btn btn-darkblue btn-xs" data-toggle="tooltip" value="103"><i class="fa fa-pencil"></i></button>&nbsp;';
-        $strHtml .= '<button class="btn btn-danger btn-xs" data-toggle="tooltip" title="Delete" data-value="103"><i class="fa fa-trash"></i></button>';
-
-        $strHtml = Html::renderTag('section', $attributes, $strHtml);
-
-        return $strHtml;
+            $strHtml .= $values;
+            $strHtml = Html::renderTag('section', $attributes, $strHtml);
+            return $strHtml;
+        } else {
+            return null;
+        }
     }
-
 
     /**
      * Returns the HTML for the control.
@@ -364,11 +328,15 @@ TMPL;
         $this->intCurrentRowIndex = 0;
         if ($this->objDataSource) {
             foreach ($this->objDataSource as $objObject) {
-                $strRows[] = $this->renderCell($objObject);  //$this->getItemRaw //$this->renderCell
+                if ($this->nodeParamsCallback) {
+                    $strRows[] = $this->getItemRaw($objObject);
+                }
+                if ($this->cellParamsCallback) {
+                    $strRows[] = $this->getObjectDraw($objObject);
+                }
                 $this->intCurrentRowIndex++;
             }
         }
-
         $strHtml = $this->renderMenuTree($strRows);
         $this->objDataSource = null;
         return $strHtml;

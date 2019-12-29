@@ -31,8 +31,6 @@ class SampleForm extends Form
     protected $tblSorterTable;
 
     protected $pnl;
-    protected $strStatus;
-
 
     protected function formCreate()
     {
@@ -82,9 +80,7 @@ class SampleForm extends Form
 
         $this->btnCollapseAll = new Q\Plugin\Button($this);
         $this->btnCollapseAll->Text = t(' Collapse All');
-        $this->btnCollapseAll->Tip = true;
         $this->btnCollapseAll->Glyph = 'fa fa-minus';
-        $this->btnCollapseAll->ToolTip = t(' Collapse All');
         $this->btnCollapseAll->addWrapperCssClass('center-button');
         $this->btnCollapseAll->CssClass = 'btn btn-default js-collapse-all';
 
@@ -122,7 +118,7 @@ class SampleForm extends Form
         $this->pnl->TagName = 'ul';
         $this->pnl->setDataBinder('Menu_Bind');
         $this->pnl->createNodeParams([$this, 'Menu_Draw']);
-        $this->pnl->createRenderButtons([$this, 'Buttons_Draw']);
+        //$this->pnl->createRenderButtons([$this, 'Buttons_Draw']);
         $this->pnl->SectionClass = 'menu-btn-body center-button';
 
         $this->tblSorterTable->addAction(new Q\Jqui\Event\SortableStop(), new Q\Action\Ajax('Sortable_Stop'));
@@ -140,7 +136,6 @@ class SampleForm extends Form
         if ($this->intEditMenuId == -1) {
             array_push($objMenuArray, new Menu);
         }
-
         $this->pnl->DataSource = $objMenuArray;
     }
 
@@ -158,49 +153,54 @@ class SampleForm extends Form
 
     public function Buttons_Draw(Menu $objMenu)
     {
-        $strControlId = 'btnStatus' . $objMenu->Id;
+        $strStatusId = 'btnStatus' . $objMenu->Id;
 
-        $btnStatus = new Q\Plugin\Button($this->pnl, $strControlId);
-        if ($objMenu->MenuContent->IsEnabled == 1) {
-            $this->strStatus = 'Disable';
-            $btnStatus->CssClass = 'btn btn-white btn-xs';
-            //$btnStatus->removeCssClass('btn btn-success btn-xs');
-            //$btnStatus->addCssClass('btn btn-white btn-xs');
-        } else {
-            $this->strStatus = 'Enable';
-            $btnStatus->CssClass = 'btn btn-success btn-xs';
-            //$btnStatus->removeCssClass('btn btn-white btn-xs');
-            //$btnStatus->addCssClass('btn btn-success btn-xs');
+        if (!$btnStatus = $this->getControl($strStatusId)) {
+            $btnStatus = new Q\Plugin\Button($this->pnl, $strStatusId);
+            if ($objMenu->MenuContent->IsEnabled == 1) {
+                $strStatus = 'Disable';
+                $btnStatus->CssClass = 'btn btn-white btn-xs';
+                //$btnStatus->removeCssClass('btn btn-success btn-xs');
+                //$btnStatus->addCssClass('btn btn-white btn-xs');
+                } else {
+                $strStatus = 'Enable';
+                $btnStatus->CssClass = 'btn btn-success btn-xs';
+                //$btnStatus->removeCssClass('btn btn-white btn-xs');
+                //$btnStatus->addCssClass('btn btn-success btn-xs');
+                }
+            $btnStatus->Text = t($strStatus);
+            //$btnStatus->addAction(new Q\Event\Click(), new Q\Action\Ajax('btnStatus_Click'));
         }
-        $btnStatus->Text = t($this->strStatus);
-        //$this->btnStatus->addAction(new Q\Event\Click(), new Q\Action\Ajax('btnStatus_Click'));
 
-        $strControlId = 'btnEdit' . $objMenu->Id;
+        $strEditId = 'btnEdit' . $objMenu->Id;
 
-        $btnEdit = new Q\Plugin\Button($this->pnl, $strControlId);
-        $btnEdit->Glyph = 'fa fa-pencil';
-        $btnEdit->Tip = true;
-        $btnEdit->ToolTip = t('Edit');
+        if (!$btnEdit = $this->getControl($strEditId)) {
+            $btnEdit = new Q\Plugin\Button($this->pnl, $strEditId);
+            $btnEdit->Glyph = 'fa fa-pencil';
+            $btnEdit->Tip = true;
+            $btnEdit->ToolTip = t('Edit');
+            $btnEdit->CssClass = 'btn btn-darkblue btn-xs';
+            //$btnEdit->addAction(new Q\Event\Click(), new Q\Action\Ajax('btnEdit_Click'));
+        }
 
-        $btnEdit->CssClass = 'btn btn-darkblue btn-xs';
-        //$this->btnEdit->addAction(new Q\Event\Click(), new Q\Action\Ajax('btnEdit_Click'));
+        $strDeleteId = 'btnDelete' . $objMenu->Id;
 
-        $strControlId = 'btnDelete' . $objMenu->Id;
-
-        $btnDelete = new Q\Plugin\Button($this->pnl, $strControlId);
-        $btnEdit->Glyph = 'fa fa-trash';
-        $btnDelete->Tip = true;
-        $btnDelete->ToolTip = t('Delete');
-
-        $btnDelete->CssClass = 'btn btn-danger btn-xs';
-        //$this->btnDelete->addAction(new Q\Event\Click(), new Q\Action\Ajax('btnDelete_Click'));
-
+        if (!$btnDelete = $this->getControl($strDeleteId)) {
+            $btnDelete = new Q\Plugin\Button($this->pnl, $strDeleteId);
+            $btnDelete->Glyph = 'fa fa-trash';
+            $btnDelete->Tip = true;
+            $btnDelete->ToolTip = t('Delete');
+            $btnDelete->CssClass = 'btn btn-danger btn-xs';
+            //$btnDelete->addAction(new Q\Event\Click(), new Q\Action\Ajax('btnDelete_Click'));
+        }
+        return $btnStatus->render(false) . $btnEdit->render(false) . $btnDelete->render(false);
     }
 
     protected function formPreRender()
     {
         if ($this->intEditMenuId) {
             $this->btnAddMenuItem->Enabled = false;
+
         } else {
             $this->btnAddMenuItem->Enabled = true;
         }
