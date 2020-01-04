@@ -1,8 +1,6 @@
 <?php
 
-/**
- * This file contains the MenuPanel Class.
- */
+/** This file contains the MenuPanel Class */
 
 namespace QCubed\Plugin;
 
@@ -17,7 +15,6 @@ use QCubed\Exception\InvalidCast;
 use QCubed\Html;
 use QCubed\Js;
 use QCubed\Type;
-
 
 // we need a better way of reconfiguring JS and CSS assets
 if (!defined('QCUBED_NESTEDSORTABLE_ASSETS_URL')) {
@@ -43,7 +40,7 @@ class MenuPanelBase extends ControlBase
     use Q\Control\DataBinderTrait;
 
     /** @var bool UseWrapper */
-    protected $blnUseWrapper = false; //If you do not have it turned on globally, then turn on locally.
+    protected $blnUseWrapper = false; //If it's not turned off globally, please do it here!
     /** @var string TagName */
     protected $strTagName = null;
     /** @var string SectionClass */
@@ -55,12 +52,11 @@ class MenuPanelBase extends ControlBase
     /** @var  callable */
     protected $cellParamsCallback = null;
 
+    /** @var */
     protected $mixButtons;
 
     /** @var array DataSource from which the items are picked and rendered */
     protected $objDataSource;
-    /** @var  integer Used during rendering to report which visible menu item is being drawn. */
-    protected $intCurrentRowIndex;
 
     protected $intCurrentDepth = 0;
     protected $intCounter = 0;
@@ -83,7 +79,6 @@ class MenuPanelBase extends ControlBase
     /** @var  int Status */
     protected $intStatus;
 
-
     /**
      * MenuPanelBase constructor.
      * @param Q\Control\ControlBase|FormBase $objParentObject
@@ -100,9 +95,7 @@ class MenuPanelBase extends ControlBase
         $this->registerFiles();
     }
 
-    /**
-     * @throws Caller
-     */
+    /** @throws Caller */
     protected function registerFiles()
     {
         $this->AddCssFile(QCUBED_BOOTSTRAP_CSS); // make sure they know
@@ -111,8 +104,14 @@ class MenuPanelBase extends ControlBase
         Bs\Bootstrap::loadJS($this);
     }
 
+    /**
+     * @return bool
+     */
     public function validate() {return true;}
 
+    /**
+     *
+     */
     public function parsePostData() {}
 
     /**
@@ -137,9 +136,7 @@ class MenuPanelBase extends ControlBase
         $this->nodeParamsCallback = $callback;
     }
 
-    /**
-     * @param callable $callback
-     */
+    /** @param callable $callback */
     public function createRenderButtons(callable $callback)
     {
         $this->cellParamsCallback = $callback;
@@ -202,15 +199,18 @@ class MenuPanelBase extends ControlBase
         return $vars;
     }
 
+    /**
+     * @param $objItem
+     * @return mixed
+     * @throws \Exception
+     */
     public function getObjectDraw($objItem)
     {
         if (!$this->cellParamsCallback) {
             throw new \Exception("Must provide an cellParamsCallback");
         }
         $this->mixButtons = call_user_func($this->cellParamsCallback, $objItem);
-        //print '<pre>';
-        //print_r($this->mixButtons . "***");
-        //print '</pre>';
+
         return $this->mixButtons;
     }
 
@@ -237,23 +237,26 @@ class MenuPanelBase extends ControlBase
 
     /**
      * @param $arrParams
+     * @param $arrObjects
      * @return string
      */
-    protected function renderMenuTree($arrParams)
+    protected function renderMenuTree($arrParams, $arrObjects)
     {
         $strHtml = '';
-        foreach ($arrParams as $arrParam) {
 
-            if ($this->nodeParamsCallback) {
-                $this->intId = $arrParam['id'];
-                $this->intParentId = $arrParam['parent_id'];
-                $this->intDepth = $arrParam['depth'];
-                $this->intLeft = $arrParam['left'];
-                $this->intRight = $arrParam['right'];
-                $this->strMenuText = $arrParam['text'];
-                $this->intStatus = $arrParam['status'];
+        for ($i = 0; $i < count($arrParams); $i++)
+        {
+            $this->intId = $arrParams[$i]['id'];
+            $this->intParentId = $arrParams[$i]['parent_id'];
+            $this->intDepth = $arrParams[$i]['depth'];
+            $this->intLeft = $arrParams[$i]['left'];
+            $this->intRight = $arrParams[$i]['right'];
+            $this->strMenuText = $arrParams[$i]['text'];
+            $this->intStatus = $arrParams[$i]['status'];
+
+            if ($this->cellParamsCallback) {
+                $this->strRenderCellHtml = $this->getRenderCellHtml($arrObjects[$i]);
             }
-            $strRenderCellHtml = $this->getRenderCellHtml($arrParam);
 
             if ($this->intDepth == $this->intCurrentDepth) {
                 if ($this->intCounter > 0)
@@ -272,7 +275,6 @@ class MenuPanelBase extends ControlBase
                 $strHtml .= ' class="mjs-nestedSortable-expanded"';
             }
             $strHtml .= '>';
-
             $strCheckStatus = $this->intStatus == 1 ? 'enabled' : 'disabled';
             $strHtml .= <<<TMPL
 
@@ -280,27 +282,33 @@ class MenuPanelBase extends ControlBase
         <span class="reorder"><i class="fa fa-bars"></i></span>
         <span class="disclose"><span></span></span>
         <section class="menu-body">{$this->strMenuText}</section>
-        $strRenderCellHtml
+TMPL;
+            if ($this->cellParamsCallback) {
+                $strHtml .= $this->strRenderCellHtml;
+            }
+            $strHtml .= <<<TMPL
     </div>
-
 TMPL;
             ++$this->intCounter;
         }
         $strHtml .= str_repeat('</li>' . '</' . $this->strTagName . '>', $this->intDepth) . '</li>';
-
         return $strHtml;
     }
 
-    protected function getRenderCellHtml($values)
+    /**
+     * @param $value
+     * @return null|string
+     */
+    protected function getRenderCellHtml($value)
     {
         if ($this->cellParamsCallback) {
-        $strHtml = '';
-        $attributes = [];
+            $strHtml = '';
+            $attributes = [];
 
-        if ($this->strSectionClass) {
-            $attributes['class'] = $this->strSectionClass;
-        }
-            $strHtml .= $values;
+            if ($this->strSectionClass) {
+                $attributes['class'] = $this->strSectionClass;
+            }
+            $strHtml .= $value;
             $strHtml = Html::renderTag('section', $attributes, $strHtml);
             return $strHtml;
         } else {
@@ -324,20 +332,18 @@ TMPL;
 </div></li>";
         }
 
-        $strRows = [];
-        $this->intCurrentRowIndex = 0;
+        $strParams = [];
+        $strObjects = [];
+
         if ($this->objDataSource) {
             foreach ($this->objDataSource as $objObject) {
-                if ($this->nodeParamsCallback) {
-                    $strRows[] = $this->getItemRaw($objObject);
-                }
+                $strParams[] = $this->getItemRaw($objObject);
                 if ($this->cellParamsCallback) {
-                    $strRows[] = $this->getObjectDraw($objObject);
+                    $strObjects[] = $this->getObjectDraw($objObject);
                 }
-                $this->intCurrentRowIndex++;
             }
         }
-        $strHtml = $this->renderMenuTree($strRows);
+        $strHtml = $this->renderMenuTree($strParams, $strObjects);
         $this->objDataSource = null;
         return $strHtml;
     }
@@ -358,6 +364,9 @@ TMPL;
         }
     }
 
+    /**
+     *
+     */
     public function makeJqWidget()
     {
         Application::executeSelectorFunction(".disclose" , "on", "click",
@@ -420,7 +429,7 @@ TMPL;
         switch ($strName) {
             case "Id":
                 try {
-                    $this->blnModified = true;
+                    //$this->blnModified = true;
                     $this->intId = Type::Cast($mixValue, Type::INTEGER);
                     $this->blnModified = true;
                     break;

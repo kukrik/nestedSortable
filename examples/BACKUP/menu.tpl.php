@@ -16,17 +16,23 @@
                 <div class="content-body">
                     <div class="panel-heading">
                         <h3 class="panel-title">Menu Management</h3>
+
                         <div class="row">
-                            <div class="form-group col-md-2 center-button">
-                                <?= _r($this->btnAddMenuItem); ?>
-                            </div>
-                            <div class="form-group col-md-5 center-button">
-                                <?= _r($this->txtMenuText); ?>
-                            </div>
-                            <div class="form-group col-md-5 center-button">
-                                <?= _r($this->btnSave); ?>
-                                <?= _r($this->btnCancel); ?>
-                            </div>
+                                <div class="form-group col-md-2 center-button">
+                                    <?= _r($this->btnAddMenuItem); ?>
+                                </div>
+                                <div class="form-group col-md-5 center-button">
+                                    <?= _r($this->txtMenuText); ?>
+                                </div>
+                                <div class="form-group col-md-5 center-button">
+                                    <?= _r($this->btnSave); ?>
+                                    <?= _r($this->btnCancel); ?>
+                                </div>
+
+
+
+
+
                         </div>
 
                         <div class="row">
@@ -36,6 +42,7 @@
                             </div>
                         </div>
                     </div>
+
                     <!-- MENU CONTAINER BEGIN -->
                     <div class="panel-body">
                         <div class="row">
@@ -43,6 +50,7 @@
                                 <?= _r($this->lblMessage); ?>
                             </div>
                         </div>
+
                         <!-- MENU BEGIN -->
                         <?= _r($this->tblSorterTable); ?>
                         <!-- MENU END -->
@@ -54,11 +62,10 @@
         <!-- END PAGE CONTENT-->
     </div>
 </div>
-
 <!-- BEGIN CONTENT -->
+
 
 <?php $this->RenderEnd(); ?>
 
 <?php require('footer.inc.php'); ?>
-
 <?php // require(QCUBED_CONFIG_DIR . '/footer.inc.php'); ?>

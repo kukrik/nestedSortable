@@ -270,7 +270,7 @@ ul.sortable ul {
     text-align: center;
     vertical-align: middle;
     border-right: 1px solid #ddd;
-    cursor: move;
+    cursor: pointer;
 }
 
 .sortable li.mjs-nestedSortable-collapsed > div.menu-row > .disclose span::before {

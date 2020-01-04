@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Relocate</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nestedSortable/2.0.0/jquery.mjs.nestedSortable.js"></script>
+
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+
+        .ui-stack {
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            margin-top: -1.6rem;
+            margin-left: -1.6rem;
+        }
+
+        .ui-stack>* {
+            -webkit-box-flex: 0;
+            -webkit-flex: 0 0 auto;
+            -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
+            margin-top: 1.6rem;
+            margin-left: 1.6rem;
+        }
+
+        .ui-stack-wrap {
+            -webkit-flex-wrap: wrap;
+            -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+        }
+
+        .ui-stack-center {
+            -webkit-box-pack: center;
+            -webkit-justify-content: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+        }
+
+        .ui-stack-align-center {
+            -webkit-box-align: center;
+            -webkit-align-items: center;
+            -ms-flex-align: center;
+            align-items: center;
+        }
+
+        .ui-stack-vertical {
+            -webkit-box-orient: vertical;
+            -webkit-box-direction: normal;
+            -webkit-flex-direction: column;
+            -ms-flex-direction: column;
+            flex-direction: column;
+        }
+
+        .ui-stack-item {
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        .ui-stack-item-fill {
+            -webkit-box-flex: 1;
+            -webkit-flex: 1 1 auto;
+            -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+        }
+
+        .ui-card-section.ui-navigation {
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        .ui-navigation ol {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .ui-navigation li {
+            padding: 0;
+        }
+
+        .ui-navigation ol ol {
+            padding-left: 30px;
+        }
+
+        .ui-navigation ol ol .sortable-menu-item,
+        .ui-navigation ol ol .button-add-item {
+            border-left: 1px solid #dfe3e8;
+        }
+
+        .sortable-menu-item {
+            padding: 10px;
+            background: white;
+            border-top: 1px solid #dfe3e8;
+            -webkit-box-shadow: 0 1px 0 0 #dfe3e8;
+            box-shadow: 0 1px 0 0 #dfe3e8;
+            margin-top: 0;
+            margin-left: 0;
+            line-height: 30px;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .ui-menu-handle {
+            width: 20px;
+            height: 20px;
+            background-color: #5c6ac4;
+            border-radius: 50%;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .ui-menu-placeholder {
+            position: relative;
+            background-color: #5c6ac4;
+            height: 2px;
+            width: 100%;
+            margin-top: -1px;
+            margin-bottom: -1px;
+        }
+
+        .ui-menu-placeholder:before {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            border: 2px solid #5c6ac4;
+            top: -4px;
+            left: -9px;
+            content: "";
+        }
+
+        .ui-menu-placeholder.ui-menu-item-invalid,
+        .ui-menu-placeholder.ui-menu-item-invalid:before {
+            background-color: #ddd;
+            border-color: #bbb;
+        }
+
+        .ui-menu-item-title {
+            margin: 0;
+            padding: 0 0.8rem;
+        }
+
+        .button-add-item {
+            width: 100%;
+            background: #f4f5fa;
+            color: #5c6ac4;
+            text-align: left;
+            -webkit-transition: none;
+            transition: none;
+            border: 0;
+            border-top: 1px solid #dfe3e8;
+            border-color: #dfe3e8;
+            border-radius: 0;
+            line-height: 34px;
+            padding: 10px 15px;
+        }
+
+        .button-add-item:hover {
+            border-color: #5c6ac4;
+            background: #5c6ac4;
+            color: white;
+        }
+    </style>
+    <script>
+        function addButton($el) {
+            var tpl = '<li class="add-menu-item"><button class="ui-button button-add-item" type="button">Add menu item</button></li>';
+
+            var $branches = $el.parents('li.ui-menu-item-branch').not(':has( > ol li.add-menu-item)');
+            $branches.each(function(i, el) {
+                $(el).find('> ol').append(tpl);
+            });
+        }
+
+        $(document).ready(function() {
+            $('.sortable').nestedSortable({
+                handle: '.ui-menu-handle',
+                placeholder: 'ui-menu-placeholder',
+                items: 'li:not(.add-menu-item)',
+                toleranceElement: '> div',
+                branchClass: 'ui-menu-item-branch',
+                leafClass: 'ui-menu-item-leaf',
+                collapsedClass: 'ui-menu-item-collapsed',
+                expandedClass: 'ui-menu-item-expanded',
+                errorClass: 'ui-menu-item-invalid',
+                isTree: true,
+                distance: 0,
+                maxLevels: 3,
+                isAllowed: function(placeholder, placeholderParent, currentItem) {
+                    if (placeholder.prev().hasClass('add-menu-item')) {
+                        return false;
+                    }
+                    if (placeholderParent && placeholderParent.hasClass('add-menu-item')) {
+                        return false;
+                    }
+                    return true;
+                },
+                relocate: function(event, currentItem) {
+                    var target = $(event.target);
+                    console.log('relocate', currentItem);
+                    addButton(currentItem.item);
+                }
+            });
+
+            $('.sortable').on('click', '.button-add-item', function(e) {
+                var el = $(this);
+                var tpl = '<li class="ui-menu-item"><div class="ui-stack ui-stack-wrap ui-stack-align-center sortable-menu-item">' +
+                        '<div class="ui-menu-handle ui-sortable-handle"></div><div class="ui-menu-item-title">Sub Content 2</div></div></li>';
+                $(tpl).insertBefore(el);
+            });
+        });
+    </script>
+</head>
+
+
+<body>
+<div class="ui-navigation">
+    <ol class="sortable">
+        <li class="ui-menu-item" data-menu-item='{"title":"Content 1"}'>
+            <div class="ui-stack ui-stack-wrap ui-stack-align-center sortable-menu-item">
+                <div class="ui-menu-handle"></div>
+                <div class="ui-menu-item-title">Content 1</div>
+            </div>
+        </li>
+        <li class="ui-menu-item" data-menu-item='{"title":"Content 2"}'>
+            <div class="ui-stack ui-stack-wrap ui-stack-align-center sortable-menu-item">
+                <div class="ui-menu-handle"></div>
+                <div class="ui-menu-item-title">Content 2</div>
+            </div>
+            <ol>
+                <li class="ui-menu-item" data-menu-item='{"title":"Sub Content 1"}'>
+                    <div class="ui-stack ui-stack-wrap ui-stack-align-center sortable-menu-item">
+                        <div class="ui-menu-handle"></div>
+                        <div class="ui-menu-item-title">Sub Content 1</div>
+                    </div>
+                </li>
+                <li class="ui-menu-item" data-menu-item='{"title":"Sub Content 2"}'>
+                    <div class="ui-stack ui-stack-wrap ui-stack-align-center sortable-menu-item">
+                        <div class="ui-menu-handle"></div>
+                        <div class="ui-menu-item-title">Sub Content 2</div>
+                    </div>
+                </li>
+                <li class="add-menu-item">
+                    <button class="ui-button button-add-item" type="button">Add menu item to Content 2</button>
+                </li>
+            </ol>
+        </li>
+        <li class="ui-menu-item" data-menu-item='{"title":"Content 3"}'>
+            <div class="ui-stack ui-stack-wrap ui-stack-align-center sortable-menu-item">
+                <div class="ui-menu-handle"></div>
+                <div class="ui-menu-item-title">Content 3</div>
+            </div>
+        </li>
+        <li class="add-menu-item">
+            <button class="ui-button button-add-item" type="button">Add menu item</button>
+        </li>
+    </ol>
+</div>
+</body>
+
+
+</html>

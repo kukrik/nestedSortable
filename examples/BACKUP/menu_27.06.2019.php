@@ -8,34 +8,40 @@ ini_set('log_errors', TRUE); // Error logging
 
 use QCubed as Q;
 use QCubed\Bootstrap as Bs;
+/*use QCubed\Plugin\NestedSortable;
+use QCubed\Plugin\MenuPanel;
+use QCubed\Plugin\Button;
+use QCubed\Plugin\Alert;
+use QCubed\Project\Application;*/
+use QCubed\Project\HtmlAttributeManager;
 use QCubed\Project\Control\ControlBase;
 use QCubed\Project\Control\FormBase as Form;
-use QCubed\Action\ActionParams;
+use QCubed\Query\QQ;
 
 /**
  * Class SampleForm
  */
 class SampleForm extends Form
 {
+    protected $objContent;
+    protected $objMenu;
+    protected $objMaxValue;
+
     // This value is either a Menu->Id, "null" (if nothing is being edited), or "-1" (if creating a new Menu)
     protected $intEditMenuId = null;
 
     protected $btnAddMenuItem;
     protected $txtMenuText;
     protected $btnSave;
+
+
     protected $btnCancel;
 
     protected $btnCollapseAll;
     protected $btnExpandAll;
     protected $lblMessage;
     protected $tblSorterTable;
-
     protected $pnl;
-    protected $strStatus;
-
-    protected $btnStatus;
-    protected $btnEdit;
-    protected $btnDelete;
 
     protected function formCreate()
     {
@@ -69,7 +75,6 @@ class SampleForm extends Form
         $this->btnSave->Text = t('Save');
         $this->btnSave->CssClass = 'btn btn-orange';
         $this->btnSave->addWrapperCssClass('center-button');
-        $this->btnSave->CssClass = 'btn btn-orange';
         $this->btnSave->PrimaryButton = true;
         $this->btnSave->CausesValidation = true;
         $this->btnSave->addAction(new Q\Event\Click(), new Q\Action\Ajax('btnMenuSave_Click'));
@@ -86,21 +91,23 @@ class SampleForm extends Form
 
         $this->btnCollapseAll = new Q\Plugin\Button($this);
         $this->btnCollapseAll->Text = t(' Collapse All');
-        $this->btnCollapseAll->Glyph = 'fa fa-minus';
+        $this->btnCollapseAll->Tip = true;
+        $this->btnCollapseAll->ToolTip = t('Collapse All');
         $this->btnCollapseAll->addWrapperCssClass('center-button');
-        $this->btnCollapseAll->CssClass = 'btn btn-default js-collapse-all';
+        $this->btnCollapseAll->Glyph = 'fa fa-minus';
+        $this->btnCollapseAll->CssClass = 'btn btn-default collapse-all';
 
         $this->btnExpandAll = new Q\Plugin\Button($this);
         $this->btnExpandAll->Text = t(' Expand All');
-        $this->btnExpandAll->Glyph = 'fa fa-plus';
         $this->btnExpandAll->addWrapperCssClass('center-button');
-        $this->btnExpandAll->CssClass = 'btn btn-default js-expand-all';
+        $this->btnExpandAll->Glyph = 'fa fa-plus';
+        $this->btnExpandAll->CssClass = 'btn btn-default expand-all';
 
         // NestedSortable
 
         $this->tblSorterTable = new Q\Plugin\NestedSortable($this);
         $this->tblSorterTable->ForcePlaceholderSize = true;
-        $this->tblSorterTable->Handle = '.reorder';
+        $this->tblSorterTable->Handle = 'div';
         $this->tblSorterTable->Helper = 'clone';
         $this->tblSorterTable->ListType = 'ul';
         $this->tblSorterTable->Items = 'li';
@@ -122,9 +129,15 @@ class SampleForm extends Form
         $this->pnl = new Q\Plugin\MenuPanel($this->tblSorterTable);
         $this->pnl->TagName = 'ul';
         $this->pnl->setDataBinder('Menu_Bind');
-        $this->pnl->createNodeParams([$this, 'Menu_Draw']);
-        $this->pnl->createRenderButtons([$this, 'Buttons_Draw']);
+        $this->pnl->setNodeParamsCallback([$this, 'Menu_Draw']);
+
         $this->pnl->SectionClass = 'menu-btn-body center-button';
+
+        $this->pnl->addStatusButton(/*QQN::MenuContent()->IsEnabled, */t('Enable'), t('Disable'), true, ['btn btn-success btn-xs', 'btn btn-white btn-xs']);
+        //$this->pnl->addAction(new Q\Event\Click(), new Q\Action\Ajax('btnMenuStatus_Click', 'default', 'btnMenuEdit_Click', 'default'));
+
+
+        $this->pnl->addEditButton(t('Edit'), true, 'btn btn-darkblue btn-xs');
 
         $this->tblSorterTable->addAction(new Q\Jqui\Event\SortableStop(), new Q\Action\Ajax('Sortable_Stop'));
     }
@@ -134,14 +147,20 @@ class SampleForm extends Form
     protected function Menu_Bind()
     {
         $objMenuArray = $this->pnl->DataSource = Menu::loadAll(
-            Q\Query\QQ::Clause(Q\Query\QQ::OrderBy(QQN::menu()->Left),
-                Q\Query\QQ::expand(QQN::menu()->MenuContent)
+            Q\Query\QQ::Clause(Q\Query\QQ::OrderBy(QQN::Menu()->Left),
+                Q\Query\QQ::expand(QQN::Menu()->MenuContent)
             ));
 
         if ($this->intEditMenuId == -1) {
             array_push($objMenuArray, new Menu);
         }
+
         $this->pnl->DataSource = $objMenuArray;
+
+        /*$this->pnl->DataSource = Menu::loadAll(
+            Q\Query\QQ::Clause(Q\Query\QQ::OrderBy(QQN::menu()->Left),
+                Q\Query\QQ::expand(QQN::menu()->Content)
+            ));*/
     }
 
     public function Menu_Draw(Menu $objMenu)
@@ -156,75 +175,44 @@ class SampleForm extends Form
         return $a;
     }
 
-    public function Buttons_Draw(Menu $objMenu)
+    /*public function Buttons_Draw(Menu $objMenu)
     {
-        $strStatusId = 'btnStatus' . $objMenu->Id;
+        $objControlId = "statusButton" . $objMenu->Content->IsEnabled;
 
-        if (!$this->btnStatus = $this->getControl($strStatusId)) {
-            $this->btnStatus = new Q\Plugin\Button($this->pnl, $strStatusId);
-            if ($objMenu->MenuContent->IsEnabled == 1) {
-                $this->strStatus = 'Disable';
-                $this->btnStatus->CssClass = 'btn btn-white btn-xs';
-                } else {
-                $this->strStatus = 'Enable';
-                $this->btnStatus->CssClass = 'btn btn-success btn-xs';
-                }
-            $this->btnStatus->Text = t($this->strStatus);
-            $this->btnStatus->ActionParameter = $objMenu->MenuContent->Id;
-            $this->btnStatus->CausesValidation = false;
-            $this->btnStatus->addAction(new Q\Event\Click(), new Q\Action\Ajax('btnStatus_Click'));
-        }
+        $this->btnStatus = new Q\Plugin\Button($this->pnl);
+        $this->btnStatus->Tip = true;
+        $this->btnStatus->setDataAttribute('toggle', 'tooltip');
+        //$this->btnStatus->addAction(new Q\Event\Click(), new Q\Action\Ajax('btnStatus_Click'));
 
-        $strEditId = 'btnEdit' . $objMenu->Id;
-
-        if (!$this->btnEdit = $this->getControl($strEditId)) {
-            $this->btnEdit = new Q\Plugin\Button($this->pnl, $strEditId);
-            $this->btnEdit->Glyph = 'fa fa-pencil';
-            $this->btnEdit->Tip = true;
-            $this->btnEdit->ToolTip = t('Edit');
-            $this->btnEdit->CssClass = 'btn btn-darkblue btn-xs';
-            //$this->btnEdit->addAction(new Q\Event\Click(), new Q\Action\Ajax('btnEdit_Click'));
-        }
-
-        $strDeleteId = 'btnDelete' . $objMenu->Id;
-
-        if (!$this->btnDelete = $this->getControl($strDeleteId)) {
-            $this->btnDelete = new Q\Plugin\Button($this->pnl, $strDeleteId);
-            $this->btnDelete->Glyph = 'fa fa-trash';
-            $this->btnDelete->Tip = true;
-            $this->btnDelete->ToolTip = t('Delete');
-            $this->btnDelete->CssClass = 'btn btn-danger btn-xs';
-            //$this->btnDelete->addAction(new Q\Event\Click(), new Q\Action\Ajax('btnDelete_Click'));
-        }
-
-        if ($this->intEditMenuId == -1) {
-            $this->btnStatus->Enabled = false;
-            $this->btnEdit->Enabled = false;
-            $this->btnDelete->Enabled = false;
-        } else {
-            $this->btnStatus->Enabled = true;
-            $this->btnEdit->Enabled = true;
-            $this->btnDelete->Enabled = true;
-        }
-
-        /*if ($objMenu->MenuContent->IsEnabled == 1) {
-            $this->strStatus = 'Disable';
+        if ($objMenu->Content->IsEnabled == 1) {
+            $this->btnStatus->Text = t('Disable');
+            $this->btnStatus->ToolTip = t('Disable');
             $this->btnStatus->CssClass = 'btn btn-white btn-xs';
+            //$this->btnStatus->removeCssClass('btn btn-success btn-xs');
+            //$this->btnStatus->addCssClass('btn btn-white btn-xs');
         } else {
-            $this->strStatus = 'Enable';
+            $this->btnStatus->Text = t('Enable');
+            $this->btnStatus->ToolTip = t('Enable');
             $this->btnStatus->CssClass = 'btn btn-success btn-xs';
-        }*/
+            //$this->btnStatus->removeCssClass('btn btn-white btn-xs');
+            //$this->btnStatus->addCssClass('btn btn-success btn-xs');
+        }
 
+        Later work
 
-        return $this->btnStatus->render(false) . $this->btnEdit->render(false) . $this->btnDelete->render(false);
-    }
+        $objControlId = "editButton" . $objMenu->Content->MenuId;
+        $this->btnEdit = new Q\Plugin\Button($this->pnl, $objControlId);
+        $this->btnEdit->Text = t('Edit');
+        $this->btnEdit->addAction(new Q\Event\Click(), new Q\Action\Ajax('btnEdit_Click'));
 
-    ///////////////////////////////////////////////////////////////////////////////////////////
+        $objControlId = "deleteButton" . $objMenu->Id;
+        $this->btnDelete = new Q\Plugin\Button($this->pnl, $objControlId);
+        $this->btnDelete->Text = t('Delete');
+        $this->btnDelete->addAction(new Q\Event\Click(), new Q\Action\Ajax('btnDelete_Click'));
+    }*/
 
     protected function formPreRender()
     {
-        //$this->tblSorterTable->refresh();
-
         if ($this->intEditMenuId) {
             $this->btnAddMenuItem->Enabled = false;
         } else {
@@ -250,13 +238,13 @@ class SampleForm extends Form
         $this->lblMessage->Dismissable = true;
         $this->lblMessage->removeCssClass(Bs\Bootstrap::ALERT_WARNING);
         $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_SUCCESS);
-        $this->lblMessage->Text = t('<strong>Well done!</strong> To add a new item of menu to the database is successful.');
+        $this->lblMessage->Text = t('<strong>Well done!</strong> To add a new item to the database is successful.');
         return true;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////
 
-    protected function btnAddMenuItem_Click(ActionParams $params)
+    protected function btnAddMenuItem_Click($strFormId, $strControlId, $strParameter)
     {
         $this->intEditMenuId = -1;
 
@@ -267,28 +255,28 @@ class SampleForm extends Form
         $this->txtMenuText->focus();
     }
 
-    protected function btnMenuSave_Click(ActionParams $params)
+    protected function btnMenuSave_Click($strFormId, $strControlId, $strParameter)
     {
-        $objMenu = Menu::querySingle(Q\Query\QQ::all(),
+        $this->objMenu = Menu::querySingle(Q\Query\QQ::all(),
             [
                 Q\Query\QQ::maximum(QQN::menu()->Right, 'max')
             ]
         );
-        $objMaxValue = $objMenu->getVirtualAttribute('max');
+        $this->objMaxValue = $this->objMenu->getVirtualAttribute('max');
 
         if (($this->intEditMenuId == -1) && ($this->txtMenuText->Text !== '')) {
-            $objMenu = new Menu();
-            $objMenu->setParentId('');
-            $objMenu->setDepth('0');
-            $objMenu->setLeft($objMaxValue + 1);
-            $objMenu->setRight($objMaxValue + 2);
-            $objMenu->save();
+            $this->objMenu = new Menu();
+            $this->objMenu->setParentId('');
+            $this->objMenu->setDepth('0');
+            $this->objMenu->setLeft($this->objMaxValue + 1);
+            $this->objMenu->setRight($this->objMaxValue + 2);
+            $this->objMenu->save();
 
-            $objContent = new MenuContent();
-            $objContent->setMenuId($objMenu->Id);
-            $objContent->setMenuText(trim($this->txtMenuText->Text));
-            $objContent->setIsEnabled('0');
-            $objContent->save();
+            $this->objContent = new MenuContent();
+            $this->objContent->setMenuId($this->objMenu->Id);
+            $this->objContent->setMenuText(trim($this->txtMenuText->Text));
+            $this->objContent->setIsEnabled('0');
+            $this->objContent->save();
 
             $this->intEditMenuId = null;
             $this->txtMenuText->Visible = false;
@@ -299,7 +287,7 @@ class SampleForm extends Form
         }
     }
 
-    protected function btnMenuCancel_Click(ActionParams $params)
+    protected function btnMenuCancel_Click($strFormId, $strControlId, $strParameter)
     {
         $this->txtMenuText->Visible = false;
         $this->btnSave->Visible = false;
@@ -307,37 +295,21 @@ class SampleForm extends Form
         $this->intEditMenuId = null;
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////
-
-    protected function btnStatus_Click(ActionParams $params)
+    protected function btnMenuStatus_Click($strFormId, $strControlId, $strParameter)
     {
-        $this->intEditMenuId = null;
-        $intStatusId = intval($params->ActionParameter);
-
-        $objContent = MenuContent::load($intStatusId);
-
-        if ($objContent->IsEnabled == 1) {
-            $objContent->setIsEnabled('0');
-            $objContent->save();
-        } else {
-            $objContent->setIsEnabled('1');
-            $objContent->save();
-        }
-
-        if ($objContent->IsEnabled == 1) {
-            $this->strStatus = 'Disable';
-            $this->btnStatus->CssClass = 'btn btn-white btn-xs';
-        } else {
-            $this->strStatus = 'Enable';
-            $this->btnStatus->CssClass = 'btn btn-success btn-xs';
-        }
-        //$this->tblSorterTable->refresh();
-        Q\Project\Application::redirect('menu.php');
+        ////////////////
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////
+    protected function btnMenuEdit_Click($strFormId, $strControlId, $strParameter)
+    {
+        ////////////////
+        $this->txtMenuText->Visible = false;
+        $this->btnSave->Visible = false;
+        $this->btnCancel->Visible = false;
+        $this->intEditMenuId = null;
+    }
 
-    protected function Sortable_Stop(ActionParams $params)
+    protected function Sortable_Stop($strFormId, $strControlId, $strParameter)
     {
         $arr = $this->tblSorterTable->ItemArray;
         $someArray = json_decode($arr, true);
@@ -357,14 +329,14 @@ class SampleForm extends Form
             $this->lblMessage->Dismissable = true;
             $this->lblMessage->removeCssClass(Bs\Bootstrap::ALERT_SUCCESS);
             $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_WARNING);
-            $this->lblMessage->Text = t('<strong>Sorry</strong>, the order could not be edit or saved.');
+            $this->lblMessage->Text = t('<strong>Sorry</strong>, the new order could not be saved.');
             return false;
         }
         $this->lblMessage->Display = true;
         $this->lblMessage->Dismissable = true;
         $this->lblMessage->removeCssClass(Bs\Bootstrap::ALERT_WARNING);
         $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_SUCCESS);
-        $this->lblMessage->Text = t('<strong>Well done!</strong> Order have been changed and saved.');
+        $this->lblMessage->Text = t('<strong>Well done!</strong> The new order has been saved.');
         return true;
     }
 

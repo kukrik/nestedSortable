@@ -11,7 +11,7 @@
  Target Server Version : 50722
  File Encoding         : 65001
 
- Date: 22/12/2019 23:37:47
+ Date: 28/06/2019 11:41:09
 */
 
 SET NAMES utf8mb4;
@@ -53,7 +53,7 @@ CREATE TABLE `menu` (
   `left` int(11) DEFAULT NULL,
   `right` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of menu
@@ -61,13 +61,14 @@ CREATE TABLE `menu` (
 BEGIN;
 INSERT INTO `menu` VALUES (1, NULL, 0, 2, 3);
 INSERT INTO `menu` VALUES (2, NULL, 0, 4, 11);
-INSERT INTO `menu` VALUES (3, 2, 1, 5, 10);
-INSERT INTO `menu` VALUES (4, 3, 2, 6, 7);
-INSERT INTO `menu` VALUES (5, 3, 2, 8, 9);
+INSERT INTO `menu` VALUES (3, 2, 1, 5, 6);
+INSERT INTO `menu` VALUES (4, 2, 1, 7, 8);
+INSERT INTO `menu` VALUES (5, 2, 1, 9, 10);
 INSERT INTO `menu` VALUES (6, NULL, 0, 12, 13);
-INSERT INTO `menu` VALUES (7, NULL, 0, 14, 15);
-INSERT INTO `menu` VALUES (8, 9, 1, 17, 18);
-INSERT INTO `menu` VALUES (9, NULL, 0, 16, 19);
+INSERT INTO `menu` VALUES (7, NULL, 0, 14, 19);
+INSERT INTO `menu` VALUES (8, 7, 1, 15, 18);
+INSERT INTO `menu` VALUES (9, 8, 2, 16, 17);
+INSERT INTO `menu` VALUES (11, NULL, 0, 20, 21);
 COMMIT;
 
 -- ----------------------------
@@ -85,7 +86,7 @@ CREATE TABLE `menu_content` (
   KEY `menu_type_idx` (`menu_type`),
   CONSTRAINT `menu_content_f` FOREIGN KEY (`menu_id`) REFERENCES `menu` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `menu_type_f` FOREIGN KEY (`menu_type`) REFERENCES `content_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- ----------------------------
 -- Records of menu_content
@@ -100,6 +101,7 @@ INSERT INTO `menu_content` VALUES (6, 6, 'Reporting', 2, 1);
 INSERT INTO `menu_content` VALUES (7, 7, 'Projects', 5, 1);
 INSERT INTO `menu_content` VALUES (8, 8, 'News', 6, 0);
 INSERT INTO `menu_content` VALUES (9, 9, 'Gallery', 7, 0);
+INSERT INTO `menu_content` VALUES (11, 11, 'Tervitusi Pärnust', 3, 0);
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;
