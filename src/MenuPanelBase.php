@@ -369,15 +369,15 @@ TMPL;
      */
     public function makeJqWidget()
     {
-        Application::executeSelectorFunction(".disclose" , "on", "click",
+        Application::executeSelectorFunction(".disclose", "on", "click",
             new Js\Closure("jQuery(this).closest(\"li\").toggleClass(\"mjs-nestedSortable-expanded\").toggleClass(\"mjs-nestedSortable-collapsed\")"),
             Application::PRIORITY_HIGH);
 
-        Application::executeSelectorFunction(".js-collapse-all" , "on", "click",
+        Application::executeSelectorFunction(".js-collapse-all", "on", "click",
             new Js\Closure("jQuery(\"ul.sortable\").find(\"li.mjs-nestedSortable-expanded\").removeClass(\"mjs-nestedSortable-expanded\").addClass(\"mjs-nestedSortable-collapsed\")"),
             Application::PRIORITY_HIGH);
 
-        Application::executeSelectorFunction(".js-expand-all" , "on", "click",
+        Application::executeSelectorFunction(".js-expand-all", "on", "click",
             new Js\Closure("jQuery(\"ul.sortable\").find(\"li.mjs-nestedSortable-collapsed\").removeClass(\"mjs-nestedSortable-collapsed\").addClass(\"mjs-nestedSortable-expanded\")"),
             Application::PRIORITY_HIGH);
     }

@@ -83,11 +83,11 @@ FUNC;
      * its functionality here.
      */
 
-    public function refresh()
+    /*public function refresh()
     {
         parent::refresh();
         ControlBase::refresh();
-    }
+    }*/
 
     public function __set($strName, $mixValue)
     {
