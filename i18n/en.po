@@ -1,12 +1,86 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 4.0\n"
-"Report-Msgid-Bugs-To: QCubed\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Tiit Papp <tiit.papp@gmail.com>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"Language: en\n"
+"X-Generator: Poedit 2.3\n"
 
-# For QCubed\nestedSortable
-msgid "Welcome to use nestedSortable!"
-msgstr "Welcome to use nestedSortable!"
+#: examples/menu.php:51
+msgid " Add Menu Item"
+msgstr " Add Menu Item"
+
+#: examples/menu.php:60
+msgid "Menu text"
+msgstr "Menu text"
+
+#: examples/menu.php:67
+msgid "Save"
+msgstr "Save"
+
+#: examples/menu.php:77
+msgid "Cancel"
+msgstr "Cancel"
+
+#: examples/menu.php:86
+msgid " Collapse All"
+msgstr " Collapse All"
+
+#: examples/menu.php:94
+msgid " Expand All"
+msgstr " Expand All"
+
+#: examples/menu.php:170 examples/menu.php:207
+msgid "Disable"
+msgstr "Disable"
+
+#: examples/menu.php:173 examples/menu.php:210
+msgid "Enable"
+msgstr "Enable"
+
+#: examples/menu.php:189
+msgid "Edit"
+msgstr "Edit"
+
+#: examples/menu.php:200
+msgid "Delete"
+msgstr "Delete"
+
+#: examples/menu.php:261
+msgid "<strong>Sorry</strong>, the menu text is at least mandatory."
+msgstr "<strong>Sorry</strong>, the menu text is at least mandatory."
+
+#: examples/menu.php:268
+msgid ""
+"<strong>Well done!</strong> To add a new item of menu to the database is "
+"successful."
+msgstr ""
+"<strong>Well done!</strong> To add a new item of menu to the database is "
+"successful."
+
+#: examples/menu.php:377
+msgid ""
+"<p><strong>Sorry</strong>, the order could not be edited or saved.</p>\n"
+"                                <p>Please try again or refresh your browser!"
+"</p>"
+msgstr ""
+"<p><strong>Sorry</strong>, the order could not be edited or saved.</p>\n"
+"                                <p>Please try again or refresh your browser!"
+"</p>"
+
+#: examples/menu.php:379
+msgid "Warning"
+msgstr "Warning"
+
+#: examples/menu.tpl.php:1 examples/menu.tpl.php:18
+msgid "Menu management"
+msgstr "Menu management"
+
+#: src/MenuPanelBase.php:365
+msgid "<strong>Welcome! </strong> Create the following menu items!"
+msgstr "<strong>Welcome! </strong> Create the following menu items!"

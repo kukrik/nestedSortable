@@ -1,0 +1,511 @@
+/* here you can put your own css to customize and override the theme */
+
+.btn-orange {
+	color: #fff;
+	background-color: #f36118;
+	border-color: #f36018;
+}
+
+.btn-orange:hover,
+.btn-orange:focus,
+.btn-orange.active {
+	color: #fff;
+	background-color: #e44c14;
+	border-color: #e44c14;
+}
+
+.btn-gray {
+	color: #fff;
+	background-color: #bdc9cd;
+	border-color: #bdc9cd;
+}
+
+.btn-gray:hover,
+.btn-gray:focus,
+.btn-gray.active {
+	color: #fff;
+	background-color: #afbbbf;
+	border-color: #afbbbf;
+}
+
+.btn-darkblue {
+	color: #fff;
+	background-color: #1195bb;
+	border-color: #1187ae;
+}
+
+.btn-darkblue:hover,
+.btn-darkblue:focus,
+.btn-darkblue.active {
+	color: #fff;
+	background-color: #0885a4;
+	border-color: #24709f;
+}
+
+.btn-danger {
+    color: #fff;
+    background-color: #da2004;
+    border-color: #d11c04;
+}
+
+.btn-danger:hover,
+.btn-danger:focus,
+.btn-danger.active {
+    color: #fff;
+    background-color: #c72923;
+    border-color: #A51D1D;
+}
+
+.btn-cancel {
+	color: #257886;
+	background-color: #eaded7;
+	border-color: #eaded7;
+}
+
+.btn-cancel:hover,
+.btn-cancel:focus,
+.btn-cancel.active {
+	color: #257886;
+	background-color: #ddcdc4;
+	border-color: #ddcdc4;
+}
+
+button.back::before, .button.back::before {
+	content: "« ";
+	margin-left: -5px;
+}
+
+input.calendar-trigger {
+	background-image: url('../img/font-awesome/brown/svg/calendar.svg');
+	background-repeat: no-repeat;
+	background-size: 20px 20px;
+	background-position: right;
+	background-position-x: 95%;
+	padding-right: 30px;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+}
+
+input.clock-trigger {
+	background-image: url('../img/font-awesome/brown/svg/clock-o.svg');
+	background-repeat: no-repeat;
+	background-size: 20px 20px;
+	background-position: right;
+	background-position-x: 95%;
+	padding-right: 30px;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+}
+
+.form-control {
+	display: block;
+	width: 100% !important;
+	height: 34px;
+	padding: 6px 12px;
+	font-size: 13px;
+	line-height: 1.42857143;
+	color: #555;
+	background-color: #fff;
+	background-image: none;
+	border: 1px solid #bcd8db;
+	border-radius: 4px;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+	-webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+	-o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+	transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+}
+
+.active {
+	border-color: #31a3ae;
+	outline: 0;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+}
+
+.form-control:focus {
+	border-color: #31a3ae;
+	outline: 0;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+}
+
+.form-group .view-label	{
+	margin-top: 2px;
+}
+
+.form-search {
+	position: relative;
+	display: block;
+	height: 35px;
+}
+
+.btn-view {
+	display: block;
+	width: auto;
+	height: 34px;
+	line-height: 1.42857143;
+	/*color: #ee7023;*/
+	/*border: 1px solid #bcd8db;
+	border-radius: 4px;*/
+}
+
+.form-search:before {
+	content: "\f016";
+	font-family: "FontAwesome";
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	color: #bcd8db; /* #ee7023 #512b2b */
+	font-size: 20px;
+	padding-left: 9px;
+	position: absolute;
+	top: -2px;
+	left: 6px;
+}
+
+a.btn-view {
+	position: relative;
+}
+
+a.btn-view:before  {
+	content: "\f002";
+	font-family: FontAwesome;
+	font-style: normal;
+	font-weight: normal;
+	text-decoration: none;
+	outline: none;
+	color: #ee7023;
+	font-size: 18px;
+	/*padding-left: 0.5em;*/
+	position: absolute;
+	z-index: 1;
+	top: 8px;
+	left: 8px;
+	transition: all .5s;
+}
+
+a:hover.btn-view:before,
+a:focus.btn-view:before {
+	font-size: 24px;
+	position: absolute;
+	z-index: 1;
+	top: -2px;
+	left: 5px;
+	/*color: #eeaf00;*/
+	transition: all .5s;
+}
+
+a {
+	text-shadow: none !important;
+	font-weight: 500;
+	color: #2593a1; /* #257886 #005f71 #256f7d  #257886 */
+	text-decoration: none;
+	outline: none !important;
+}
+
+a:focus, a:hover, a:active {
+	color: #2593a1;
+	text-decoration: underline;
+	outline: none !important;
+}
+
+.footer a {
+	text-shadow: none !important;
+	font-weight: 500;
+	color: #512b2b;
+	outline: 0;
+	text-decoration: none;
+}
+
+
+
+.footer a:focus, .footer a:hover, .footer a:active {
+	color: #512b2b;
+	text-decoration: underline;
+}
+
+/*** Custom login stuff ***/
+
+.login .content .form-title {
+	color: #f35b1c;
+	font-weight: bold !important;
+	margin-bottom: 25px;
+}
+
+/*** Custom title ***/
+.vauu-title-3 {
+	padding: 0;
+	font-size: 18px;
+	letter-spacing: -1px;
+	display: block;
+	color: #000;
+	margin: 0 0 25px 15px;
+	font-weight: 600 !important;
+	font-family: 'Open Sans', sans-serif;
+}
+
+.margin-left-0 {
+	margin-left: 0;
+}
+
+/*** MUUDETUD LOGOUT ***/
+
+.header .navbar-nav > li.dropdown.logout .dropdown-toggle {
+	display: inline-block;
+	height: 45px;
+}
+
+.header .navbar-nav > li.dropdown.logout a span {
+	vertical-align: super;
+	color: #512b2b;
+}
+
+.header .navbar-nav > li.dropdown.logout a i  {
+	display: inline-block;
+	margin-top: 5px;
+	margin: 0;
+	font-size: 25px;
+	color: #ee7023 !important;
+}
+
+.header .navbar-nav > li.dropdown.logout a:hover i {
+	text-decoration: none;
+	color: #fdc129 !important;
+}
+
+.header .navbar-nav > li.dropdown.logout a:hover span {
+	/*opacity: 0.5;
+	filter: alpha(opacity=50);*/
+}
+
+/*** MUUDETUD LOGOUT LOPP ***/
+
+@media (max-width: 480px) {
+
+	.header .navbar-nav > li.dropdown.user .dropdown-toggle {
+		background-color: #ebe7e2 !important;
+	}
+	.header .navbar-nav > li.dropdown.logout .dropdown-toggle {
+		padding-right: 10px;
+	}
+
+	.header .navbar-nav > li.dropdown.user .dropdown-toggle:hover,
+	.header .navbar-nav > li.dropdown.logout .dropdown-toggle:hover {
+		background-color: #ebe7e2 !important;
+	}
+}
+
+/*** LISATUD CONTENT ALGUS ***/
+
+.content-body {
+	background-color: #fff;
+	clear: both;
+	margin-top: 0;
+	margin-bottom: 20px;
+	/*padding: 0;*/
+	padding: 20px;
+	border-radius: 4px;
+}
+
+/*** LISATUD CONTENT LOPP ***/
+
+/*** CUSTOM TABS ALGUS ***/
+
+.tabbable-custom  .nav-tabs {
+	font-size: 16px;
+	font-weight: 500;
+}
+
+.tabbable-custom  .nav-tabs > li {
+	float: left;
+	margin-bottom: -1px;
+}
+
+.tabbable-custom .nav-tabs > li > a {
+	margin-right: 0 !important;
+	line-height: 1.42857143;
+	background-color: #f5eeeb;
+	color: #512b2b;
+	border: 1px solid #efe3df;
+	border-bottom-color: transparent;
+	border-radius: 4px 4px 0 0;
+
+}
+
+.tabbable-custom .nav-tabs > li > a:hover {
+	background-color: #feecbe;
+}
+
+.tabbable-custom > .nav-tabs > li.active > a,
+.tabbable-custom > .nav-tabs > li.active > a:hover,
+.tabbable-custom > .nav-tabs > li.active > a:focus {
+	color: #512b2b;
+	cursor: default;
+	background-color: #fff;
+	border: 1px solid #ddd;
+	border-bottom-color: transparent;
+}
+
+.tabbable-custom > .tab-content > .tab-pane {
+	margin: 5px;
+	margin-top: 15px;
+	margin-bottom: 15px;
+}
+
+.tabbable.tabbable-custom .radio-list > label.radio-inline:first-child {
+	padding-left: 20px;
+}
+
+/*** CUSTOM TABS LOPP ***/
+
+/*** CUSTOM TABLE  ALGUS ***/
+
+/*table thead > tr > th*/
+
+.table > thead > tr > th {
+	/*border-bottom: 0;*/
+	background: #e9f7fb !important;
+}
+
+
+.table tbody > tr:first-child td  {
+	border-top: 0;
+}
+
+.table tbody > tr:last-child td  {
+	 border-bottom: 1px solid #ddd;
+ }
+
+.table tbody tr td  {
+	border-bottom: 1px solid #ddd;
+}
+
+
+.table thead tr th {
+	color: #008c9e; /* #257886 #005f71  */
+	/*font-size: 14px;*/
+	font-weight: 400;
+}
+
+/*** CUSTOM TABLE LOPP ***/
+
+/*** CUSTOM LABEL ALGUS ***/
+
+/*.label.label-sm {
+	display: inline-block;
+	margin-top: 3px;
+}*/
+
+.label-approval
+/*.badge-approval*/ {
+	background-color: #f35b1c;
+	background-image: none !important;
+}
+
+.label-green,
+.badge-green {
+	background-color: #5cb85c;
+	 background-image: none !important;
+}
+
+.label-blue,
+.badge-blue {
+	background-color: #11a0c7;
+	background-image: none !important;
+}
+
+.label-yellow,
+.badge-yellow {
+	background-color: #ffaa1c;
+	background-image: none !important;
+}
+
+/*** CUSTOM LABEL LOPP ***/
+
+/*** CUSTOM ACTIONS-BODY ALGUS ***/
+
+.actions-body {
+	margin:  0;
+	padding: 0;
+	*zoom: 1;
+}
+
+.actions-right {
+	text-align: right;
+}
+
+/*** CUSTOM ACTIONS-BODY LOPP ***/
+
+/*** CUSTOM VAUU-SORTABLE ALGUS ***/
+
+.vauu-sortable {
+	padding-top: 20px;
+	padding-bottom: 20px;
+}
+
+/*** CUSTOM VAUU-SORTABLE LOPP ***/
+
+/*** CUSTOM FOR POPOVERS ALGUS ***/
+
+.btn-circle {
+	width: 22px;
+	height: 22px;
+	padding: 1px 1px;
+	border-radius: 50%;
+	text-align: center;
+	/*font-size: 12px;*/
+	line-height: 1.228571429;
+}
+
+.popover {
+	max-width: 350px;
+}
+
+.popover-title {
+	padding: 8px 14px;
+	margin: 0;
+	color: #512b2b;
+	font-size: 16px;
+	font-weight: 400 !important;
+	background-color: #f5eeeb; /* #f7f7f7  */
+	border-bottom: 1px solid #ebebeb;
+	border-radius: 5px 5px 0 0
+}
+
+.popover-content {
+	min-height: 55px;
+}
+
+@media (min-width: 320px) and (max-width: 480px) {
+	.text-left {
+		text-align: right;
+	}
+	.popover {
+		max-width: 210px;
+	}
+}
+
+@media (min-width: 480px) and (max-width: 800px) {
+	.text-left {
+		text-align: right;
+	}
+	.popover {
+		max-width: 350px;
+	}
+}
+
+/*** CUSTOM FOR POPOVERS LOPP ***/
+
+@media (min-width: 800px) and (max-width: 1200px) {
+
+	.label.label-sm {
+		margin-top: 1px;
+		margin-bottom: 1px;
+	}
+}

@@ -8,6 +8,7 @@ use QCubed as Q;
 use QCubed\Bootstrap as Bs;
 use QCubed\Control\FormBase;
 use QCubed\Project\Control\ControlBase;
+use QCubed\Control\Panel;
 use QCubed\Project\Control;
 use QCubed\Project\Application;
 use QCubed\Exception\Caller;
@@ -17,9 +18,9 @@ use QCubed\Js;
 use QCubed\Type;
 
 // we need a better way of reconfiguring JS and CSS assets
-if (!defined('QCUBED_NESTEDSORTABLE_ASSETS_URL')) {
+/*if (!defined('QCUBED_NESTEDSORTABLE_ASSETS_URL')) {
     define('QCUBED_NESTEDSORTABLE_ASSETS_URL', dirname(QCUBED_BASE_URL) . '/kukrik/nestedsortable/assets');
-}
+}*/
 
 /**
  * Class MenuPanelBase
@@ -35,14 +36,16 @@ if (!defined('QCUBED_NESTEDSORTABLE_ASSETS_URL')) {
  *
  * @package QCubed\Plugin
  */
-class MenuPanelBase extends ControlBase
+class MenuPanelBase extends Panel
 {
     use Q\Control\DataBinderTrait;
 
     /** @var bool UseWrapper */
     protected $blnUseWrapper = false; //If it's not turned off globally, please do it here!
+
+    protected $blnIsBlockElement = true;
     /** @var string TagName */
-    protected $strTagName = null;
+    protected $strSubTagName = null;
     /** @var string SectionClass */
     protected $strSectionClass = null;
 
@@ -262,13 +265,13 @@ class MenuPanelBase extends ControlBase
                 if ($this->intCounter > 0)
                     $strHtml .= '</li>';
             } elseif ($this->intDepth > $this->intCurrentDepth) {
-                $strHtml .= '<' . $this->strTagName . '>';
+                $strHtml .= '<' . $this->strSubTagName . '>';
                 $this->intCurrentDepth = $this->intCurrentDepth + ($this->intDepth - $this->intCurrentDepth);
             } elseif ($this->intDepth < $this->intCurrentDepth) {
-                $strHtml .= str_repeat('</li>' . '</' . $this->strTagName . '>', $this->intCurrentDepth - $this->intDepth) . '</li>';
+                $strHtml .= str_repeat('</li>' . '</' . $this->strSubTagName . '>', $this->intCurrentDepth - $this->intDepth) . '</li>';
                 $this->intCurrentDepth = $this->intCurrentDepth - ($this->intCurrentDepth - $this->intDepth);
             }
-            $strHtml .= _nl() . '<li id="' . $this->strControlId . '_' . $this->intId . '"';
+            $strHtml .= _nl() . '<li id="' . $this->ControlId . '_' . $this->intId . '"';
             if ($this->intLeft + 1 == $this->intRight) {
                 $strHtml .= ' class="mjs-nestedSortable-leaf"';
             } else {
@@ -291,7 +294,7 @@ TMPL;
 TMPL;
             ++$this->intCounter;
         }
-        $strHtml .= str_repeat('</li>' . '</' . $this->strTagName . '>', $this->intDepth) . '</li>';
+        $strHtml .= str_repeat('</li>' . '</' . $this->strSubTagName . '>', $this->intDepth) . '</li>';
         return $strHtml;
     }
 
@@ -322,15 +325,9 @@ TMPL;
      */
     protected function getControlHtml()
     {
-        $this->dataBind();
+        parent::getControlHtml();
 
-        if (empty($this->objDataSource)) {
-            $this->objDataSource = null;
-            $strEmptyMenuText = sprintf(t('<strong>Empty menu!</strong> Create the first menu item!'));
-            return "<li><div class='alert alert-info alert-dismissible' role='alert' style='display: block;'>
-    $strEmptyMenuText
-</div></li>";
-        }
+        $this->dataBind();
 
         $strParams = [];
         $strObjects = [];
@@ -343,8 +340,18 @@ TMPL;
                 }
             }
         }
-        $strHtml = $this->renderMenuTree($strParams, $strObjects);
+
+        $strHtml = $this->welcomeMessage();
+
+
+        $strHtml .= $this->renderMenuTree($strParams, $strObjects);
+
+        //$strOut = $this->renderMenuTree($strParams, $strObjects);
+        //$strHtml .= $this->renderTag($this->TagName, null, null, $strOut);
+
+
         $this->objDataSource = null;
+
         return $strHtml;
     }
 
@@ -365,21 +372,58 @@ TMPL;
     }
 
     /**
+     * This is just a welcome message!
+     * At the same time, the first menu item has been created!
+     * Only the menu item title can be edited here.
+     *
+     * @return string
+     */
+    public function welcomeMessage()
+    {
+        if (count($this->objDataSource) == 1) {
+            $strEmptyMenuText = sprintf(t('<strong>Welcome!</strong> Create the following menu items!'));
+            return "<div class='alert alert-info alert-dismissible' role='alert' style='display: block;'>
+                    $strEmptyMenuText
+                    </div>";
+        }
+    }
+
+    /**
      *
      */
     public function makeJqWidget()
     {
         Application::executeSelectorFunction(".disclose", "on", "click",
-            new Js\Closure("jQuery(this).closest(\"li\").toggleClass(\"mjs-nestedSortable-expanded\").toggleClass(\"mjs-nestedSortable-collapsed\")"),
+            new Js\Closure("jQuery(this).closest('li').toggleClass('mjs-nestedSortable-expanded').toggleClass('mjs-nestedSortable-collapsed')"),
             Application::PRIORITY_HIGH);
 
-        Application::executeSelectorFunction(".js-collapse-all", "on", "click",
-            new Js\Closure("jQuery(\"ul.sortable\").find(\"li.mjs-nestedSortable-expanded\").removeClass(\"mjs-nestedSortable-expanded\").addClass(\"mjs-nestedSortable-collapsed\")"),
+        Application::executeSelectorFunction("[data-collapse='true']", "on", "click",
+            new Js\Closure("jQuery('.sortable').find('li.mjs-nestedSortable-expanded').removeClass('mjs-nestedSortable-expanded').addClass('mjs-nestedSortable-collapsed')"),
             Application::PRIORITY_HIGH);
 
-        Application::executeSelectorFunction(".js-expand-all", "on", "click",
-            new Js\Closure("jQuery(\"ul.sortable\").find(\"li.mjs-nestedSortable-collapsed\").removeClass(\"mjs-nestedSortable-collapsed\").addClass(\"mjs-nestedSortable-expanded\")"),
+        Application::executeSelectorFunction("[data-collapse='false']", "on", "click",
+            new Js\Closure("jQuery('.sortable').find('li.mjs-nestedSortable-collapsed').removeClass('mjs-nestedSortable-collapsed').addClass('mjs-nestedSortable-expanded')"),
             Application::PRIORITY_HIGH);
+
+        Application::executeSelectorFunction("body", "on", "click", "[data-buttons='true']",
+            new Js\Closure("jQuery(\"[data-status='change'], [data-edit='true'], [data-delete='true']\").prop('disabled', true);"),
+            Application::PRIORITY_HIGH);
+
+        Application::executeSelectorFunction("body", "on", "click", "[data-buttons='false']",
+        new Js\Closure("jQuery(\"[data-status='change'], [data-edit='true'], [data-delete='true']\").prop('disabled', false);"),
+        Application::PRIORITY_HIGH);
+
+        //Application::executeControlCommand($this->getJqControlId(), "nestedSortable", "refresh", Application::PRIORITY_LOW);
+
+        /**
+         * The nestedsortable functions here do not support locking the first menu item.
+         * Or are they unsupported or not working well?
+         * Simple locking is added here.
+         * But it can be hidden or removed if you need to.
+         */
+        Application::executeJavaScript(sprintf("jQuery('#{$this->ControlId}_1').addClass('disabled');"));
+
+        //Application::executeJavaScript(sprintf("jQuery('.sortable').remove()"));
     }
 
     /////////////////////////
@@ -403,8 +447,8 @@ TMPL;
                 return $this->strMenuText;
             case "Status":
                 return $this->intStatus;
-            case "TagName":
-                return $this->strTagName;
+            case "SubTagName":
+                return $this->strSubTagName;
             case "SectionClass":
                 return $this->strSectionClass;
             case "DataSource":
@@ -429,9 +473,8 @@ TMPL;
         switch ($strName) {
             case "Id":
                 try {
-                    //$this->blnModified = true;
-                    $this->intId = Type::Cast($mixValue, Type::INTEGER);
                     $this->blnModified = true;
+                    $this->intId = Type::Cast($mixValue, Type::INTEGER);
                     break;
                 } catch (InvalidCast $objExc) {
                     $objExc->IncrementOffset();
@@ -492,10 +535,10 @@ TMPL;
                     throw $objExc;
                 }
                 break;
-            case "TagName":
+            case "SubTagName":
                 try {
                     $this->blnModified = true;
-                    $this->strTagName = Type::Cast($mixValue, Type::STRING);
+                    $this->strSubTagName = Type::Cast($mixValue, Type::STRING);
                 } catch (InvalidCast $objExc) {
                     $objExc->IncrementOffset();
                     throw $objExc;

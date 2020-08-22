@@ -11,6 +11,6 @@
       "psr-4": {"QCubed\\Plugin\\": "src/"}
     },
     "extra": {
-        "examples": ["menu.php"]
+        "examples": ["menu_examples.php", "menu_manager.php"]
     }
 }

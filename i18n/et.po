@@ -1,12 +1,87 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 4.0\n"
-"Report-Msgid-Bugs-To: QCubed\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Tiit Papp <tiit.papp@gmail.com>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"Language: et\n"
+"X-Generator: Poedit 2.3\n"
 
-# For QCubed\nestedSortable
-msgid "Welcome to use nestedSortable!"
-msgstr "Tere tulemast nestedSortable kasutama!"
+#: examples/menu.php:51
+msgid " Add Menu Item"
+msgstr " Lisa menüü kirje"
+
+#: examples/menu.php:60
+msgid "Menu text"
+msgstr "Menüü tekst"
+
+#: examples/menu.php:67
+msgid "Save"
+msgstr "Salvesta"
+
+#: examples/menu.php:77
+msgid "Cancel"
+msgstr "Loobu"
+
+#: examples/menu.php:86
+msgid " Collapse All"
+msgstr " Ahenda kõik"
+
+#: examples/menu.php:94
+msgid " Expand All"
+msgstr " Laienda kõik"
+
+#: examples/menu.php:170 examples/menu.php:207
+msgid "Disable"
+msgstr "Keela"
+
+#: examples/menu.php:173 examples/menu.php:210
+msgid "Enable"
+msgstr "Luba"
+
+#: examples/menu.php:189
+msgid "Edit"
+msgstr "Redigeeri"
+
+#: examples/menu.php:200
+msgid "Delete"
+msgstr "Kustuta"
+
+#: examples/menu.php:261
+msgid "<strong>Sorry</strong>, the menu text is at least mandatory."
+msgstr "<strong>Vabandust</strong>, menüü tekst on vähemalt kohustuslik."
+
+#: examples/menu.php:268
+msgid ""
+"<strong>Well done!</strong> To add a new item of menu to the database is "
+"successful."
+msgstr ""
+"<strong>Hästi tehtud!</strong> Uue menüü kirje lisamine andmebaasi on "
+"õnnestunud."
+
+#: examples/menu.php:377
+msgid ""
+"<p><strong>Sorry</strong>, the order could not be edited or saved.</p>\n"
+"                                <p>Please try again or refresh your browser!"
+"</p>"
+msgstr ""
+"<p><strong>Vabandust</strong>, tellimust ei saanud redigeerida ega "
+"salvestada.</p>\n"
+"                                <p>Palun proovi uuesti või värskenda "
+"brauserit!</p>"
+
+#: examples/menu.php:379
+msgid "Warning"
+msgstr "Hoiatus"
+
+#: examples/menu.tpl.php:1 examples/menu.tpl.php:18
+msgid "Menu management"
+msgstr "Menüü haldus"
+
+#: src/MenuPanelBase.php:365
+msgid "<strong>Welcome!</strong> Create the following menu items!"
+msgstr "<strong>Tere tulemast!</strong> Loo menüü järgmised kirjed!"

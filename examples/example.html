@@ -259,9 +259,25 @@
 
 			// Testiks tehtud
 
+			//$('.sortable').nestedSortable();
+
 			$('#addNode').click(function(){
 				$('ul.sortable').append('<li id="item_' + (new Date()).getTime() + '"><div>Uus element</div></li>');
 				$('ul.sortable').nestedSortable('refresh');
+			});
+
+			$('#delete').click(function(){
+				$('#c8_8').remove();
+				$('.sortable').nestedSortable('enable');
+				$('.sortable').nestedSortable('refresh');
+			});
+
+			$('#addNode').click(function(){
+				$('.sortable').nestedSortable('disable');
+			});
+
+			$('#activate').click(function(){
+				$('.sortable').nestedSortable('enable');
 			});
 
 		});
@@ -326,18 +342,11 @@
 
 
 		<p><br>
+			<input id="addNode" name="#addNode" type="submit" value="Add Node">
 
-		<!--<ul class="sortable">
-		<li id="a1_1">esimene</li>
-		<li><ul>
-			<li>esimene-sub</li>
-			<li>teine-sub</li>
-		</ul></li>
-		<li>teine</li>
-		<li>kolmas</li>
-	</ul>-->
-		<input id="addNode" name="#addNode" type="submit" value=
-				"Add Node">
+			<input id="delete" name="#delete" type="submit" value="Delete Node">
+
+			<input type="button" id="activate" value="Activate"/>
 		</p>
 
         <h3>Try the custom methods:</h3>
