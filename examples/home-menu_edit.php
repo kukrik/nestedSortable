@@ -1,7 +1,7 @@
 <?php
 require('qcubed.inc.php');
-require ('HomePageEditPanel.class.php');
-require ('HomePageMetaDataPanel.class.php');
+require ('classes/HomePageEditPanel.class.php');
+require ('classes/HomePageMetaDataPanel.class.php');
 
 use QCubed\Bootstrap as Bs;
 use QCubed\Project\Control\ControlBase;
