@@ -48,7 +48,7 @@ class SampleForm extends Form
 
         if ($this->objMenuContent->ContentType == null) {
             $this->pnlPage = new PageEditPanel($this->nav);
-            $this->pnlPage->Name = t('Content management');
+            $this->pnlPage->Name = t('Configure page');
         } else {
             $objPanelName = ContentType::toClassNames($this->objMenuContent->ContentType);
             $this->pnlContent = new $objPanelName($this->nav);
