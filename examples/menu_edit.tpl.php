@@ -1,4 +1,13 @@
-<?php // $strPageTitle = t('Page edit'); ?>
+<?php
+
+if ($this->objMenuContent->ContentType) {
+    $strOn = ContentType::toTabsText($this->objMenuContent->ContentType);
+    $strNo = t('Configure page');
+    $strContentType = $this->objMenuContent->ContentType ? $strOn : $strNo;
+    $strPageTitle = $strContentType;
+}
+
+?>
 
 <?php $strPageTitle = ContentType::toTabsText($this->objMenuContent->ContentType); ?>
 
