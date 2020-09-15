@@ -113,7 +113,7 @@ class SampleForm extends Form
 
         // NestedSortable
 
-        $this->tblSorter = new Q\Plugin\Control\NestedSortable($this);
+        $this->tblSorter = new Q\Plugin\NestedSortable($this);
         $this->tblSorter->ForcePlaceholderSize = true;
         $this->tblSorter->Handle = '.reorder';
         $this->tblSorter->Helper = 'clone';
