@@ -1,4 +1,4 @@
-<?php $strPageTitle = t('Homepage edit'); ?>
+<?php $strPageTitle = t('Edit homepage'); ?>
 
 <?php require('header.inc.php'); ?>
 
