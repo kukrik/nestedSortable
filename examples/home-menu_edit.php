@@ -21,7 +21,7 @@ class SampleForm extends Form
         $this->nav = new Bs\Tabs($this);
         $this->nav->addCssClass('tabbable tabbable-custom');
         $objPanel = new HomePageEditPanel($this->nav);
-        $objPanel->Name = t('Homepage edit');
+        $objPanel->Name = t('Edit homepage');
         $objPanel = new HomePageMetaDataPanel($this->nav);
         $objPanel->Name = t('Metadata');
 
