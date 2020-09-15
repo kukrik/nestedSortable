@@ -2,14 +2,13 @@ body,  html {
     background-color: #ebe7e2 !important;
     /*font-family: 'Open Sans', sans-serif;*/
     font-size: 13px;
+    color: #000;
     height: 100%;
 }
-
 .page-container {
     margin: 0 !important;
     padding: 0 !important;
 }
-
 .page-content-wrapper {
     width: 100%;
 }
@@ -27,39 +26,32 @@ body,  html {
     background-color : #fff;
     border-radius : 4px;
 }
-
 .form-body {
     padding-right: 15px;
     padding-left: 15px;
     margin-right: auto;
     margin-left: auto;
 }
-
 label {
     display: inline-block;
     max-width: 100%;
     margin-bottom: 5px;
     font-weight: 400;
 }
-
 .control-label .required {
     color: #e02222;
     font-size: 12px;
     padding-left: 2px;
 }
-
-.control-label {
-    /*margin-top: 2px;*/
-}
-
 .form-control-static {
     font-size: 14px;
-    padding-top: 7px;
+    padding-top: 0;
+    margin-bottom: -20px;
 }
 .panel-heading {
     margin: 0;
-    padding: 20px 20px 5px 20px;
-    border-bottom-color: #dedede !important; /* #ededed */
+    padding: 20px 20px 20px 20px;
+    border-bottom-color: #dedede !important;
 }
 .panel-title {
     padding: 0;
@@ -77,7 +69,7 @@ label {
     padding: 6px 12px;
     font-size: 13px;
     line-height: 1.42857143;
-    color: #555;
+    color: #000; /* #555 */
     background-color: #fff;
     background-image: none;
     border: #bcd8db solid 1px;
@@ -90,10 +82,12 @@ label {
     outline: 0;
     -webkit-box-shadow: none;
     box-shadow: none;
-    /*-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
-    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);*/
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
 }
-
+.textbox.form-control {
+    margin-top: 7px;
+}
 .has-success .form-control {
     border-color: #bcd8db;
     box-shadow: none;
@@ -206,11 +200,9 @@ i {
     background-color: #da2004;
     background-image: none !important;
 }
-
 .red {
     color: #da2004;
 }
-
 .form-actions {
     padding: 20px 10px;
     margin-top: 20px;
@@ -245,141 +237,42 @@ a:focus, a:hover, a:active {
     text-decoration: underline !important;
     outline: none !important;
 }
-
-/*** CUSTOM TABS START ***/
-
-.tabbable-custom {
-    margin-bottom: 15px;
-    padding: 0;
-    overflow: hidden;
-}
-
-.tabbable-custom > .nav-tabs {
-    border: none;
-    margin: 0;
-}
-
-.tabbable-custom > .tab-content {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-    padding: 10px;
-
-
-}
-
-/* BS3.0.3 removed tabbable class so its added back */
-.tabbable:before,
-.tabbable:after {
-    display: table;
-    content: " ";
-}
-
-.tabbable:after {
-    clear: both;
-}
-
-.tabbable:before,
-.tabbable:after {
-    display: table;
-    content: " ";
-}
-
-.tabbable:after {
-    clear: both;
-}
-
-.tabbable-custom  .nav-tabs {
-    font-size: 16px;
-    /*font-weight: 400;*/
-}
-
-.tabbable-custom  .nav-tabs > li {
-    float: left;
-    margin-bottom: -1px;
-}
-
-.tabbable-custom .nav-tabs > li > a {
-    margin-right: 0 !important;
-    line-height: 1.42857143;
-    background-color: #f5eeeb;
-    color: #512b2b;
-    border: 1px solid #efe3df;
-    border-bottom-color: transparent;
-    border-radius: 4px 4px 0 0;
-    text-decoration: none !important;
-    outline: none;
-
-}
-
-.tabbable-custom .nav-tabs > li > a:hover {
-    background-color: #feecbe;
-}
-
-.tabbable-custom > .nav-tabs > li.active > a,
-.tabbable-custom > .nav-tabs > li.active > a:hover,
-.tabbable-custom > .nav-tabs > li.active > a:focus {
-    color: #512b2b;
-    cursor: default;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-bottom-color: transparent;
-}
-
-.tabbable-custom > .tab-content > .tab-pane {
-    margin: 5px;
-    margin-top: 15px;
-    margin-bottom: 15px;
-}
-
-.tabbable.tabbable-custom .radio-list > label.radio-inline:first-child {
-    padding-left: 20px;
-}
-
-/*** CUSTOM TABS END ***/
-
 .vauu-title-3 {
     padding: 0;
     font-size: 18px;
     letter-spacing: -1px;
     display: block;
     color: #000;
-    margin: 0 0 25px 15px;
+    margin: 0 0 15px 15px;
     font-weight: 600 !important;
     font-family: 'Open Sans', sans-serif;
 }
-
+.margin-left-0 {
+    margin-left: 0;
+}
 .left-box {
     padding-right: 30px;
     background: #ffffff;
 }
-
 .right-box {
     padding: 0 25px;
     background-color: #f5f5f5;
 }
-
 .padded-wrapper {
     margin-left: -5px;
     padding-top: 15px;
 }
-
 .padded-form-actions {
     margin-top: 15px;
     padding-top: 10px;
     padding-bottom: 10px;
 }
-
 .right-box .form-group {
     padding: 0 15px;
 }
-
 .right-box div.radio.radio-orange {
     padding-top: 15px;
 }
-
 /*  https://css-tricks.com/complete-guide-table-element/ */
 
 /* https://scotch.io/bar-talk/different-tricks-on-how-to-make-bootstrap-columns-all-the-same-height */
@@ -389,12 +282,10 @@ a:focus, a:hover, a:active {
     display: flex;
     flex-wrap: wrap;
 }
-
 .equal > div[class*='col-'] {
     display: flex;
     flex-direction: column;
 }
-
 @media screen and (min-width: 768px) {
     .equal2, .equal2 > div[class*='col-'] {
         display: -webkit-box;
@@ -406,6 +297,152 @@ a:focus, a:hover, a:active {
     }
 }
 
+/* //////////////////////////////////// */
+/* CUSTOM TABS STYLES */
+/* //////////////////////////////////// */
+
+.tabbable-custom {
+    margin-bottom: 15px;
+    padding: 0;
+    overflow: hidden;
+}
+.tabbable-custom > .nav-tabs {
+    border: none;
+    margin: 0;
+}
+.tabbable-custom > .tab-content {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    padding: 10px;
+}
+/* BS3.0.3 removed tabbable class so its added back */
+.tabbable:before,
+.tabbable:after {
+    display: table;
+    content: " ";
+}
+.tabbable:after {
+    clear: both;
+}
+.tabbable:before,
+.tabbable:after {
+    display: table;
+    content: " ";
+}
+.tabbable:after {
+    clear: both;
+}
+.tabbable-custom  .nav-tabs {
+    font-size: 16px;
+    /*font-weight: 400;*/
+}
+.tabbable-custom  .nav-tabs > li {
+    float: left;
+    margin-bottom: -1px;
+}
+.tabbable-custom .nav-tabs > li > a {
+    margin-right: 0 !important;
+    line-height: 1.42857143;
+    background-color: #f5eeeb;
+    color: #512b2b;
+    border: 1px solid #efe3df;
+    border-bottom-color: transparent;
+    border-radius: 4px 4px 0 0;
+    text-decoration: none !important;
+    outline: none;
+}
+.tabbable-custom .nav-tabs > li > a:hover {
+    background-color: #feecbe;
+}
+.tabbable-custom > .nav-tabs > li.active > a,
+.tabbable-custom > .nav-tabs > li.active > a:hover,
+.tabbable-custom > .nav-tabs > li.active > a:focus {
+    color: #512b2b;
+    cursor: default;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-bottom-color: transparent;
+}
+.tabbable-custom > .tab-content > .tab-pane {
+    margin: 5px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+.tabbable.tabbable-custom .radio-list > label.radio-inline:first-child {
+    padding-left: 20px;
+}
+
+/* //////////////////////////////////// */
+/* CUSTOM TABLE STYLES */
+/* //////////////////////////////////// */
+
+.vauu-table > thead > tr > th {
+    border-bottom: 0;
+    background: #e9f7fb !important;
+}
+.vauu-table tbody > tr:first-child td  {
+    border-top: 0;
+}
+.vauu-table tbody > tr:last-child td  {
+    border-bottom: 1px solid #ddd;
+}
+.vauu-table tbody tr td  {
+    border-bottom: 1px solid #ddd;
+}
+.vauu-table thead tr th {
+    color: #008c9e; /* #257886 #005f71  */
+    font-size: 14px !important;
+    font-weight: 400;
+}
+.clickable-rows tr td,
+.clickable-rows tr th {
+    -webkit-user-select: none;
+    /* webkit (safari, chrome) browsers */
+    -moz-user-select: none;
+    /* mozilla browsers */
+    -khtml-user-select: none;
+    /* webkit (konqueror) browsers */
+    -ms-user-select: none;
+    /* IE10+ */
+    cursor: default;
+}
+.clickable-rows tr:hover {
+    background-color: #f7f7f7;
+}
+.pagination {
+    display: inline-block;
+    padding-left: 0;
+    margin: 0;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    border-radius: 4px;
+}
+.pagination > .active > a,
+.pagination > .active > span,
+.pagination > .active > a:hover,
+.pagination > .active > span:hover,
+.pagination > .active > a:focus,
+.pagination > .active > span:focus {
+    z-index: 3;
+    cursor: default;
+    color: #333;
+    background-color: #f3f3f3;
+    border-color: #ccc;
+}
+
+.fa-lg {
+    font-size: 1em;
+    line-height: 0.5em;
+    vertical-align: -15%;
+}
+
+/* //////////////////////////////////// */
+/* NESTEDSORTABLE STYLES */
 /* //////////////////////////////////// */
 
 p, ol, ul {

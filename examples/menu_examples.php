@@ -22,6 +22,7 @@ class SampleForm extends Form
     protected $navBar;
     protected $objListMenu;
     protected $objListSubMenu;
+    protected $strUrl;
 
     protected $smartMenus;
     protected $tblNav;
@@ -43,7 +44,7 @@ class SampleForm extends Form
 
     protected function naturalList_Create()
     {
-        $this->tblList = new Q\Plugin\NaturalList($this);
+        $this->tblList = new Q\Plugin\Control\NaturalList($this);
         $this->tblList->CssClass = 'simple';
         $this->tblList->TagName = 'ol';
         $this->tblList->setDataBinder('NaturalMenu_Bind');
@@ -58,34 +59,34 @@ class SampleForm extends Form
             ));
 
         $this->navBar = new Bs\Navbar($this, 'navbar');
-        $url = 'menu_examples.php';
+        $header_url = 'menu_examples.php';
         $this->navBar->HeaderText = Html::renderTag("img",
             ["class" => "logo", "src" => QCUBED_IMAGE_URL . "/qcubed_logo_footer.png", "alt" => "Logo"], null, true);
-        $this->navBar->HeaderAnchor = $url;
+        $this->navBar->HeaderAnchor = $header_url;
         $this->navBar->StyleClass = Bs\Bootstrap::NAVBAR_INVERSE;
         $this->navBar->addAction(new Bs\Event\NavbarSelect(), new Q\Action\Ajax('Menu_Click'));
 
         $dlgBar = new Bs\NavbarList($this->navBar);
 
         foreach ($objMenuArray as $objMenu) {
-
+            if (!$objMenu->MenuContent->IsRedirect) {
+                $url = (isset($_SERVER['HTTPS']) ? "https" : "http") . '://' . $_SERVER['HTTP_HOST'] . QCUBED_URL_PREFIX . $objMenu->MenuContent->RedirectUrl;
+            } else {
+                $url = $objMenu->MenuContent->RedirectUrl;
+            }
             if (!$objMenu->MenuContent->IsEnabled == 0) {
-
                 if ($objMenu->ParentId == null && $objMenu->Right == $objMenu->Left + 1) {
-                    $this->objListMenu = new Bs\NavbarItem($objMenu->MenuContent->MenuText, null,
-                        $objMenu->MenuContent->RedirectUrl);
-                    $dlgBar->addMenuItem($this->objListMenu);
 
+                    $this->objListMenu = new Bs\NavbarItem($objMenu->MenuContent->getMenuText(), null, $url);
+                    $dlgBar->addMenuItem($this->objListMenu);
                 } elseif (!in_array($objMenu->ParentId, $this->ControllableValues($objMenuArray, 'Id')) &&
                     $objMenu->Right !== $objMenu->Left + 1) {
-                    $this->objListSubMenu = new Bs\NavbarDropdown($objMenu->MenuContent->MenuText);
+                    $this->objListSubMenu = new Q\Plugin\Control\NavbarDropdown($objMenu->MenuContent->getMenuText(), null, $url);
                     $dlgBar->addMenuItem($this->objListSubMenu);
                 }
-
                 if (in_array($objMenu->ParentId, $this->ControllableValues($objMenuArray, 'Id')) &&
                     $objMenu->Depth == 1) {
-                    $this->objListSubMenu->addItem(new Bs\NavbarItem($objMenu->MenuContent->MenuText, null,
-                        $objMenu->MenuContent->RedirectUrl));
+                    $this->objListSubMenu->addItem(new Bs\NavbarItem($objMenu->MenuContent->getMenuText(), null, $url));
                 }
             }
         }
@@ -101,7 +102,7 @@ class SampleForm extends Form
         $this->smartMenus->StyleClass = Bs\Bootstrap::NAVBAR_INVERSE;
         $this->smartMenus->addAction(new Bs\Event\NavbarSelect(), new Q\Action\Ajax('SmartMenu_Click'));
 
-        $this->tblNav = new Q\Plugin\SmartMenus($this->smartMenus);
+        $this->tblNav = new Q\Plugin\Control\SmartMenus($this->smartMenus);
         $this->tblNav->CssClass = 'nav navbar-nav smartside';
         $this->tblNav->TagName = 'ul';
         $this->tblNav->TagStyle = 'dropdown-menu';
@@ -132,8 +133,8 @@ class SampleForm extends Form
 
             if (!$objMenu->MenuContent->IsEnabled == 0) {
                 if ($objMenu->ParentId == null && $objMenu->Right == $objMenu->Left + 1) {
-                    $this->objListMenu = new Bs\NavbarItem($objMenu->MenuContent->MenuText, $objMenu->Id, '#'
-                    /*$objMenu->MenuContent->RedirectUrl*/); //Temporarily disabled $RedirectUrl for testing
+                    $this->objListMenu = new Bs\NavbarItem($objMenu->MenuContent->MenuText, $objMenu->Id,
+                        $objMenu->MenuContent->RedirectUrl);
                     $this->tblBar->addMenuItem($this->objListMenu);
                 } elseif (!in_array($objMenu->ParentId, $this->ControllableValues($objMenuArray, 'Id')) &&
                     $objMenu->Right !== $objMenu->Left + 1) {
@@ -143,7 +144,7 @@ class SampleForm extends Form
             }
         }
 
-        $this->tblSubMenu = new Q\Plugin\SideBar($this);
+        $this->tblSubMenu = new Q\Plugin\Control\SideBar($this);
         $this->tblSubMenu->TagName = 'ul';
         $this->tblSubMenu->TagClass = 'sidemenu';
         $this->tblSubMenu->setDataBinder('SubMenuList_Bind');

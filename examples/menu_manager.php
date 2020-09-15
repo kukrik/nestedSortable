@@ -19,7 +19,6 @@ use QCubed\Js;
  */
 class SampleForm extends Form
 {
-    // This value is either a Menu->Id, "null" (if nothing is being edited), or "-1" (if creating a new Menu)
     protected $intEditMenuId = null;
 
     protected $btnAddMenuItem;
@@ -50,14 +49,14 @@ class SampleForm extends Form
 
         // Alerts
 
-        $this->lblMessage = new Q\Plugin\Alert($this);
+        $this->lblMessage = new Q\Plugin\Control\Alert($this);
         $this->lblMessage->Display = false;
         $this->lblMessage->FullEffect = true;
         //$this->lblMessage->HalfEffect = true;
 
-        // Menu item creation group (buttons and text box)
+        // Menu item creation group (buttons and textbox)
 
-        $this->btnAddMenuItem = new Q\Plugin\Button($this);
+        $this->btnAddMenuItem = new Q\Plugin\Control\Button($this);
         $this->btnAddMenuItem->Text = t(' Add Menu Item');
         $this->btnAddMenuItem->Glyph = 'fa fa-plus';
         $this->btnAddMenuItem->CssClass = 'btn btn-orange';
@@ -72,7 +71,7 @@ class SampleForm extends Form
         $this->txtMenuText->addWrapperCssClass('center-button');
         $this->txtMenuText->Display = false;
 
-        $this->btnSave = new Q\Plugin\Button($this);
+        $this->btnSave = new Q\Plugin\Control\Button($this);
         $this->btnSave->Text = t('Save');
         $this->btnSave->CssClass = 'btn btn-orange';
         $this->btnSave->addWrapperCssClass('center-button');
@@ -87,7 +86,7 @@ class SampleForm extends Form
         }
         $this->btnSave->Display = false;
 
-        $this->btnCancel = new Q\Plugin\Button($this);
+        $this->btnCancel = new Q\Plugin\Control\Button($this);
         $this->btnCancel->Text = t('Cancel');
         $this->btnCancel->addWrapperCssClass('center-button');
         $this->btnCancel->CssClass = 'btn btn-default';
@@ -96,16 +95,16 @@ class SampleForm extends Form
         $this->btnCancel->setDataAttribute('buttons', 'false');
         $this->btnCancel->Display = false;
 
-        // Menu entries to hide and display buttons group
+        // A group of buttons for collapsing or expanding menu items
 
-        $this->btnCollapseAll = new Q\Plugin\Button($this);
+        $this->btnCollapseAll = new Q\Plugin\Control\Button($this);
         $this->btnCollapseAll->Text = t(' Collapse All');
         $this->btnCollapseAll->Glyph = 'fa fa-minus';
         $this->btnCollapseAll->addWrapperCssClass('center-button');
         $this->btnCollapseAll->CssClass = 'btn btn-default';
         $this->btnCollapseAll->setDataAttribute('collapse', 'true');
 
-        $this->btnExpandAll = new Q\Plugin\Button($this);
+        $this->btnExpandAll = new Q\Plugin\Control\Button($this);
         $this->btnExpandAll->Text = t(' Expand All');
         $this->btnExpandAll->Glyph = 'fa fa-plus';
         $this->btnExpandAll->addWrapperCssClass('center-button');
@@ -114,7 +113,7 @@ class SampleForm extends Form
 
         // NestedSortable
 
-        $this->tblSorter = new Q\Plugin\NestedSortable($this);
+        $this->tblSorter = new Q\Plugin\Control\NestedSortable($this);
         $this->tblSorter->ForcePlaceholderSize = true;
         $this->tblSorter->Handle = '.reorder';
         $this->tblSorter->Helper = 'clone';
@@ -145,15 +144,10 @@ class SampleForm extends Form
 
     protected function Menu_Bind()
     {
-        $objMenuArray = $this->tblSorter->DataSource = Menu::loadAll(
+        $this->tblSorter->DataSource = Menu::loadAll(
             QQ::Clause(QQ::OrderBy(QQN::menu()->Left),
                 QQ::expand(QQN::menu()->MenuContent)
             ));
-
-        if ($this->intEditMenuId == -1) {
-            array_push($objMenuArray, new Menu);
-        }
-        $this->tblSorter->DataSource = $objMenuArray;
     }
 
     public function Menu_Draw(Menu $objMenu)
@@ -164,11 +158,11 @@ class SampleForm extends Form
         $a['left'] = $objMenu->Left;
         $a['right'] = $objMenu->Right;
         $a['menu_text'] = Q\QString::htmlEntities($objMenu->MenuContent->MenuText);
-        $a['content_type_object'] = $objMenu->MenuContent->ContentTypeObject;
-        $a['content_type'] = $objMenu->MenuContent->ContentType;
         $a['redirect_url'] = $objMenu->MenuContent->RedirectUrl;
         $a['is_redirect'] = $objMenu->MenuContent->IsRedirect;
-        $a['selected_page'] = $objMenu->MenuContent->SelectedPage;
+        $a['selected_page_id'] = $objMenu->MenuContent->SelectedPageId;
+        $a['content_type_object'] = $objMenu->MenuContent->ContentTypeObject;
+        $a['content_type'] = $objMenu->MenuContent->ContentType;
         $a['status'] = $objMenu->MenuContent->IsEnabled;
         return $a;
     }
@@ -178,7 +172,7 @@ class SampleForm extends Form
         $strStatusId = 'btnStatus' . $objMenu->Id;
 
         if (!$btnStatus = $this->getControl($strStatusId)) {
-            $btnStatus = new Q\Plugin\Button($this->tblSorter, $strStatusId);
+            $btnStatus = new Q\Plugin\Control\Button($this->tblSorter, $strStatusId);
 
             $btnStatus->ActionParameter = $objMenu->MenuContent->Id;
             $btnStatus->CausesValidation = false;
@@ -189,7 +183,7 @@ class SampleForm extends Form
         $strEditId = 'btnEdit' . $objMenu->Id;
 
         if (!$btnEdit = $this->getControl($strEditId)) {
-            $btnEdit = new Q\Plugin\Button($this->tblSorter, $strEditId);
+            $btnEdit = new Q\Plugin\Control\Button($this->tblSorter, $strEditId);
             $btnEdit->Glyph = 'fa fa-pencil';
             $btnEdit->Tip = true;
             $btnEdit->ToolTip = t('Edit');
@@ -202,7 +196,7 @@ class SampleForm extends Form
         $strDeleteId = 'btnDelete' . $objMenu->Id;
 
         if (!$btnDelete = $this->getControl($strDeleteId)) {
-            $btnDelete = new Q\Plugin\Button($this->tblSorter, $strDeleteId);
+            $btnDelete = new Q\Plugin\Control\Button($this->tblSorter, $strDeleteId);
             $btnDelete->Glyph = 'fa fa-trash';
             $btnDelete->Tip = true;
             $btnDelete->ToolTip = t('Delete');
@@ -266,7 +260,6 @@ class SampleForm extends Form
         $this->modal4->HeaderClasses = 'btn-darkblue';
         $this->modal4->addButton(t("OK"), 'ok', false, false, null, ['data-dismiss'=>'modal', 'class' => 'btn btn-orange']);
 
-
         $this->modal5 = new Bs\Modal($this);
         $this->modal5->Text = t('<p style="line-height: 25px; margin-bottom: 2px;">Are you sure you want to permanently delete this menu item?</p>
                                 <p style="line-height: 25px; margin-bottom: -3px;">Can\'t undo it afterwards!</p>');
@@ -293,7 +286,7 @@ class SampleForm extends Form
 
         $this->modal8 = new Bs\Modal($this);
         $this->modal8->Text = t('<p style="line-height: 25px; margin-bottom: -3px;">Selle peamenüü kirje aktiveerimiseks pead
-                                    minema selle peamenüü kirje ja alammenüü iga kirje redigeerimisvaatesse ja määrama sisutüübi.</p>');
+                                    minema selle peamenüü kirje ja/või alammenüü iga kirje redigeerimisvaatesse ja määrama sisutüübi.</p>');
         $this->modal8->Title = t("Tip");
         $this->modal8->HeaderClasses = 'btn-darkblue';
         $this->modal8->addButton(t("OK"), 'ok', false, false, null, ['data-dismiss'=>'modal', 'class' => 'btn btn-orange']);
@@ -307,10 +300,12 @@ class SampleForm extends Form
     {
         if ($this->intEditMenuId) {
             $this->btnAddMenuItem->Enabled = false;
-            $this->tblSorter->Disabled = true;
+            // To create a new item, the nestedSortable functionality must be disabled,
+            // otherwise the menu tree will break.
+            $this->tblSorter->disable();
         } else {
             $this->btnAddMenuItem->Enabled = true;
-            $this->tblSorter->Disabled = false;
+            $this->tblSorter->enable();
         }
     }
 
@@ -318,15 +313,13 @@ class SampleForm extends Form
 
     protected function btnAddMenuItem_Click(ActionParams $params)
     {
-        // To create a new item, the nestedSortable functionality must be disabled,
-        // otherwise the menu tree will break.
-        $this->tblSorter->Disabled = true;
-
         $this->txtMenuText->Display = true;
         $this->btnSave->Display = true;
         $this->btnCancel->Display = true;
         $this->txtMenuText->Text = null;
         $this->txtMenuText->focus();
+
+        $this->tblSorter->disable();
         $this->intEditMenuId = -1;
     }
 
@@ -337,18 +330,15 @@ class SampleForm extends Form
                 QQ::maximum(QQN::menu()->Right, 'max')
             ]
         );
-        $objMaxValue = $objMenu->getVirtualAttribute('max');
+        $objMaxRight = $objMenu->getVirtualAttribute('max');
 
         if (($this->intEditMenuId == -1) && ($this->txtMenuText->Text !== null)) {
-            // To create a new item, the nestedSortable functionality must be disabled,
-            // otherwise the menu tree will break.
-            //$this->tblSorter->Disabled = true;
 
             $objMenu = new Menu();
             $objMenu->setParentId(null);
             $objMenu->setDepth('0');
-            $objMenu->setLeft($objMaxValue + 1);
-            $objMenu->setRight($objMaxValue + 2);
+            $objMenu->setLeft($objMaxRight + 1);
+            $objMenu->setRight($objMaxRight + 2);
             $objMenu->save();
 
             $objContent = new MenuContent();
@@ -357,9 +347,9 @@ class SampleForm extends Form
             $objContent->setIsEnabled('0');
             $objContent->save();
 
-            $this->tblSorter->MenuItemAppend = true;
+            $this->tblSorter->refresh();
+            $this->tblSorter->reload();
             $this->intEditMenuId = null;
-            $this->tblSorter->Disabled = false;
 
             $this->txtMenuText->Display = false;
             $this->btnSave->Display = false;
@@ -380,6 +370,7 @@ class SampleForm extends Form
             $this->lblMessage->removeCssClass(Bs\Bootstrap::ALERT_SUCCESS);
             $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_WARNING);
             $this->lblMessage->Text = t('<strong>Sorry</strong>, the menu title is at least mandatory!');
+            $this->tblSorter->disable();
         }
     }
 
@@ -389,6 +380,7 @@ class SampleForm extends Form
         $this->btnSave->Display = false;
         $this->btnCancel->Display = false;
         $this->btnAddMenuItem->Enabled = true;
+
         $this->tblSorter->Disabled = false;
         $this->intEditMenuId = null;
     }
@@ -402,9 +394,12 @@ class SampleForm extends Form
 
         ///////////////////////////////////////////////////////
 
+        // ParentId entries equivalent to the Id value are picked by the clicked ID.
+        // ParentId entries with the same value are filtered according to the IsEnabled condition for those entries.
+        // The purpose is to check how many active entries are still left.
+
         $strInTempArray = [];
         $strValidArray = [];
-
         foreach ($objMenuArray as $objTempMenu) {
             if ($intStatusId == $objTempMenu->Id) {
                 $strInTempArray[] = $objTempMenu->ParentId;
@@ -422,6 +417,9 @@ class SampleForm extends Form
 
         ///////////////////////////////////////////////////////
 
+        // ParentId entries equivalent to Id value are picked by the clicked ID.
+        // Purpose to enable or disable the main menu item with submenu items.
+
         $strReadInArray = [];
         $strPushesInArray = [];
         foreach ($objMenuArray as $objTempMenu) {
@@ -438,6 +436,39 @@ class SampleForm extends Form
         }
         $this->strSelectedValues = array_merge($strReadInArray, $strPushesInArray);
         array_push($this->strSelectedValues, $intStatusId);
+
+        ///////////////////////////////////////////////////////
+
+        // The clicked ID checks the existence of the Id entry.
+        // ParentId entries equivalent to the Id value are picked by the clicked ID.
+        // Summarize the first and second loop entries into an array.
+        // Object to compare the count() of two arrays ($strSelectedInValues and $strCalculatedArray) by the ContentType condition.
+
+        $strInTempArray = [];
+        $strOnTempArray = [];
+        $strCalculatedArray = [];
+        foreach ($objMenuArray as $objInMenu) {
+            if ($intStatusId == $objInMenu->Id) {
+                $strInTempArray[] = $objInMenu->Id;
+            }
+        }
+        foreach ($objMenuArray as $objInMenu) {
+            foreach ($strInTempArray as &$strInTemp) {
+                if ($strInTemp == $objInMenu->ParentId) {
+                    $strOnTempArray[] = $objInMenu->Id;
+                }
+            }
+        }
+        $strSelectedInValues = array_merge($strInTempArray, $strOnTempArray);
+
+        foreach ($objMenuArray as $objInMenu) {
+            foreach ($strSelectedInValues as &$strValidTemp) {
+                if ($strValidTemp == $objInMenu->Id) {
+                    if($objInMenu->MenuContent->ContentType !== null)
+                        $strCalculatedArray[] = $objInMenu->Id;
+                }
+            }
+        }
 
         ///////////////////////////////////////////////////////
 
@@ -459,45 +490,13 @@ class SampleForm extends Form
             }
         } else {  // $objContent->IsEnabled == 0
             if ($objMenu->Right !== $objMenu->Left + 1) {
-                if ($objContent->ContentType) {
+                if ($objContent->ContentType && count($strSelectedInValues) == count(array_unique($strCalculatedArray))) {
                     $this->modal2->showDialogBox();
                 } else {
                     $this->modal8->showDialogBox();
                 }
-
-                ////////
-                // Siia kontroll veel
-                /*$strTempArray = [];
-                foreach ($objMenuArray as $objTempMenu) {
-                    if ($intStatusId == $objTempMenu->Id) {
-                        $strTempArray[] = $objTempMenu->ParentId;
-                    }
-                }
-                foreach ($objMenuArray as $objTempMenu) {
-                    foreach ($strTempArray as $strInTemp) {
-                        if ($strInTemp == $objTempMenu->ParentId) {
-                            if ($objTempMenu->Right == !$objTempMenu->Left + 1) {
-                                $strValidArray[] = $objTempMenu->ParentId;
-                            }
-                        }
-                    }
-                }*/
-
-                // change mouseup listener to '.content' to listen to a wider area. (mouse drag release could happen
-                // out of the '.btn' which we have not listent to). Note that the click will trigger if '.btn' mousedown
-                // event is triggered above
-
-                // https://stackoverflow.com/questions/6042202/how-to-distinguish-mouse-click-and-drag
-
-                // http://jsfiddle.net/W7tvD/729/
-
-                ////////
-
-
             }  elseif ($objContent->ContentType == null) {
-
                 $this->modal7->showDialogBox();
-
             } elseif ($objMenu->ParentId !== null &&
                 $objMenu->Right == $objMenu->Left + 1 &&
                 count($strValidArray) < 1) {
@@ -505,7 +504,6 @@ class SampleForm extends Form
             } else {
                 $objContent->setIsEnabled('1');
                 $objContent->save();
-
 
                 $disable_translate = t('Disable');
                 Application::executeJavaScript(sprintf("jQuery('#btnStatus{$intStatusId}')
@@ -536,12 +534,10 @@ class SampleForm extends Form
 
         if ($objMenu->ParentId == null && $objMenu->Right == $objMenu->Left + 1) {
             $this->modal5->showDialogBox();
-
         } else {
             $this->modal6->showDialogBox();
         }
         $this->intEditMenuId = null;
-
     }
 
     public function deletedItem_Click(ActionParams $params)
@@ -550,11 +546,6 @@ class SampleForm extends Form
         Application::executeJavaScript(sprintf("jQuery('#btnDelete{$this->intDeleteId}').closest('li').remove();"));
         $objMenu->delete();
         $this->modal5->hideDialogBox();
-    }
-
-    public function btnReload_Click()
-    {
-        $this->tblSorter->refresh();
     }
 
     public function ControllableValues($objArrays, $target)
@@ -643,5 +634,4 @@ class SampleForm extends Form
     }
 
 }
-
 SampleForm::run('SampleForm');

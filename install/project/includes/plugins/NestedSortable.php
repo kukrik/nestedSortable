@@ -8,7 +8,7 @@
  * @see NestedSortableBase
  */
 
-namespace QCubed\Plugin;
+namespace QCubed\Plugin\Control;
 
 
 class NestedSortable extends NestedSortableBase

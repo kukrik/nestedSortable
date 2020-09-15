@@ -1,4 +1,6 @@
-<?php $strPageTitle = t('Page edit'); ?>
+<?php // $strPageTitle = t('Page edit'); ?>
+
+<?php $strPageTitle = ContentType::toTabsText($this->objMenuContent->ContentType); ?>
 
 <?php require('header.inc.php'); ?>
 
