@@ -17,11 +17,6 @@ use QCubed\Html;
 use QCubed\Js;
 use QCubed\Type;
 
-// we need a better way of reconfiguring JS and CSS assets
-/*if (!defined('QCUBED_NESTEDSORTABLE_ASSETS_URL')) {
-    define('QCUBED_NESTEDSORTABLE_ASSETS_URL', dirname(QCUBED_BASE_URL) . '/kukrik/nestedsortable/assets');
-}*/
-
 /**
  * Class MenuPanelBase
  * @property integer $Id
@@ -31,8 +26,8 @@ use QCubed\Type;
  * @property integer $Right
  * @property string $MenuText
  * @property integer $Status
- *
- * // Unfinished work!!!
+ * @property string $TagName
+ * @property mixed $DataSource
  *
  * @package QCubed\Plugin
  */
@@ -62,7 +57,7 @@ class NaturalList extends ControlBase
     protected $intRight = null;
     /** @var  string MenuText */
     protected $strMenuText;
-    /** @var  int Status */
+    /** @var  integer Status */
     protected $intStatus;
 
     /**
@@ -95,9 +90,6 @@ class NaturalList extends ControlBase
      */
     public function validate() {return true;}
 
-    /**
-     *
-     */
     public function parsePostData() {}
 
     /**
@@ -110,7 +102,7 @@ class NaturalList extends ControlBase
      * depth - the depth for the node tag
      * left - the left for the node tag
      * right - the right for the node tag
-     * text - the text for the node tag
+     * menu_text - the menu_text for the node tag
      * status - the status for the node tag
      *
      * The callback is a callable, so can be of the form [$objControl, "func"]
@@ -157,9 +149,9 @@ class NaturalList extends ControlBase
         if (isset($params['right'])) {
             $intRight = $params['right'];
         }
-        $strText = '';
-        if (isset($params['text'])) {
-            $strText = $params['text'];
+        $strMenuText = '';
+        if (isset($params['menu_text'])) {
+            $strMenuText = $params['menu_text'];
         }
         $intStatus = '';
         if (isset($params['status'])) {
@@ -172,7 +164,7 @@ class NaturalList extends ControlBase
             'depth' => $intDepth,
             'left' => $intLeft,
             'right' => $intRight,
-            'text' => $strText,
+            'menu_text' => $strMenuText,
             'status' => $intStatus
             ];
 
@@ -214,7 +206,7 @@ class NaturalList extends ControlBase
             $this->intDepth = $arrParams[$i]['depth'];
             $this->intLeft = $arrParams[$i]['left'];
             $this->intRight = $arrParams[$i]['right'];
-            $this->strMenuText = $arrParams[$i]['text'];
+            $this->strMenuText = $arrParams[$i]['menu_text'];
             $this->intStatus = $arrParams[$i]['status'];
 
             if (!$this->intStatus == 0) {
@@ -281,32 +273,8 @@ class NaturalList extends ControlBase
         }
     }
 
-    /**
-     *
-     */
     public function makeJqWidget()
-    {
-        /*$('ul  li  a').click(function() {
-            $(this).next('.hidden').slideToggle();
-            $(this).parent().siblings().find('ul').slideUp();
-        })*/
-
-        /*$('#main-menu > li > a').click(function() {
-	$(this).next('.hidden').toggleClass('active');
-  $('#main-menu > li > a').not($(this)).next('.hidden').removeClass('active');
-})*/
-
-        /*Application::executeSelectorFunction(".sm-simple > li > a", "on", "click",
-            new Js\Closure("\$j(this).next('.js-hidden').toggleClass('active');
-            \$j('.sm-simple > li > a').not(\$j(this)).next('.js-hidden').removeClass('active')"),
-            Application::PRIORITY_HIGH);*/
-
-        /*Application::executeSelectorFunction("ul li a", "on", "click",
-            new Js\Closure("jQuery(this).next('.js-hidden').slideToggle();
-             jQuery(this).parent().siblings().find('ul').slideUp();"),
-            Application::PRIORITY_HIGH);*/
-
-    }
+    {}
 
     /////////////////////////
     // Public Properties: GET

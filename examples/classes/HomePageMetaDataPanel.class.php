@@ -9,7 +9,8 @@ use QCubed\Project\Application;
 
 class HomePageMetadataPanel extends Q\Control\Panel
 {
-    public $lblMessage;
+    public $dlgModal;
+    protected $dlgToastr;
 
     public $lblKeywordsHint;
     public $lblKeywords;
@@ -28,7 +29,7 @@ class HomePageMetadataPanel extends Q\Control\Panel
     public $btnDelete;
     public $btnCancel;
 
-    public $modal;
+
 
     protected $strSaveButtonId;
     protected $strSavingButtonId;
@@ -48,12 +49,6 @@ class HomePageMetadataPanel extends Q\Control\Panel
 
         $intId = Application::instance()->context()->queryStringItem('id');
         $this->objMetadata = Metadata::load($intId);
-        //$this->objMetadata = Metadata::loadByIdFromContentId($intId);
-
-        $this->lblMessage = new Q\Plugin\Control\Alert($this);
-        $this->lblMessage->Display = false;
-        $this->lblMessage->FullEffect = true;
-        //$this->lblMessage->HalfEffect = true;
 
         $this->lblKeywordsHint = new Q\Plugin\Control\Alert($this);
         $this->lblKeywordsHint->Display = true;
@@ -123,17 +118,9 @@ class HomePageMetadataPanel extends Q\Control\Panel
         $this->txtAuthor->AddAction(new Q\Event\EscapeKey(), new Q\Action\AjaxControl($this,'btnMenuCancel_Click'));
         $this->txtAuthor->addAction(new Q\Event\EscapeKey(), new Q\Action\Terminate());
 
-        $this->modal = new Bs\Modal($this);
-        $this->modal->Text = t('<p style="line-height: 25px; margin-bottom: 2px;">Are you sure you want to delete the global metadata of this website?</p>
-                            <p style="line-height: 25px; margin-bottom: -3px;">If desired, you can later re-write!</p>');
-        $this->modal->Title = t('Warning');
-        $this->modal->HeaderClasses = 'btn-danger';
-        $this->modal->addButton(t("I accept"), t('This menu metadata has been permanently deleted.'), false, false, null,
-            ['class' => 'btn btn-orange']);
-        $this->modal->addCloseButton(t("I'll cancel"));
-        $this->modal->addAction(new Q\Event\DialogButton(), new Q\Action\AjaxControl($this, 'deletedItem_Click'));
-
         $this->createButtons();
+        $this->createToastr();
+        $this->createModals();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -187,7 +174,29 @@ class HomePageMetadataPanel extends Q\Control\Panel
         $this->btnCancel->addAction(new Q\Event\Click(), new Q\Action\AjaxControl($this, 'btnMenuCancel_Click'));
     }
 
-        ///////////////////////////////////////////////////////////////////////////////////////////
+    protected function createToastr()
+    {
+        $this->dlgToastr = new Q\Plugin\Toastr($this);
+        $this->dlgToastr->AlertType = Q\Plugin\Toastr::TYPE_SUCCESS;
+        $this->dlgToastr->PositionClass = Q\Plugin\Toastr::POSITION_TOP_CENTER;
+        $this->dlgToastr->Message = t('<strong>Well done!</strong> The post has been saved or modified.');
+        $this->dlgToastr->ProgressBar = true;
+    }
+
+    public function createModals()
+    {
+        $this->dlgModal = new Bs\Modal($this);
+        $this->dlgModal->Text = t('<p style="line-height: 25px; margin-bottom: 2px;">Are you sure you want to delete the global metadata of this website?</p>
+                            <p style="line-height: 25px; margin-bottom: -3px;">If desired, you can later re-write!</p>');
+        $this->dlgModal->Title = t('Warning');
+        $this->dlgModal->HeaderClasses = 'btn-danger';
+        $this->dlgModal->addButton(t("I accept"), t('This menu metadata has been permanently deleted.'), false, false, null,
+            ['class' => 'btn btn-orange']);
+        $this->dlgModal->addCloseButton(t("I'll cancel"));
+        $this->dlgModal->addAction(new Q\Event\DialogButton(), new Q\Action\AjaxControl($this, 'deletedItem_Click'));
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
 
     public function btnMenuSave_Click(ActionParams $params)
     {
@@ -211,11 +220,7 @@ class HomePageMetadataPanel extends Q\Control\Panel
             Application::executeJavaScript(sprintf("jQuery($this->strSavingButtonId).text('{$strUpdateAndClose_translate}');"));
         }
 
-        $this->lblMessage->Display = true;
-        $this->lblMessage->Dismissable = true;
-        $this->lblMessage->removeCssClass(Bs\Bootstrap::ALERT_WARNING);
-        $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_SUCCESS);
-        $this->lblMessage->Text = t('<strong>Well done!</strong> The post has been saved or modified.');
+        $this->dlgToastr->notify();
     }
 
     public function btnMenuSaveClose_Click(ActionParams $params)
@@ -231,7 +236,7 @@ class HomePageMetadataPanel extends Q\Control\Panel
     public function btnMenuDelete_Click(ActionParams $params)
     {
         if ($this->objMetadata->getKeywords() || $this->objMetadata->getDescription() || $this->objMetadata->getAuthor()) {
-            $this->modal->showDialogBox();
+            $this->dlgModal->showDialogBox();
         }
     }
 
@@ -246,7 +251,7 @@ class HomePageMetadataPanel extends Q\Control\Panel
         $this->txtDescription->Text = '';
         $this->txtAuthor->Text = '';
 
-        $this->modal->hideDialogBox();
+        $this->dlgModal->hideDialogBox();
     }
 
     public function btnMenuCancel_Click(ActionParams $params)

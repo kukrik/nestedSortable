@@ -1,11 +1,5 @@
 <div class="form-horizontal">
     <div class="form-body">
-
-        <div class="row">
-            <div class="col-md-12">
-                <?= _r($this->lblMessage); ?>
-            </div>
-        </div>
         <div class="row equal">
             <div class="col-md-9 left-box padded-wrapper">
                 <div class="form-group">
@@ -73,7 +67,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 

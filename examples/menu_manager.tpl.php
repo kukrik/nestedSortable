@@ -1,13 +1,6 @@
 <?php $strPageTitle = t('Menu management'); ?>
 
 <?php require('header.inc.php'); ?>
-<?php
-header("Expires: Tue, 01 Jan 2000 00:00:00 GMT");
-header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Cache-Control: post-check=0, pre-check=0", false);
-header("Pragma: no-cache");
-?>
 
 <?php // require(QCUBED_CONFIG_DIR . '/header.inc.php'); ?>
 
@@ -45,13 +38,8 @@ header("Pragma: no-cache");
                     </div>
                     <!-- MENU CONTAINER BEGIN -->
                     <div class="panel-body">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <?= _r($this->lblMessage); ?>
-                            </div>
-                        </div>
                         <!-- MENU BEGIN -->
-                            <?= _r($this->tblSorter); ?>
+                        <?= _r($this->tblSorter); ?>
                         <!-- MENU END -->
                     </div>
                     <!-- MENU CONTAINER BEGIN -->

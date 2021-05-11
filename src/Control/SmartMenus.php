@@ -7,17 +7,16 @@ namespace QCubed\Plugin\Control;
 use QCubed as Q;
 use QCubed\Bootstrap as Bs;
 use QCubed\Control\FormBase;
-use QCubed\Project\Control\ControlBase;
 use QCubed\Project\Control;
 use QCubed\Project\Application;
 use QCubed\Exception\Caller;
 use QCubed\Exception\InvalidCast;
 use QCubed\Js;
 use QCubed\Type;
-use QCubed\Html;
 
 /**
  * Class SmartMenus
+ *
  * @property integer $Id
  * @property integer $ParentId
  * @property integer $Depth
@@ -26,12 +25,15 @@ use QCubed\Html;
  * @property string $MenuText
  * @property integer $Status
  * @property string $RedirectUrl
- *
- * // Unfinished work!!!
+ * @property integer $HomelyUrl
+ * @property string $TargetType
+ * @property string $TagName
+ * @property string $TagStyle
+ * @property string $DataSource
  *
  * @package QCubed\Plugin
  */
-class SmartMenus extends ControlBase
+class SmartMenus extends \QCubed\Project\Control\ControlBase
 {
     use Q\Control\DataBinderTrait;
 
@@ -63,10 +65,11 @@ class SmartMenus extends ControlBase
     protected $intStatus;
     /** @var string RedirectUrl */
     protected $strRedirectUrl;
-    /** @var int IsRedirect */
-    protected $intIsRedirect;
+    /** @var int HomelyUrl */
+    protected $intHomelyUrl;
     /** @var int TargetType */
-    protected $intTargetType;
+    protected $strTargetType;
+
 
     /**
      * SmartMenus constructor.
@@ -95,14 +98,8 @@ class SmartMenus extends ControlBase
         $this->addJavascriptFile(QCUBED_NESTEDSORTABLE_ASSETS_URL . "/smartmenus-1.1.0/addons/bootstrap/jquery.smartmenus.bootstrap.js");
     }
 
-    /**
-     * @return bool
-     */
     public function validate() {return true;}
 
-    /**
-     *
-     */
     public function parsePostData() {}
 
     /**
@@ -115,10 +112,10 @@ class SmartMenus extends ControlBase
      * depth - the depth for the node tag
      * left - the left for the node tag
      * right - the right for the node tag
-     * text - the text for the node tag
+     * menu_text - the menu_text for the node tag
      * status - the status for the node tag
      * redirect_url - the redirect_url for the node tag
-     * is_redirect - the is_redirect for the node tag
+     * homely_url - the is_redirect for the node tag
      * target_type - the target_type for the node tag
      *
      * The callback is a callable, so can be of the form [$objControl, "func"]
@@ -165,9 +162,9 @@ class SmartMenus extends ControlBase
         if (isset($params['right'])) {
             $intRight = $params['right'];
         }
-        $strText = '';
-        if (isset($params['text'])) {
-            $strText = $params['text'];
+        $strMenuText = '';
+        if (isset($params['menu_text'])) {
+            $strMenuText = $params['menu_text'];
         }
         $intStatus = '';
         if (isset($params['status'])) {
@@ -177,13 +174,13 @@ class SmartMenus extends ControlBase
         if (isset($params['redirect_url'])) {
             $strRedirectUrl = $params['redirect_url'];
         }
-        $intIsRedirect = '';
-        if (isset($params['is_redirect'])) {
-            $intIsRedirect = $params['is_redirect'];
+        $intHomelyUrl = '';
+        if (isset($params['homely_url'])) {
+            $intHomelyUrl = $params['homely_url'];
         }
-        $intTargetType = '';
+        $strTargetType = '';
         if (isset($params['target_type'])) {
-            $intTargetType = $params['target_type'];
+            $strTargetType = $params['target_type'];
         }
 
         $vars = [
@@ -192,12 +189,11 @@ class SmartMenus extends ControlBase
             'depth' => $intDepth,
             'left' => $intLeft,
             'right' => $intRight,
-            'text' => $strText,
+            'menu_text' => $strMenuText,
             'status' => $intStatus,
             'redirect_url' => $strRedirectUrl,
-            'is_redirect' => $intIsRedirect,
-            'target_type' => $intTargetType
-
+            'homely_url' => $intHomelyUrl,
+            'target_type' => $strTargetType
             ];
         return $vars;
     }
@@ -221,9 +217,9 @@ class SmartMenus extends ControlBase
         $this->nodeParamsCallback = Q\Project\Control\ControlBase::wakeupHelper($objForm, $this->nodeParamsCallback);
     }
 
+
     /**
      * @param $arrParams
-     * @param $arrObjects
      * @return string
      */
     protected function renderMenuTree($arrParams)
@@ -237,11 +233,11 @@ class SmartMenus extends ControlBase
             $this->intDepth = $arrParams[$i]['depth'];
             $this->intLeft = $arrParams[$i]['left'];
             $this->intRight = $arrParams[$i]['right'];
-            $this->strMenuText = $arrParams[$i]['text'];
+            $this->strMenuText = $arrParams[$i]['menu_text'];
             $this->intStatus = $arrParams[$i]['status'];
             $this->strRedirectUrl = $arrParams[$i]['redirect_url'];
-            $this->intIsRedirect = $arrParams[$i]['is_redirect'];
-            $this->intTargetType = $arrParams[$i]['target_type'];
+            $this->intHomelyUrl = $arrParams[$i]['homely_url'];
+            $this->strTargetType = $arrParams[$i]['target_type'];
 
             if (!$this->intStatus == 0) {
                 if ($this->intDepth == $this->intCurrentDepth) {
@@ -254,43 +250,29 @@ class SmartMenus extends ControlBase
                     $strHtml .= str_repeat('</li>' . _nl() . '</' . $this->strTagName . '>', $this->intCurrentDepth - $this->intDepth) . '</li>';
                     $this->intCurrentDepth = $this->intCurrentDepth - ($this->intCurrentDepth - $this->intDepth);
                 }
+
+                $url = isset($_SERVER['HTTPS']) ? "https" : "http" . '://' . $_SERVER['HTTP_HOST'] . QCUBED_URL_PREFIX;
+                $target = ' target="' . $this->strTargetType . '"';
+
                 if ($this->Right !== $this->Left + 1) {
                     $strHtml .= _nl() . '<li id="' . $this->ControlId . '_' . $this->intId . '">';
-
-                    if (is_null($this->intIsRedirect)) {
-                        $attributes['href'] = isset($_SERVER['HTTPS']) ? "https" : "http" . '://' . $_SERVER['HTTP_HOST'] . QCUBED_URL_PREFIX . $this->strRedirectUrl;
+                    if ($this->intHomelyUrl) {
+                        $strHtml .= '<a href="' . $url . $this->strRedirectUrl . '">';
+                    } elseif (strlen($this->strTargetType)) {
+                        $strHtml .= '<a href="' . $this->strRedirectUrl . '"' . $target . '>';
                     } else {
-                        $attributes['href'] = $this->strRedirectUrl;
+                        $strHtml .= '<a href="' . $this->strRedirectUrl . '">';
                     }
-                    if ($this->intTargetType) {
-                        $attributes['target'] = $this->strRedirectUrl;
-                    }
-
-                    if ($this->strRedirectUrl) {
-                        //$strHtml .= '<a href="' . $this->strRedirectUrl . '">';
-                        $strHtml = Html::renderString($this->strMenuText);
-
-                        $attributes = [];
-
-
-                        $strHtml = $this->renderTag("a", $attributes, null, $strHtml);
-
-
-                    } else {
-                        //$strHtml .= '<a href="#">';
-                        //$strHtml .= Q\Html::renderLink("#", $this->strMenuText, '<span class="caret"></span>');
-                        $strHtml .= '<span class="caret"></span>';
-                        $strHtml = $this->renderTag("a", $attributes, null, $strHtml);
-
-                    }
-                    //$strHtml .= $this->strMenuText;
-                    //$strHtml .= '<span class="caret"></span></a>';
+                    $strHtml .= $this->strMenuText;
+                    $strHtml .= '<span class="caret"></span></a>';
                 } else {
                     $strHtml .= _nl() . '<li id="' . $this->ControlId . '_' . $this->intId . '">';
-                    if ($this->strRedirectUrl) {
-                        $strHtml .= '<a href="' . $this->strRedirectUrl . '">';
+                    if ($this->intHomelyUrl) {
+                        $strHtml .= '<a href="' . $url . $this->strRedirectUrl . '">';
+                    } elseif (strlen($this->strTargetType)) {
+                        $strHtml .= '<a href="' . $this->strRedirectUrl . '"' . $target . '>';
                     } else {
-                        $strHtml .= '<a href="#">';
+                        $strHtml .= '<a href="' . $this->strRedirectUrl . '">';
                     }
                     $strHtml .= $this->strMenuText;
                     $strHtml .= '</a>';
@@ -304,7 +286,10 @@ class SmartMenus extends ControlBase
 
     /**
      * Returns the HTML for the control.
+     *
      * @return string
+     * @throws Caller
+     * @throws \Exception
      */
     protected function getControlHtml()
     {
@@ -345,52 +330,53 @@ class SmartMenus extends ControlBase
         }
     }
 
-    /**
-     *
-     */
     public function makeJqWidget()
     {
+        /**
+         * To draw or test the menu, the js code is temporarily placed here at the end: "return false;".
+         * This part of the code usually needs to be removed for the links to work properly.
+         */
         Application::executeControlCommand($this->ControlId, 'on', 'click', 'li',
-            new Js\Closure("jQuery(this).trigger('bsmenubarselect', this.id); return false;"),
+            new Js\Closure("jQuery(this).trigger('sidebarselect', this.id);
+            return false;"),
             Application::PRIORITY_HIGH);
 
+        /**
+         * For production, it is recommended to start activating the "Home" link.
+         * The following is intended to introduce such an opportunity.
+         */
         Application::executeJavaScript(sprintf("jQuery('#{$this->ControlId}_1').find('a').addClass('active')"));
 
         Application::executeSelectorFunction(".smartside", "on", "click", "a",
             new Js\Closure("jQuery('a.active').removeClass('active'); jQuery(this).addClass('active');"),
             Application::PRIORITY_HIGH);
-
     }
 
     /////////////////////////
     // Public Properties: GET
     /////////////////////////
 
+    /**
+     * @param string $strName
+     * @return array|mixed|string
+     * @throws Caller
+     */
     public function __get($strName)
     {
         switch ($strName) {
-            case "Id":
-                return $this->intId;
-            case "ParentId":
-                return $this->intParentId;
-            case "Depth":
-                return $this->intDepth;
-            case "Left":
-                return $this->intLeft;
-            case "Right":
-                return $this->intRight;
-            case "MenuText":
-                return $this->strMenuText;
-            case "Status":
-                return $this->intStatus;
-            case "RedirectUrl":
-                return $this->strRedirectUrl;
-            case "TagName":
-                return $this->strTagName;
-            case "TagStyle":
-                return $this->strTagStyle;
-            case "DataSource":
-                return $this->objDataSource;
+            case "Id": return $this->intId;
+            case "ParentId": return $this->intParentId;
+            case "Depth": return $this->intDepth;
+            case "Left": return $this->intLeft;
+            case "Right": return $this->intRight;
+            case "MenuText": return $this->strMenuText;
+            case "Status": return $this->intStatus;
+            case "RedirectUrl": return $this->strRedirectUrl;
+            case "HomelyUrl": return $this->intHomelyUrl;
+            case "TargetType": return $this->strTargetType;
+            case "TagName": return $this->strTagName;
+            case "TagStyle": return $this->strTagStyle;
+            case "DataSource": return $this->objDataSource;
 
             default:
                 try {
@@ -406,6 +392,13 @@ class SmartMenus extends ControlBase
     // Public Properties: SET
     /////////////////////////
 
+    /**
+     * @param string $strName
+     * @param string $mixValue
+     * @throws Caller
+     * @throws InvalidCast
+     * @throws \Exception
+     */
     public function __set($strName, $mixValue)
     {
         switch ($strName) {
@@ -478,6 +471,24 @@ class SmartMenus extends ControlBase
                 try {
                     $this->blnModified = true;
                     $this->strRedirectUrl = Type::Cast($mixValue, Type::STRING);
+                } catch (InvalidCast $objExc) {
+                    $objExc->IncrementOffset();
+                    throw $objExc;
+                }
+                break;
+            case "HomelyUrlUrl":
+                try {
+                    $this->blnModified = true;
+                    $this->intHomelyUrl = Type::Cast($mixValue, Type::INTEGER);
+                } catch (InvalidCast $objExc) {
+                    $objExc->IncrementOffset();
+                    throw $objExc;
+                }
+                break;
+            case "TargetType":
+                try {
+                    $this->blnModified = true;
+                    $this->strTargetType = Type::Cast($mixValue, Type::STRING);
                 } catch (InvalidCast $objExc) {
                     $objExc->IncrementOffset();
                     throw $objExc;

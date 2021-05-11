@@ -5,7 +5,6 @@
 <?php // require(QCUBED_CONFIG_DIR . '/header.inc.php'); ?>
 
 <?php $this->RenderBegin(); ?>
-
     <div class="page-content-wrapper">
         <div class="page-content">
             <div class="row">
@@ -17,7 +16,7 @@
                         <div class="panel-body">
                             <div class="row">
                                 <div class="col-md-1">
-                                    <?= _r($this->lstItemsPerPage); ?>
+                                    <?= _r($this->lstItemsPerPageByAssignedUserObject); ?>
                                 </div>
                                 <div class="col-md-3" style="margin-top: -7px;">
                                     <?= _r($this->txtFilter); ?>

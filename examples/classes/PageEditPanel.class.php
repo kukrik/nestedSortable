@@ -1,7 +1,5 @@
 <?php
 
-// https://stackoverflow.com/questions/18999501/bootstrap-3-keep-selected-tab-on-page-refresh
-
 use QCubed as Q;
 use QCubed\Bootstrap as Bs;
 use QCubed\Project\Control\ControlBase;
@@ -11,7 +9,8 @@ use QCubed\Project\Application;
 
 class PageEditPanel extends Q\Control\Panel
 {
-    public $lblMessage;
+    protected $dlgToastr1;
+    protected $dlgToastr2;
 
     public $lblExistingMenuText;
     public $txtExistingMenuText;
@@ -35,7 +34,7 @@ class PageEditPanel extends Q\Control\Panel
 
     protected $strTemplate = 'PageEditPanel.tpl.php';
 
-    public function __construct($objParentObject, /*$strMethodCallBack,*/ $strControlId = null)
+    public function __construct($objParentObject, $strControlId = null)
     {
         try {
             parent::__construct($objParentObject, $strControlId);
@@ -46,11 +45,6 @@ class PageEditPanel extends Q\Control\Panel
 
         $this->intId = Application::instance()->context()->queryStringItem('id');
         $this->objMenuContent = MenuContent::load($this->intId);
-
-        $this->lblMessage = new Q\Plugin\Control\Alert($this);
-        $this->lblMessage->Display = false;
-        $this->lblMessage->FullEffect = true;
-        //$this->lblMessage->HalfEffect = true;
 
         $this->lblExistingMenuText = new Q\Plugin\Control\Label($this);
         $this->lblExistingMenuText->Text = t('Existing menu text');
@@ -92,14 +86,64 @@ class PageEditPanel extends Q\Control\Panel
         $this->lstContentTypes->SelectedValue = $this->objMenuContent->ContentType;
         $this->lstContentTypes->addAction(new Q\Event\Change(), new Q\Action\AjaxControl($this,'lstClassNames_Change'));
 
-        /*if ($this->objMenuContent->ContentType == null) {
-            $this->txtMenuText->Enabled = false;
-        } else {
-            $this->txtMenuText->Enabled = true;
-        }*/
-
         $this->createButtons();
+        $this->createToastr();
     }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
+    public function CreateButtons()
+    {
+        $this->btnSave = new Q\Plugin\Control\Button($this);
+        if (is_null($this->objMenuContent->getContentType())) {
+            $this->btnSave->Text = t('Save');
+        } else {
+            $this->btnSave->Text = t('Update');
+        }
+        $this->btnSave->CssClass = 'btn btn-orange';
+        $this->btnSave->addWrapperCssClass('center-button');
+        $this->btnSave->PrimaryButton = true;
+        $this->btnSave->addAction(new Q\Event\Click(), new Q\Action\AjaxControl($this,'btnMenuSave_Click'));
+        // The variable below is being prepared for fast transmission
+        $this->strSaveButtonId = $this->btnSave->ControlId;
+
+        $this->btnSaving = new Q\Plugin\Control\Button($this);
+        if (is_null($this->objMenuContent->getContentType())) {
+            $this->btnSaving->Text = t('Save and close');
+        } else {
+            $this->btnSaving->Text = t('Update and close');
+        }
+        $this->btnSaving->CssClass = 'btn btn-darkblue';
+        $this->btnSaving->addWrapperCssClass('center-button');
+        $this->btnSaving->PrimaryButton = true;
+        $this->btnSaving->addAction(new Q\Event\Click(), new Q\Action\AjaxControl($this,'btnMenuSaveClose_Click'));
+        // The variable below is being prepared for fast transmission
+        $this->strSavingButtonId = $this->btnSaving->ControlId;
+
+        $this->btnCancel = new Q\Plugin\Control\Button($this);
+        $this->btnCancel->Text = t('Cancel');
+        $this->btnCancel->CssClass = 'btn btn-default';
+        $this->btnCancel->addWrapperCssClass('center-button');
+        $this->btnCancel->CausesValidation = false;
+        $this->btnCancel->addAction(new Q\Event\Click(), new Q\Action\AjaxControl($this,'btnMenuCancel_Click'));
+    }
+
+    protected function createToastr()
+    {
+        $this->dlgToastr1 = new Q\Plugin\Toastr($this);
+        $this->dlgToastr1->AlertType = Q\Plugin\Toastr::TYPE_SUCCESS;
+        $this->dlgToastr1->PositionClass = Q\Plugin\Toastr::POSITION_TOP_CENTER;
+        $this->dlgToastr1->Message = t('<strong>Well done!</strong> The post has been saved or modified.');
+        $this->dlgToastr1->ProgressBar = true;
+
+        $this->dlgToastr2 = new Q\Plugin\Toastr($this);
+        $this->dlgToastr2->AlertType = Q\Plugin\Toastr::TYPE_ERROR;
+        $this->dlgToastr2->PositionClass = Q\Plugin\Toastr::POSITION_TOP_CENTER;
+        $this->dlgToastr2->Message = t('<strong>Sorry</strong>, the menu title must exist!');
+        $this->dlgToastr2->ProgressBar = true;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
 
     public function lstContentTypeObject_GetItems()
     {
@@ -141,45 +185,6 @@ class PageEditPanel extends Q\Control\Panel
 
     ///////////////////////////////////////////////////////////////////////////////////////////
 
-    public function CreateButtons()
-    {
-        $this->btnSave = new Q\Plugin\Control\Button($this);
-        if (is_null($this->objMenuContent->getContentType())) {
-            $this->btnSave->Text = t('Save');
-        } else {
-            $this->btnSave->Text = t('Update');
-        }
-        $this->btnSave->CssClass = 'btn btn-orange';
-        $this->btnSave->addWrapperCssClass('center-button');
-        $this->btnSave->PrimaryButton = true;
-        $this->btnSave->addAction(new Q\Event\Click(), new Q\Action\AjaxControl($this,'btnMenuSave_Click'));
-        // The variable below is being prepared for fast transmission
-        $this->strSaveButtonId = $this->btnSave->ControlId;
-
-        $this->btnSaving = new Q\Plugin\Control\Button($this);
-        if (is_null($this->objMenuContent->getContentType())) {
-            $this->btnSaving->Text = t('Save and close');
-        } else {
-            $this->btnSaving->Text = t('Update and close');
-        }
-        $this->btnSaving->CssClass = 'btn btn-darkblue';
-        $this->btnSaving->addWrapperCssClass('center-button');
-        $this->btnSaving->PrimaryButton = true;
-        $this->btnSaving->addAction(new Q\Event\Click(), new Q\Action\AjaxControl($this,'btnMenuSaveClose_Click'));
-        // The variable below is being prepared for fast transmission
-        $this->strSavingButtonId = $this->btnSaving->ControlId;
-
-        $this->btnCancel = new Q\Plugin\Control\Button($this);
-        $this->btnCancel->Text = t('Cancel');
-        $this->btnCancel->CssClass = 'btn btn-default';
-        $this->btnCancel->addWrapperCssClass('center-button');
-        $this->btnCancel->CausesValidation = false;
-        $this->btnCancel->addAction(new Q\Event\Click(), new Q\Action\AjaxControl($this,'btnMenuCancel_Click'));
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////
-
-
     public function btnMenuSave_Click(ActionParams $params)
     {
         if ($this->txtMenuText->Text) {
@@ -189,7 +194,6 @@ class PageEditPanel extends Q\Control\Panel
             $this->objMenuContent->save();
 
             $this->txtExistingMenuText->Text = $this->objMenuContent->getMenuText();
-            $this->txtExistingMenuText->refresh();
 
             if (is_null($this->objMenuContent->getContentType())) {
                 $strSave_translate = t('Save');
@@ -203,18 +207,9 @@ class PageEditPanel extends Q\Control\Panel
                 Application::executeJavaScript(sprintf("jQuery($this->strSavingButtonId).text('{$strUpdateAndClose_translate}');"));
             }
 
-            $this->lblMessage->Display = true;
-            $this->lblMessage->Dismissable = true;
-            $this->lblMessage->removeCssClass(Bs\Bootstrap::ALERT_WARNING);
-            $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_SUCCESS);
-            $this->lblMessage->Text = t('<strong>Well done!</strong> The post has been saved or modified.');
+            $this->dlgToastr1->notify();
         } else {
-            $this->lblMessage->Display = true;
-            $this->lblMessage->Dismissable = true;
-            $this->txtMenuText->focus();
-            $this->lblMessage->removeCssClass(Bs\Bootstrap::ALERT_SUCCESS);
-            $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_DANGER);
-            $this->lblMessage->Text = t('<strong>Sorry</strong>, the menu title must exist!');
+            $this->dlgToastr2->notify();
         }
     }
 
@@ -228,11 +223,7 @@ class PageEditPanel extends Q\Control\Panel
 
             $this->redirectToListPage();
         } else {
-            $this->lblMessage->Display = true;
-            $this->lblMessage->Dismissable = true;
-            $this->txtMenuText->focus();
-            $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_DANGER);
-            $this->lblMessage->Text = t('<strong>Sorry</strong>, the menu title must exist!');
+            $this->dlgToastr2->notify();
         }
     }
 

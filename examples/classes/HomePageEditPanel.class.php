@@ -9,7 +9,8 @@ use QCubed\Project\Application;
 
 class HomePageEditPanel extends Q\Control\Panel
 {
-    public $lblMessage;
+    protected $dlgToastr1;
+    protected $dlgToastr2;
 
     public $lblExistingMenuText;
     public $txtExistingMenuText;
@@ -39,11 +40,6 @@ class HomePageEditPanel extends Q\Control\Panel
 
         $intId = Application::instance()->context()->queryStringItem('id');
         $this->objMenuContent = MenuContent::load($intId);
-
-        $this->lblMessage = new Q\Plugin\Control\Alert($this);
-        $this->lblMessage->Display = false;
-        $this->lblMessage->FullEffect = true;
-        //$this->lblMessage->HalfEffect = true;
 
         $this->lblExistingMenuText = new Q\Plugin\Control\Label($this);
         $this->lblExistingMenuText->Text = t('Existing menu text');
@@ -82,6 +78,7 @@ class HomePageEditPanel extends Q\Control\Panel
         $this->txtTitleSlug->setCssStyle('font-weight', 400);
 
         $this->createButtons();
+        $this->createToastr();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -118,29 +115,35 @@ class HomePageEditPanel extends Q\Control\Panel
         $this->btnCancel->addAction(new Q\Event\Click(), new Q\Action\AjaxControl($this,'btnMenuCancel_Click'));
     }
 
+    protected function createToastr()
+    {
+        $this->dlgToastr1 = new Q\Plugin\Toastr($this);
+        $this->dlgToastr1->AlertType = Q\Plugin\Toastr::TYPE_SUCCESS;
+        $this->dlgToastr1->PositionClass = Q\Plugin\Toastr::POSITION_TOP_CENTER;
+        $this->dlgToastr1->Message = t('<strong>Well done!</strong> The post has been saved or modified.');
+        $this->dlgToastr1->ProgressBar = true;
+
+        $this->dlgToastr2 = new Q\Plugin\Toastr($this);
+        $this->dlgToastr2->AlertType = Q\Plugin\Toastr::TYPE_ERROR;
+        $this->dlgToastr2->PositionClass = Q\Plugin\Toastr::POSITION_TOP_CENTER;
+        $this->dlgToastr2->Message = t('<strong>Sorry</strong>, the menu title cannot be deleted!');
+        $this->dlgToastr2->ProgressBar = true;
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     public function btnMenuSave_Click(ActionParams $params)
     {
         if ($this->txtMenuText->Text) {
             $this->objMenuContent->setMenuText($this->txtMenuText->Text);
+            $this->objMenuContent->setHomelyUrl(1);
             $this->objMenuContent->save();
 
             $this->txtExistingMenuText->Text = $this->objMenuContent->getMenuText();
-            $this->txtExistingMenuText->refresh();
 
-            $this->lblMessage->Display = true;
-            $this->lblMessage->Dismissable = true;
-            $this->lblMessage->removeCssClass(Bs\Bootstrap::ALERT_WARNING);
-            $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_SUCCESS);
-            $this->lblMessage->Text = t('<strong>Well done!</strong> The post has been saved or modified.');
+            $this->dlgToastr1->notify();
         } else {
-            $this->lblMessage->Display = true;
-            $this->lblMessage->Dismissable = true;
-            $this->txtMenuText->focus();
-            $this->lblMessage->removeCssClass(Bs\Bootstrap::ALERT_SUCCESS);
-            $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_DANGER);
-            $this->lblMessage->Text = t('<strong>Sorry</strong>, the menu title cannot be deleted!');
+            $this->dlgToastr2->notify();
         }
     }
 
@@ -148,14 +151,11 @@ class HomePageEditPanel extends Q\Control\Panel
     {
         if ($this->txtMenuText->Text) {
             $this->objMenuContent->setMenuText($this->txtMenuText->Text);
+            $this->objMenuContent->setHomelyUrl(1);
             $this->objMenuContent->save();
             $this->redirectToListPage();
         } else {
-            $this->lblMessage->Display = true;
-            $this->lblMessage->Dismissable = true;
-            $this->txtMenuText->focus();
-            $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_DANGER);
-            $this->lblMessage->Text = t('<strong>Sorry</strong>, the menu title cannot be deleted!');
+            $this->dlgToastr2->notify();
         }
     }
 

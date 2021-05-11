@@ -25,4 +25,3 @@ class Label extends \QCubed\Control\Label
         return $strToReturn;
     }
 }
-

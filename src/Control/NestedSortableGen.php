@@ -68,7 +68,7 @@ use QCubed\Type;
  *
  */
 
-class NestedSortableGen extends Q\Control\BlockControl
+class NestedSortableGen extends Q\Control\Panel
 {
     protected $strJavaScripts = QCUBED_JQUI_JS;
     protected $strStyleSheets = QCUBED_JQUI_CSS;
@@ -173,7 +173,6 @@ class NestedSortableGen extends Q\Control\BlockControl
 
     /**
      * Builds the option array to be sent to the widget constructor.
-     *
      * @return array key=>value array of options
      */
 
@@ -254,40 +253,44 @@ class NestedSortableGen extends Q\Control\BlockControl
      * prior to when the current sort was started. Useful in the stop and
      * receive callback functions.
      *
-     * 	* This method does not accept any arguments.
+     * This method does not accept any arguments.
      */
     public function cancel()
     {
         Application::executeControlCommand($this->getJqControlId(), $this->getJqSetupFunction(), "cancel", Application::PRIORITY_LOW);
     }
+
     /**
      * Removes the sortable functionality completely. This will return the
      * element back to its pre-init state.
      *
-     * 	* This method does not accept any arguments.
+     * This method does not accept any arguments.
      */
     public function destroy()
     {
         Application::executeControlCommand($this->getJqControlId(), $this->getJqSetupFunction(), "destroy", Application::PRIORITY_LOW);
     }
+
     /**
      * Disables the sortable.
      *
-     * 	* This method does not accept any arguments.
+     * This method does not accept any arguments.
      */
     public function disable()
     {
         Application::executeControlCommand($this->getJqControlId(), $this->getJqSetupFunction(), "disable", Application::PRIORITY_LOW);
     }
+
     /**
      * Enables the sortable.
      *
-     * 	* This method does not accept any arguments.
+     * This method does not accept any arguments.
      */
     public function enable()
     {
         Application::executeControlCommand($this->getJqControlId(), $this->getJqSetupFunction(), "enable", Application::PRIORITY_LOW);
     }
+
     /**
      * Retrieves the sortables instance object. If the element does not have
      * an associated instance, undefined is returned.
@@ -295,12 +298,13 @@ class NestedSortableGen extends Q\Control\BlockControl
      * Unlike other widget methods, instance() is safe to call on any element
      * after the sortable plugin has loaded.
      *
-     * 	* This method does not accept any arguments.
+     * This method does not accept any arguments.
      */
     public function instance()
     {
         Application::executeControlCommand($this->getJqControlId(), $this->getJqSetupFunction(), "instance", Application::PRIORITY_LOW);
     }
+
     /**
      * Gets the value currently associated with the specified optionName.
      *
@@ -308,23 +312,25 @@ class NestedSortableGen extends Q\Control\BlockControl
      * value of a specific key by using dot notation. For example, "foo.bar"
      * would get the value of the bar property on the foo option.
      *
-     * 	* optionName Type: String The name of the option to get.
+     * optionName Type: String The name of the option to get.
      * @param $optionName
      */
     public function option($optionName)
     {
         Application::executeControlCommand($this->getJqControlId(), $this->getJqSetupFunction(), "option", $optionName, Application::PRIORITY_LOW);
     }
+
     /**
      * Gets an object containing key/value pairs representing the current
      * sortable options hash.
      *
-     * 	* This signature does not accept any arguments.
+     * This signature does not accept any arguments.
      */
     public function option1()
     {
         Application::executeControlCommand($this->getJqControlId(), $this->getJqSetupFunction(), "option", Application::PRIORITY_LOW);
     }
+
     /**
      * Sets the value of the sortable option associated with the specified
      * optionName.
@@ -334,8 +340,8 @@ class NestedSortableGen extends Q\Control\BlockControl
      * example, "foo.bar" would update only the bar property of the foo
      * option.
      *
-     * 	* optionName Type: String The name of the option to set.
-     * 	* value Type: Object A value to set for the option.
+     * optionName Type: String The name of the option to set.
+     * value Type: Object A value to set for the option.
      * @param $optionName
      * @param $value
      */
@@ -343,36 +349,40 @@ class NestedSortableGen extends Q\Control\BlockControl
     {
         Application::executeControlCommand($this->getJqControlId(), $this->getJqSetupFunction(), "option", $optionName, $value, Application::PRIORITY_LOW);
     }
+
     /**
      * Sets one or more options for the sortable.
      *
-     * 	* options Type: Object A map of option-value pairs to set.
+     * options Type: Object A map of option-value pairs to set.
      * @param $options
      */
     public function option3($options)
     {
         Application::executeControlCommand($this->getJqControlId(), $this->getJqSetupFunction(), "option", $options, Application::PRIORITY_LOW);
     }
+
     /**
      * Refresh the sortable items. Triggers the reloading of all sortable
      * items, causing new items to be recognized.
      *
-     * 	* This method does not accept any arguments.
+     * This method does not accept any arguments.
      */
     public function refresh()
     {
         Application::executeControlCommand($this->getJqControlId(), $this->getJqSetupFunction(), "refresh", Application::PRIORITY_LOW);
     }
+
     /**
      * Refresh the cached positions of the sortable items. Calling this
      * method refreshes the cached item positions of all sortables.
      *
-     * 	* This method does not accept any arguments.
+     * This method does not accept any arguments.
      */
     public function refreshPositions()
     {
         Application::executeControlCommand($this->getJqControlId(), $this->getJqSetupFunction(), "refreshPositions", Application::PRIORITY_LOW);
     }
+
     /**
      * Serializes the sortables item ids into a form/ajax submittable string.
      * Calling this method produces a hash that can be appended to any url to
@@ -390,9 +400,9 @@ class NestedSortableGen extends Q\Control\BlockControl
      * number. For example "foo=1", "foo-1", and "foo_1" all serialize to
      * "foo[]=1"._
      *
-     * 	* options Type: Object Options to customize the serialization.
+     * options Type: Object Options to customize the serialization.
      *
-     * 	* key (default: the part of the attribute in front of the separator)
+     * key (default: the part of the attribute in front of the separator)
      * Type: String Replaces part1[] with the specified value.
      * 	* attribute (default: "id") Type: String The name of the attribute
      * to use for the values.
@@ -404,12 +414,13 @@ class NestedSortableGen extends Q\Control\BlockControl
     {
         Application::executeControlCommand($this->getJqControlId(), $this->getJqSetupFunction(), "serialize", $options, Application::PRIORITY_LOW);
     }
+
     /**
      * Serializes the sortables item ids into an array of string.
      *
-     * 	* options Type: Object Options to customize the serialization.
+     * options Type: Object Options to customize the serialization.
      *
-     * 	* attribute (default: "id") Type: String The name of the attribute to
+     * attribute (default: "id") Type: String The name of the attribute to
      * use for the values.
      * @param $options
      */
@@ -422,7 +433,7 @@ class NestedSortableGen extends Q\Control\BlockControl
      * Fires when the item is dragged to a new location.
      * This triggers for each location it is dragged into not just the ending location.
      *
-     *This method does not accept any arguments.
+     * This method does not accept any arguments.
      */
     public function change()
     {
@@ -432,7 +443,7 @@ class NestedSortableGen extends Q\Control\BlockControl
     /**
      * Fires when the item is dragged.
      *
-     *This method does not accept any arguments.
+     * This method does not accept any arguments.
      */
     public function sort()
     {
@@ -442,7 +453,7 @@ class NestedSortableGen extends Q\Control\BlockControl
     /**
      * Fires once the object has moved if the new location is invalid.
      *
-     *This method does not accept any arguments.
+     * This method does not accept any arguments.
      */
     public function revert()
     {
@@ -452,7 +463,7 @@ class NestedSortableGen extends Q\Control\BlockControl
     /**
      * Only fires once when the item is done bing moved at its final location.
      *
-     *This method does not accept any arguments.
+     * This method does not accept any arguments.
      */
     public function relocate()
     {

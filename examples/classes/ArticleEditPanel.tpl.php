@@ -1,12 +1,6 @@
 <div class="form-horizontal">
     <div class="form-body">
 
-        <div class="row">
-            <div class="col-md-12">
-                <?= _r($this->lblMessage); ?>
-            </div>
-        </div>
-
         <div class="row equal">
             <div class="col-md-9 left-box padded-wrapper">
 
@@ -72,7 +66,7 @@
                         <?= _r($this->btnSaving); ?>
                         <?= _r($this->btnCancel); ?>
                     </div>
-                </div>
+               </div>
 
             </div>
 
@@ -86,6 +80,16 @@
                 <div class="form-group">
                     <?= _r($this->lblPostUpdateDate); ?>
                     <?= _r($this->calPostUpdateDate); ?>
+                </div>
+
+                <div class="form-group">
+                    <?= _r($this->lblAuthor); ?>
+                    <?= _r($this->txtAuthor); ?>
+                </div>
+
+                <div class="form-group">
+                    <?= _r($this->lblUsersAsArticlesEditors); ?>
+                    <?= _r($this->txtUsersAsArticlesEditors); ?>
                 </div>
 
                 <div class="form-group">

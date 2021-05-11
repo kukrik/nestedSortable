@@ -1,22 +1,24 @@
 <?php
 
-/** This file contains the SideBar Class */
+/** This file contains the Sidebar Class */
 
 namespace QCubed\Plugin\Control;
 
 use QCubed as Q;
 use QCubed\Bootstrap as Bs;
 use QCubed\Control\FormBase;
-use QCubed\Project\Control\ControlBase;
+use QCubed\Control\ControlBase;
 use QCubed\Project\Control;
 use QCubed\Project\Application;
 use QCubed\Exception\Caller;
 use QCubed\Exception\InvalidCast;
 use QCubed\Js;
 use QCubed\Type;
+use QCubed\Html;
 
 /**
- * Class SideBar
+ * Class Sidebar
+ *
  * @property integer $Id
  * @property integer $ParentId
  * @property integer $Depth
@@ -25,23 +27,28 @@ use QCubed\Type;
  * @property string $MenuText
  * @property integer $Status
  * @property string $RedirectUrl
- *
- * // Unfinished work!!!
+ * @property integer $HomelyUrl
+ * @property string $TargetType
+ * @property string $SubTagName
+ * @property string $SubTagClass
+ * @property mixed $DataSource
  *
  * @package QCubed\Plugin
  */
-class SideBar extends ControlBase
+class Sidebar extends \QCubed\Control\Panel
 {
     use Q\Control\DataBinderTrait;
 
-    /** @var string TagName */
-    protected $strTagName = null;
-    /** @var string TagStyle */
-    protected $strTagClass = null;
+    /** @var string SubTagName */
+    protected $strSubTagName = null;
+    /** @var string SubTagClass */
+    protected $strSubTagClass = null;
     /** @var  callable */
     protected $nodeParamsCallback = null;
     /** @var array DataSource from which the items are picked and rendered */
     protected $objDataSource;
+    protected $strParams;
+    protected $strObjects;
 
     protected $intCurrentDepth = 0;
     protected $intCounter = 0;
@@ -57,15 +64,19 @@ class SideBar extends ControlBase
     /** @var integer Right */
     protected $intRight = null;
     /** @var string MenuText */
-    protected $strMenuText;
+    protected $strMenuText = null;
     /** @var int Status */
-    protected $intStatus;
+    protected $intStatus = null;
     /** @var string RedirectUrl */
-    protected $strRedirectUrl;
-    /** @var string Text */
+    protected $strRedirectUrl = null;
+    /** @var int IsHomelyUrl */
+    protected $intHomelyUrl = null;
+    /** @var int TargetType */
+    protected $strTargetType = null;
+
 
     /**
-     * SideBar constructor.
+     * Sidebar constructor.
      * @param Q\Control\ControlBase|FormBase $objParentObject
      * @param null $strControlId
      */
@@ -85,35 +96,31 @@ class SideBar extends ControlBase
     {
         $this->AddCssFile(QCUBED_BOOTSTRAP_CSS); // make sure they know
         $this->AddCssFile(QCUBED_FONT_AWESOME_CSS); // make sure they know
-        //$this->addCssFile(QCUBED_NESTEDSORTABLE_ASSETS_URL . "/smartmenus-1.1.0/addons/bootstrap/jquery.smartmenus.bootstrap.css");
         Bs\Bootstrap::loadJS($this);
-        //$this->addJavascriptFile(QCUBED_NESTEDSORTABLE_ASSETS_URL . "/smartmenus-1.1.0/jquery.smartmenus.js");
-        //$this->addJavascriptFile(QCUBED_NESTEDSORTABLE_ASSETS_URL . "/smartmenus-1.1.0/addons/bootstrap/jquery.smartmenus.bootstrap.js");
     }
 
-    /**
-     * @return bool
-     */
-    public function validate() {return true;}
+    //public function validate() {return true;}
 
-    /**
-     *
-     */
-    public function parsePostData() {}
+    //public function parsePostData() {}
 
     /**
      * Set the node params callback. The callback should be of the form:
      * func($objItem)
      * The callback will be give the raw node from the data source, and the item's index.
      * The function should return a key/value array with the following possible items:
+     *
      * id - the id for the node tag
      * parent_id - the parent_id for the node tag
      * depth - the depth for the node tag
      * left - the left for the node tag
      * right - the right for the node tag
-     * text - the text for the node tag
-     * status - the status for the node tag
+     * menu_text - the menu_text for the node tag
      * redirect_url - the redirect_url for the node tag
+     * is_redirect - the is_redirect for the node tag
+     * selected_page_id - the selected_page_id for the node tag
+     * content_type_object - the content_type_object for the node tag
+     * content_type - the content_type for the node tag
+     * status - the status for the node tag for the node tag
      *
      * The callback is a callable, so can be of the form [$objControl, "func"]
      *
@@ -159,9 +166,9 @@ class SideBar extends ControlBase
         if (isset($params['right'])) {
             $intRight = $params['right'];
         }
-        $strText = '';
-        if (isset($params['text'])) {
-            $strText = $params['text'];
+        $strMenuText = '';
+        if (isset($params['menu_text'])) {
+            $strMenuText = $params['menu_text'];
         }
         $intStatus = '';
         if (isset($params['status'])) {
@@ -171,6 +178,14 @@ class SideBar extends ControlBase
         if (isset($params['redirect_url'])) {
             $strRedirectUrl = $params['redirect_url'];
         }
+        $intHomelyUrl = '';
+        if (isset($params['homely_url'])) {
+            $intHomelyUrl = $params['homely_url'];
+        }
+        $strTargetType = '';
+        if (isset($params['target_type'])) {
+            $strTargetType = $params['target_type'];
+        }
 
         $vars = [
             'id' => $intId,
@@ -178,13 +193,65 @@ class SideBar extends ControlBase
             'depth' => $intDepth,
             'left' => $intLeft,
             'right' => $intRight,
-            'text' => $strText,
+            'menu_text' => $strMenuText,
             'status' => $intStatus,
-            'redirect_url' => $strRedirectUrl
-
-            ];
+            'redirect_url' => $strRedirectUrl,
+            'homely_url' => $intHomelyUrl,
+            'target_type' => $strTargetType
+        ];
         return $vars;
     }
+
+
+    /**
+     * Returns the HTML for the control.
+     * @return string
+     * @throws Caller
+     * @throws \Exception
+     */
+    protected function getControlHtml()
+    {
+        //$this->dataBind();
+
+        if (empty($this->objDataSource)) {
+            $this->objDataSource = null;
+        }
+
+        $this->strParams = [];
+
+        if ($this->objDataSource) {
+            foreach ($this->objDataSource as $objObject) {
+                $this->strParams[] = $this->getItemRaw($objObject);
+            }
+        }
+
+        if ($this->strSubTagClass) {
+            $attributes['class'] = $this->strSubTagClass;
+        } else {
+            $attributes = '';
+        }
+
+        $strOut = $this->renderMenuTree($this->strParams);
+        $strHtml = $this->renderTag('nav', $attributes, null, $strOut);
+        $this->objDataSource = null;
+        return $strHtml;
+    }
+
+    /**
+     * @throws Caller
+     */
+    /*public function dataBind()
+    {
+        // Run the DataBinder (if applicable)
+        if (($this->objDataSource === null) && ($this->hasDataBinder()) && (!$this->blnRendered)) {
+            try {
+                $this->callDataBinder();
+            } catch (Caller $objExc) {
+                $objExc->incrementOffset();
+                throw $objExc;
+            }
+        }
+    }*/
 
     /**
      * Fix up possible embedded reference to the form.
@@ -207,12 +274,12 @@ class SideBar extends ControlBase
 
     /**
      * @param $arrParams
-     * @param $arrObjects
      * @return string
      */
     protected function renderMenuTree($arrParams)
     {
         $strHtml = '';
+        $strHtml .= '<' . $this->strSubTagName . '>';
 
         for ($i = 0; $i < count($arrParams); $i++)
         {
@@ -221,105 +288,80 @@ class SideBar extends ControlBase
             $this->intDepth = $arrParams[$i]['depth'];
             $this->intLeft = $arrParams[$i]['left'];
             $this->intRight = $arrParams[$i]['right'];
-            $this->strMenuText = $arrParams[$i]['text'];
+            $this->strMenuText = $arrParams[$i]['menu_text'];
             $this->intStatus = $arrParams[$i]['status'];
             $this->strRedirectUrl = $arrParams[$i]['redirect_url'];
+            $this->intHomelyUrl = $arrParams[$i]['homely_url'];
+            $this->strTargetType = $arrParams[$i]['target_type'];
 
-            if (!$this->intStatus == 0 && $this->intParentId !== null && $this->intDepth > 0) {
+            if ($this->intStatus !== 0 && $this->intParentId !== null && $this->intDepth > 0) {
                 if ($this->intDepth == $this->intCurrentDepth) {
                     if ($this->intCounter > 0)
                         $strHtml .= '</li>';
                 } elseif ($this->intDepth > $this->intCurrentDepth) {
-                    $strHtml .= _nl() . '<' . $this->strTagName . '>';
+                    $strHtml .= _nl() . '<' . $this->strSubTagName . '>';
                     $this->intCurrentDepth = $this->intCurrentDepth + ($this->intDepth - $this->intCurrentDepth);
                 } elseif ($this->intDepth < $this->intCurrentDepth) {
-                    $strHtml .= str_repeat('</li>' . _nl() . '</' . $this->strTagName . '>', $this->intCurrentDepth - $this->intDepth) . '</li>';
+                    $strHtml .= str_repeat('</li>' . _nl() . '</' . $this->strSubTagName . '>', $this->intCurrentDepth - $this->intDepth) . '</li>';
                     $this->intCurrentDepth = $this->intCurrentDepth - ($this->intCurrentDepth - $this->intDepth);
                 }
+
+                $url = isset($_SERVER['HTTPS']) ? "https" : "http" . '://' . $_SERVER['HTTP_HOST'] . QCUBED_URL_PREFIX;
+                $target = ' target="' . $this->strTargetType . '"';
+
                 $strHtml .= _nl() . '<li id="' . $this->strControlId . '_' . $this->intId . '">';
-                if ($this->strRedirectUrl) {
-                    $strHtml .= '<a href="' . $this->strRedirectUrl . '">';
+
+                if ($this->intHomelyUrl) {
+                    $strHtml .= '<a href="' . $url . $this->strRedirectUrl . '">';
+                } elseif (strlen($this->strTargetType)) {
+                    $strHtml .= '<a href="' . $this->strRedirectUrl . '"' . $target . '>';
                 } else {
-                    $strHtml .= '<a href="#">';
+                    $strHtml .= '<a href="' . $this->strRedirectUrl . '">';
                 }
                 $strHtml .= $this->strMenuText;
                 $strHtml .= '</a>';
                 ++$this->intCounter;
             }
         }
-        $strHtml .= str_repeat('</li>' . _nl() . '</' . $this->strTagName . '>', $this->intDepth);
+        $strHtml .= str_repeat('</li>' . _nl() . '</' . $this->strSubTagName . '>', $this->intDepth);
+        $strHtml .= '</' . $this->strSubTagName . '>';
         return $strHtml;
     }
 
     /**
-     * Returns the HTML for the control.
+     * @param $objArrays
+     * @param $value
      * @return string
      */
-    protected function getControlHtml()
+    public function getChildren($objArrays, $value = null)
     {
-        $this->dataBind();
-
-        if (empty($this->objDataSource)) {
-            $this->objDataSource = null;
-        }
-
-        $strParams = [];
-
-        if ($this->objDataSource) {
-            foreach ($this->objDataSource as $objObject) {
-                $strParams[] = $this->getItemRaw($objObject);
+        $objTempArray = [];
+        foreach ($objArrays as $objMenu) {
+            if($objMenu->ParentId == $value) {
+                $objTempArray[] = $objMenu->Id;
+                array_push($objTempArray, ...$this->getChildren($objArrays, $objMenu->Id));
             }
         }
-
-
-        if ($this->strTagClass) {
-            $attributes['class'] = $this->strTagClass;
-        } else {
-            $attributes = '';
-        }
-        $strOut = $this->renderMenuTree($strParams);
-        $strHtml = $this->renderTag('nav', $attributes, null, $strOut);
-
-        $this->objDataSource = null;
-        return $strHtml;
+        return $objTempArray;
     }
 
     /**
-     * @throws Caller
+     * Generated method overrides the built-in Control method, causing it to not redraw completely. We restore
+     * its functionality here.
      */
-    public function dataBind()
+    public function refresh()
     {
-        // Run the DataBinder (if applicable)
-        if (($this->objDataSource === null) && ($this->hasDataBinder()) && (!$this->blnRendered)) {
-            try {
-                $this->callDataBinder();
-            } catch (Caller $objExc) {
-                $objExc->incrementOffset();
-                throw $objExc;
-            }
-        }
+        parent::refresh();
+        ControlBase::refresh();
     }
 
     public function makeJqWidget()
     {
         Application::executeControlCommand($this->ControlId, 'on', 'click', 'li',
-            new Js\Closure("jQuery(this).trigger('sidebarselect', this.id); return false;"),
+            new Js\Closure("jQuery(this).trigger('sidebarselect', this.id); return false;"), //  return false;
             Application::PRIORITY_HIGH);
 
-        /**
-         * For production, it is recommended to start activating the "Home" link.
-         * The following is intended to introduce such an opportunity.
-         */
-
-        Application::executeJavaScript(sprintf("jQuery('.sidemenu-1 #c6_0').find('a').addClass('active')"));
-
-        Application::executeJavaScript(sprintf("jQuery('#{$this->ControlId}_11').find('a').addClass('active')"));
-
-        Application::executeSelectorFunction(".sidemenu", "on", "click", "a",
-            new Js\Closure("jQuery('a.active').removeClass('active'); jQuery(this).addClass('active');"),
-            Application::PRIORITY_HIGH);
-
-        Application::executeSelectorFunction(".sidemenu-1", "on", "click", "a",
+        Application::executeSelectorFunction(".submenu", "on", "click", "a",
             new Js\Closure("jQuery('a.active').removeClass('active'); jQuery(this).addClass('active');"),
             Application::PRIORITY_HIGH);
     }
@@ -328,6 +370,11 @@ class SideBar extends ControlBase
     // Public Properties: GET
     /////////////////////////
 
+    /**
+     * @param string $strName
+     * @return array|int|mixed|string
+     * @throws Caller
+     */
     public function __get($strName)
     {
         switch ($strName) {
@@ -347,10 +394,10 @@ class SideBar extends ControlBase
                 return $this->intStatus;
             case "RedirectUrl":
                 return $this->strRedirectUrl;
-            case "TagName":
-                return $this->strTagName;
-            case "TagClass":
-                return $this->strTagClass;
+            case "SubTagName":
+                return $this->strSubTagName;
+            case "SubTagClass":
+                return $this->strSubTagClass;
             case "DataSource":
                 return $this->objDataSource;
 
@@ -368,12 +415,19 @@ class SideBar extends ControlBase
     // Public Properties: SET
     /////////////////////////
 
+    /**
+     * @param string $strName
+     * @param string $mixValue
+     * @throws Caller
+     * @throws InvalidCast
+     * @throws \Exception
+     */
     public function __set($strName, $mixValue)
     {
         switch ($strName) {
             case "Id":
                 try {
-                    //$this->blnModified = true;
+                    $this->blnModified = true;
                     $this->intId = Type::Cast($mixValue, Type::INTEGER);
                     $this->blnModified = true;
                     break;
@@ -445,19 +499,19 @@ class SideBar extends ControlBase
                     throw $objExc;
                 }
                 break;
-            case "TagName":
+            case "SubTagName":
                 try {
                     $this->blnModified = true;
-                    $this->strTagName = Type::Cast($mixValue, Type::STRING);
+                    $this->strSubTagName = Type::Cast($mixValue, Type::STRING);
                 } catch (InvalidCast $objExc) {
                     $objExc->IncrementOffset();
                     throw $objExc;
                 }
                 break;
-            case "TagClass":
+            case "SubTagClass":
                 try {
                     $this->blnModified = true;
-                    $this->strTagClass = Type::Cast($mixValue, Type::STRING);
+                    $this->strSubTagClass = Type::Cast($mixValue, Type::STRING);
                 } catch (InvalidCast $objExc) {
                     $objExc->IncrementOffset();
                     throw $objExc;

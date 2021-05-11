@@ -19,6 +19,20 @@ use QCubed\Js;
  */
 class SampleForm extends Form
 {
+    protected $dlgToastr1;
+    protected $dlgToastr2;
+
+    protected $dlgModal1;
+    protected $dlgModal2;
+    protected $dlgModal3;
+    protected $dlgModal4;
+    protected $dlgModal5;
+    protected $dlgModal6;
+    protected $dlgModal7;
+    protected $dlgModal8;
+    protected $dlgModal9;
+    protected $dlgModal10;
+    
     protected $intEditMenuId = null;
 
     protected $btnAddMenuItem;
@@ -29,31 +43,17 @@ class SampleForm extends Form
     protected $btnCollapseAll;
     protected $btnExpandAll;
     protected $lblMessage;
+
     protected $tblSorter;
     protected $intDeleteId;
+    protected $btnStatus;
 
     protected $strSelectedValues = [];
-
-    protected $modal1;
-    protected $modal2;
-    protected $modal3;
-    protected $modal4;
-    protected $modal5;
-    protected $modal6;
-    protected $modal7;
-    protected $modal8;
 
     protected function formCreate()
     {
         parent::formCreate();
-
-        // Alerts
-
-        $this->lblMessage = new Q\Plugin\Control\Alert($this);
-        $this->lblMessage->Display = false;
-        $this->lblMessage->FullEffect = true;
-        //$this->lblMessage->HalfEffect = true;
-
+        
         // Menu item creation group (buttons and textbox)
 
         $this->btnAddMenuItem = new Q\Plugin\Control\Button($this);
@@ -113,7 +113,7 @@ class SampleForm extends Form
 
         // NestedSortable
 
-        $this->tblSorter = new Q\Plugin\Control\NestedSortable($this);
+        $this->tblSorter = new Q\Plugin\NestedSortable($this);
         $this->tblSorter->ForcePlaceholderSize = true;
         $this->tblSorter->Handle = '.reorder';
         $this->tblSorter->Helper = 'clone';
@@ -125,59 +125,36 @@ class SampleForm extends Form
         $this->tblSorter->TabSize = 25;
         $this->tblSorter->Tolerance = 'pointer';
         $this->tblSorter->ToleranceElement = '> div';
-        $this->tblSorter->MaxLevels = 3;
+        $this->tblSorter->MaxLevels = 5;
         $this->tblSorter->IsTree = true;
         $this->tblSorter->ExpandOnHover = 700;
         $this->tblSorter->StartCollapsed = false;
 
         $this->tblSorter->TagName = 'ul'; //Please make sure TagName and ListType tags are the same!
-        $this->tblSorter->CssClass = 'sortable ui-sortable'; // ui-sortable
+        $this->tblSorter->CssClass = 'sortable'; // ui-sortable
         $this->tblSorter->setDataBinder('Menu_Bind');
         $this->tblSorter->createNodeParams([$this, 'Menu_Draw']);
         $this->tblSorter->createRenderButtons([$this, 'Buttons_Draw']);
         $this->tblSorter->SectionClass = 'menu-btn-body center-button';
 
         $this->tblSorter->addAction(new Q\Jqui\Event\SortableStop(), new Q\Action\Ajax('Sortable_Stop'));
+        
+        $this->createToastr();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////
-
-    protected function Menu_Bind()
-    {
-        $this->tblSorter->DataSource = Menu::loadAll(
-            QQ::Clause(QQ::OrderBy(QQN::menu()->Left),
-                QQ::expand(QQN::menu()->MenuContent)
-            ));
-    }
-
-    public function Menu_Draw(Menu $objMenu)
-    {
-        $a['id'] = $objMenu->Id;
-        $a['parent_id'] = $objMenu->ParentId;
-        $a['depth'] = $objMenu->Depth;
-        $a['left'] = $objMenu->Left;
-        $a['right'] = $objMenu->Right;
-        $a['menu_text'] = Q\QString::htmlEntities($objMenu->MenuContent->MenuText);
-        $a['redirect_url'] = $objMenu->MenuContent->RedirectUrl;
-        $a['is_redirect'] = $objMenu->MenuContent->IsRedirect;
-        $a['selected_page_id'] = $objMenu->MenuContent->SelectedPageId;
-        $a['content_type_object'] = $objMenu->MenuContent->ContentTypeObject;
-        $a['content_type'] = $objMenu->MenuContent->ContentType;
-        $a['status'] = $objMenu->MenuContent->IsEnabled;
-        return $a;
-    }
 
     public function Buttons_Draw(Menu $objMenu)
     {
         $strStatusId = 'btnStatus' . $objMenu->Id;
 
-        if (!$btnStatus = $this->getControl($strStatusId)) {
-            $btnStatus = new Q\Plugin\Control\Button($this->tblSorter, $strStatusId);
+        if (!$this->btnStatus = $this->getControl($strStatusId)) {
+            $this->btnStatus = new Q\Plugin\Control\Button($this->tblSorter, $strStatusId);
 
-            $btnStatus->ActionParameter = $objMenu->MenuContent->Id;
-            $btnStatus->CausesValidation = false;
-            $btnStatus->setDataAttribute('status', 'change');
-            $btnStatus->addAction(new Q\Event\Click(), new Q\Action\Ajax('btnStatus_Click'));
+            $this->btnStatus->ActionParameter = $objMenu->MenuContent->Id;
+            $this->btnStatus->CausesValidation = false;
+            $this->btnStatus->setDataAttribute('status', 'change');
+            $this->btnStatus->addAction(new Q\Event\Click(), new Q\Action\Ajax('btnStatus_Click'));
         }
 
         $strEditId = 'btnEdit' . $objMenu->Id;
@@ -207,91 +184,153 @@ class SampleForm extends Form
         }
 
         if ($objMenu->MenuContent->IsEnabled == 1) {
-            $btnStatus->Text = t('Disable');
-            $btnStatus->CssClass = 'btn btn-white btn-xs';
+            $this->btnStatus->Text = t('Disable');
+            $this->btnStatus->CssClass = 'btn btn-white btn-xs';
         } else {
-            $btnStatus->Text = t('Enable');
-            $btnStatus->CssClass = 'btn btn-success btn-xs';
+            $this->btnStatus->Text = t('Enable');
+            $this->btnStatus->CssClass = 'btn btn-success btn-xs';
         }
 
         if ($objMenu->MenuContent->ContentType == 1 && $objMenu->MenuContent->IsEnabled == 1) {
-            $btnStatus->Display = false;
-            $btnDelete->Display = false;
+            $this->btnStatus->Display = false;
+            $this->btnStatus->Display = false;
         } else {
-            $btnStatus->Display = true;
+            $this->btnStatus->Display = true;
             $btnDelete->Display = true;
         }
 
-        $this->modal1 = new Bs\Modal($this);
-        $this->modal1->Text = t('<p style="line-height: 25px; margin-bottom: -3px;">Kas oled kindel, et soovid selle
-                                peamenüü kirje keelata koos alammenüü kirjetega?</p>');
-        $this->modal1->Title = t('Question');
-        $this->modal1->HeaderClasses = 'btn-warning';
-        $this->modal1->addButton(t("I accept"), $btnStatus->ActionParameter, false, false, null,
+        $this->createModals();
+
+        return $this->btnStatus->render(false) . $btnEdit->render(false) . $btnDelete->render(false);
+    }
+
+    protected function createToastr()
+    {
+        $this->dlgToastr1 = new Q\Plugin\Toastr($this);
+        $this->dlgToastr1->AlertType = Q\Plugin\Toastr::TYPE_SUCCESS;
+        $this->dlgToastr1->PositionClass = Q\Plugin\Toastr::POSITION_TOP_RIGHT;
+        $this->dlgToastr1->Message = t('<strong>Well done!</strong> To add a new item of menu to the database is successful.');
+        $this->dlgToastr1->ProgressBar = true;
+
+        $this->dlgToastr2 = new Q\Plugin\Toastr($this);
+        $this->dlgToastr2->AlertType = Q\Plugin\Toastr::TYPE_ERROR;
+        $this->dlgToastr2->PositionClass = Q\Plugin\Toastr::POSITION_TOP_RIGHT;
+        $this->dlgToastr2->Message = t('<strong>Sorry</strong>, the menu title is at least mandatory!');
+        $this->dlgToastr2->ProgressBar = true;
+    }
+    
+    public function createModals()
+    {
+        $this->dlgModal1 = new Bs\Modal($this);
+        $this->dlgModal1->Text = t('<p style="line-height: 25px; margin-bottom: -3px;">Kas oled kindel, et soovid selle peamenüü kirje keelata koos alammenüü kirjetega?</p>');
+        $this->dlgModal1->Title = t('Question');
+        $this->dlgModal1->HeaderClasses = 'btn-warning';
+        $this->dlgModal1->addButton(t("I accept"), $this->btnStatus->ActionParameter, false, false, null,
             ['class' => 'btn btn-orange']);
-        $this->modal1->addCloseButton(t("I'll cancel"));
-        $this->modal1->addAction(new \QCubed\Event\DialogButton(), new \QCubed\Action\Ajax('HideAllItem_Click'));
-        $this->modal1->addAction(new Bs\Event\ModalHidden(), new \QCubed\Action\Ajax('DataClearing_Click'));
+        $this->dlgModal1->addCloseButton(t("I'll cancel"));
+        $this->dlgModal1->addAction(new \QCubed\Event\DialogButton(), new \QCubed\Action\Ajax('HideAllItem_Click'));
+        $this->dlgModal1->addAction(new Bs\Event\ModalHidden(), new \QCubed\Action\Ajax('DataClearing_Click'));
 
-        $this->modal2 = new Bs\Modal($this);
-        $this->modal2->Text = t('<p style="line-height: 25px; margin-bottom: -3px;">Kas oled kindel, et soovid selle
-                                peamenüü kirje lubada koos alammenüü kirjetega?');
-        $this->modal2->Title = t("Question");
-        $this->modal2->HeaderClasses = 'btn-success';
-        $this->modal2->addButton(t("I accept"), $btnStatus->ActionParameter, false, false, null,
+        $this->dlgModal2 = new Bs\Modal($this);
+        $this->dlgModal2->Text = t('<p style="line-height: 25px; margin-bottom: -3px;">Kas oled kindel, et soovid selle peamenüü kirje lubada koos alammenüü kirjetega?');
+        $this->dlgModal2->Title = t("Question");
+        $this->dlgModal2->HeaderClasses = 'btn-success';
+        $this->dlgModal2->addButton(t("I accept"), $this->btnStatus->ActionParameter, false, false, null,
             ['class' => 'btn btn-orange']);
-        $this->modal2->addCloseButton(t("I'll cancel"));
-        $this->modal2->addAction(new \QCubed\Event\DialogButton(), new \QCubed\Action\Ajax('ShowAllItem_Click'));
-        $this->modal2->addAction(new Bs\Event\ModalHidden(), new \QCubed\Action\Ajax('DataClearing_Click'));
+        $this->dlgModal2->addCloseButton(t("I'll cancel"));
+        $this->dlgModal2->addAction(new \QCubed\Event\DialogButton(), new \QCubed\Action\Ajax('ShowAllItem_Click'));
+        $this->dlgModal2->addAction(new Bs\Event\ModalHidden(), new \QCubed\Action\Ajax('DataClearing_Click'));
 
-        $this->modal3 = new Bs\Modal($this);
-        $this->modal3->Text = t('<p style="line-height: 25px; margin-bottom: -3px;">Selle peamenüü alammenüü viimast
-                                kirjet ei saa keelata, pead selle peamenüü kirjet keelama.</p>');
-        $this->modal3->Title = t("Tip");
-        $this->modal3->HeaderClasses = 'btn-darkblue';
-        $this->modal3->addButton(t("OK"), 'ok', false, false, null, ['data-dismiss'=>'modal', 'class' => 'btn btn-orange']);
+        $this->dlgModal3 = new Bs\Modal($this);
+        $this->dlgModal3->Text = t('<p style="line-height: 25px; margin-bottom: -3px;">Selle peamenüü alammenüü viimast kirjet ei saa keelata, pead selle peamenüü kirjet keelama.</p>');
+        $this->dlgModal3->Title = t("Tip");
+        $this->dlgModal3->HeaderClasses = 'btn-darkblue';
+        $this->dlgModal3->addButton(t("OK"), 'ok', false, false, null,
+            ['data-dismiss'=>'modal', 'class' => 'btn btn-orange']);
 
-        $this->modal4 = new Bs\Modal($this);
-        $this->modal4->Text = t('<p style="line-height: 25px; margin-bottom: 2px;">Peidetud peamenüü all ei saa alammenüü
-                                kirjed teha avalikuks! </p>
-                                <p style="line-height: 25px; margin-bottom: -3px;">Pead selle peamenüü kirje lubama.
-                                Või vii alammenüü kirje menüüpuus teise kohta.</p>');
-        $this->modal4->Title = t("Tip");
-        $this->modal4->HeaderClasses = 'btn-darkblue';
-        $this->modal4->addButton(t("OK"), 'ok', false, false, null, ['data-dismiss'=>'modal', 'class' => 'btn btn-orange']);
+        $this->dlgModal4 = new Bs\Modal($this);
+        $this->dlgModal4->Text = t('<p style="line-height: 25px; margin-bottom: 2px;">Peidetud peamenüü all ei saa alammenüü kirjed teha avalikuks! </p>
+                                <p style="line-height: 25px; margin-bottom: -3px;">Pead selle peamenüü kirje lubama. Või vii alammenüü kirje menüüpuus teise kohta.</p>');
+        $this->dlgModal4->Title = t("Tip");
+        $this->dlgModal4->HeaderClasses = 'btn-darkblue';
+        $this->dlgModal4->addButton(t("OK"), 'ok', false, false, null,
+            ['data-dismiss'=>'modal', 'class' => 'btn btn-orange']);
 
-        $this->modal5 = new Bs\Modal($this);
-        $this->modal5->Text = t('<p style="line-height: 25px; margin-bottom: 2px;">Are you sure you want to permanently delete this menu item?</p>
+        $this->dlgModal5 = new Bs\Modal($this);
+        $this->dlgModal5->Text = t('<p style="line-height: 25px; margin-bottom: 2px;">Are you sure you want to permanently delete this menu item?</p>
                                 <p style="line-height: 25px; margin-bottom: -3px;">Can\'t undo it afterwards!</p>');
-        $this->modal5->Title = t('Warning');
-        $this->modal5->HeaderClasses = 'btn-danger';
-        $this->modal5->addButton(t("I accept"), t('This menu item has been permanently deleted.'), false, false, null,
+        $this->dlgModal5->Title = t('Warning');
+        $this->dlgModal5->HeaderClasses = 'btn-danger';
+        $this->dlgModal5->addButton(t("I accept"), t('This menu item has been permanently deleted.'), false, false, null,
             ['class' => 'btn btn-orange']);
-        $this->modal5->addCloseButton(t("I'll cancel"));
-        $this->modal5->addAction(new \QCubed\Event\DialogButton(), new \QCubed\Action\Ajax('deletedItem_Click'));
+        $this->dlgModal5->addCloseButton(t("I'll cancel"));
+        $this->dlgModal5->addAction(new \QCubed\Event\DialogButton(), new \QCubed\Action\Ajax('deletedItem_Click'));
 
-        $this->modal6 = new Bs\Modal($this);
-        $this->modal6->Text = t('<p style="line-height: 25px; margin-bottom: -3px;">Selle menüü kirje kustutamiseks peab
-                                 seda kirjet peamenüüst või alammenüüst välja viima.</p>');
-        $this->modal6->Title = t("Tip");
-        $this->modal6->HeaderClasses = 'btn-darkblue';
-        $this->modal6->addButton(t("OK"), 'ok', false, false, null, ['data-dismiss'=>'modal', 'class' => 'btn btn-orange']);
+        $this->dlgModal6 = new Bs\Modal($this);
+        $this->dlgModal6->Text = t('<p style="line-height: 25px; margin-bottom: -3px;">Selle menüü kirje kustutamiseks peab seda kirjet peamenüüst või alammenüüst välja viima.</p>');
+        $this->dlgModal6->Title = t("Tip");
+        $this->dlgModal6->HeaderClasses = 'btn-darkblue';
+        $this->dlgModal6->addButton(t("OK"), 'ok', false, false, null,
+            ['data-dismiss'=>'modal', 'class' => 'btn btn-orange']);
 
-        $this->modal7 = new Bs\Modal($this);
-        $this->modal7->Text = t('<p style="line-height: 25px; margin-bottom: -3px;">Selle menüü kirje aktiveerimiseks pead
-                                minema redigeerimisvaatesse ja määrama sisutüübi.</p>');
-        $this->modal7->Title = t("Tip");
-        $this->modal7->HeaderClasses = 'btn-darkblue';
-        $this->modal7->addButton(t("OK"), 'ok', false, false, null, ['data-dismiss'=>'modal', 'class' => 'btn btn-orange']);
+        $this->dlgModal7 = new Bs\Modal($this);
+        $this->dlgModal7->Text = t('<p style="line-height: 25px; margin-bottom: -3px;">Selle menüü kirje aktiveerimiseks pead minema redigeerimisvaatesse ja määrama sisutüübi.</p>');
+        $this->dlgModal7->Title = t("Tip");
+        $this->dlgModal7->HeaderClasses = 'btn-darkblue';
+        $this->dlgModal7->addButton(t("OK"), 'ok', false, false, null,
+            ['data-dismiss'=>'modal', 'class' => 'btn btn-orange']);
 
-        $this->modal8 = new Bs\Modal($this);
-        $this->modal8->Text = t('<p style="line-height: 25px; margin-bottom: -3px;">Selle peamenüü kirje aktiveerimiseks pead
+        $this->dlgModal8 = new Bs\Modal($this);
+        $this->dlgModal8->Text = t('<p style="line-height: 25px; margin-bottom: -3px;">Selle peamenüü kirje aktiveerimiseks pead
                                     minema selle peamenüü kirje ja/või alammenüü iga kirje redigeerimisvaatesse ja määrama sisutüübi.</p>');
-        $this->modal8->Title = t("Tip");
-        $this->modal8->HeaderClasses = 'btn-darkblue';
-        $this->modal8->addButton(t("OK"), 'ok', false, false, null, ['data-dismiss'=>'modal', 'class' => 'btn btn-orange']);
+        $this->dlgModal8->Title = t("Tip");
+        $this->dlgModal8->HeaderClasses = 'btn-darkblue';
+        $this->dlgModal8->addButton(t("OK"), 'ok', false, false, null,
+            ['data-dismiss'=>'modal', 'class' => 'btn btn-orange']);
 
-        return $btnStatus->render(false) . $btnEdit->render(false) . $btnDelete->render(false);
+        $this->dlgModal9 = new Bs\Modal($this);
+        $this->dlgModal9->Text = t('<p style="line-height: 25px; margin-bottom: -3px;">Selle peamenüü kirje aktiveerimiseks
+                                    pead enne aktiveerima vanema peamenüü kirjet.</p>');
+        $this->dlgModal9->Title = t("Tip");
+        $this->dlgModal9->HeaderClasses = 'btn-darkblue';
+        $this->dlgModal9->addButton(t("OK"), 'ok', false, false, null,
+            ['data-dismiss'=>'modal', 'class' => 'btn btn-orange']);
+
+        $this->dlgModal10 = new Bs\Modal($this);
+        $this->dlgModal10->Text = t('<p style="line-height: 25px; margin-bottom: 2px;">Selle menüü kirje keelamiseks
+                                    pead enne keelama vanema peamenüü kirjet.</p>
+        <p style="line-height: 25px; margin-bottom: -3px;">Või vii alammenüü kirje menüüpuus teise kohta.</p>');
+        $this->dlgModal10->Title = t("Tip");
+        $this->dlgModal10->HeaderClasses = 'btn-darkblue';
+        $this->dlgModal10->addButton(t("OK"), 'ok', false, false, null,
+            ['data-dismiss'=>'modal', 'class' => 'btn btn-orange']);
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
+    protected function Menu_Bind()
+    {
+        $this->tblSorter->DataSource = Menu::loadAll(
+            QQ::Clause(QQ::OrderBy(QQN::menu()->Left),
+                QQ::expand(QQN::menu()->MenuContent)
+            ));
+    }
+
+    public function Menu_Draw(Menu $objMenu)
+    {
+        $a['id'] = $objMenu->Id;
+        $a['parent_id'] = $objMenu->ParentId;
+        $a['depth'] = $objMenu->Depth;
+        $a['left'] = $objMenu->Left;
+        $a['right'] = $objMenu->Right;
+        $a['menu_text'] = Q\QString::htmlEntities($objMenu->MenuContent->MenuText);
+        $a['redirect_url'] = $objMenu->MenuContent->RedirectUrl;
+        $a['is_redirect'] = $objMenu->MenuContent->IsRedirect;
+        $a['selected_page_id'] = $objMenu->MenuContent->SelectedPageId;
+        $a['content_type_object'] = $objMenu->MenuContent->ContentTypeObject;
+        $a['content_type'] = $objMenu->MenuContent->ContentType;
+        $a['status'] = $objMenu->MenuContent->IsEnabled;
+        return $a;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -300,8 +339,6 @@ class SampleForm extends Form
     {
         if ($this->intEditMenuId) {
             $this->btnAddMenuItem->Enabled = false;
-            // To create a new item, the nestedSortable functionality must be disabled,
-            // otherwise the menu tree will break.
             $this->tblSorter->disable();
         } else {
             $this->btnAddMenuItem->Enabled = true;
@@ -339,16 +376,17 @@ class SampleForm extends Form
             $objMenu->setDepth('0');
             $objMenu->setLeft($objMaxRight + 1);
             $objMenu->setRight($objMaxRight + 2);
-            $objMenu->save();
+            $objMenu->save(true);
 
             $objContent = new MenuContent();
             $objContent->setMenuId($objMenu->Id);
             $objContent->setMenuText(trim($this->txtMenuText->Text));
             $objContent->setIsEnabled('0');
-            $objContent->save();
+            $objContent->save(true);
 
+            //$this->tblSorter->MenuItemAppend = true;
             $this->tblSorter->refresh();
-            $this->tblSorter->reload();
+
             $this->intEditMenuId = null;
 
             $this->txtMenuText->Display = false;
@@ -356,20 +394,11 @@ class SampleForm extends Form
             $this->btnCancel->Display = false;
             $this->btnAddMenuItem->Enabled = true;
 
-            $this->lblMessage->Display = true;
-            $this->lblMessage->Dismissable = true;
-            $this->lblMessage->removeCssClass(Bs\Bootstrap::ALERT_WARNING);
-            $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_SUCCESS);
-            $this->lblMessage->Text = t('<strong>Well done!</strong> To add a new item of menu to the database is successful.');
+            $this->dlgToastr1->notify();
         } else {
             $this->txtMenuText->Text = null;
             $this->txtMenuText->focus();
-
-            $this->lblMessage->Display = true;
-            $this->lblMessage->Dismissable = true;
-            $this->lblMessage->removeCssClass(Bs\Bootstrap::ALERT_SUCCESS);
-            $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_WARNING);
-            $this->lblMessage->Text = t('<strong>Sorry</strong>, the menu title is at least mandatory!');
+            $this->dlgToastr2->notify();
             $this->tblSorter->disable();
         }
     }
@@ -381,7 +410,7 @@ class SampleForm extends Form
         $this->btnCancel->Display = false;
         $this->btnAddMenuItem->Enabled = true;
 
-        $this->tblSorter->Disabled = false;
+        $this->tblSorter->enable();
         $this->intEditMenuId = null;
     }
 
@@ -391,6 +420,15 @@ class SampleForm extends Form
         $objMenu = Menu::load($intStatusId);
         $objContent = MenuContent::load($intStatusId);
         $objMenuArray = Menu::loadAll(QCubed\Query\QQ::expand(QQN::menu()->MenuContent));
+
+        ///////////////////////////////////////////////////////
+
+        // ParentId entries equivalent to Id value are picked by the clicked ID.
+        // Purpose to enable or disable the main menu item with submenu items.
+        // See the getFullChildren() function from NestedSortableBase class, what it does...
+
+        $this->strSelectedValues = $this->tblSorter->getFullChildren($objMenuArray, $intStatusId);
+        array_push($this->strSelectedValues, $intStatusId);
 
         ///////////////////////////////////////////////////////
 
@@ -417,52 +455,14 @@ class SampleForm extends Form
 
         ///////////////////////////////////////////////////////
 
-        // ParentId entries equivalent to Id value are picked by the clicked ID.
-        // Purpose to enable or disable the main menu item with submenu items.
-
-        $strReadInArray = [];
-        $strPushesInArray = [];
-        foreach ($objMenuArray as $objTempMenu) {
-            if ($intStatusId == $objTempMenu->ParentId) {
-                $strReadInArray[] = $objTempMenu->Id;
-            }
-        }
-        foreach ($objMenuArray as $objTempMenu) {
-            foreach ($strReadInArray as $strTemp) {
-                if ($objTempMenu->ParentId == $strTemp) {
-                    $strPushesInArray[] = $objTempMenu->Id;
-                }
-            }
-        }
-        $this->strSelectedValues = array_merge($strReadInArray, $strPushesInArray);
-        array_push($this->strSelectedValues, $intStatusId);
-
-        ///////////////////////////////////////////////////////
-
         // The clicked ID checks the existence of the Id entry.
         // ParentId entries equivalent to the Id value are picked by the clicked ID.
         // Summarize the first and second loop entries into an array.
         // Object to compare the count() of two arrays ($strSelectedInValues and $strCalculatedArray) by the ContentType condition.
 
-        $strInTempArray = [];
-        $strOnTempArray = [];
         $strCalculatedArray = [];
         foreach ($objMenuArray as $objInMenu) {
-            if ($intStatusId == $objInMenu->Id) {
-                $strInTempArray[] = $objInMenu->Id;
-            }
-        }
-        foreach ($objMenuArray as $objInMenu) {
-            foreach ($strInTempArray as &$strInTemp) {
-                if ($strInTemp == $objInMenu->ParentId) {
-                    $strOnTempArray[] = $objInMenu->Id;
-                }
-            }
-        }
-        $strSelectedInValues = array_merge($strInTempArray, $strOnTempArray);
-
-        foreach ($objMenuArray as $objInMenu) {
-            foreach ($strSelectedInValues as &$strValidTemp) {
+            foreach ($this->strSelectedValues as &$strValidTemp) {
                 if ($strValidTemp == $objInMenu->Id) {
                     if($objInMenu->MenuContent->ContentType !== null)
                         $strCalculatedArray[] = $objInMenu->Id;
@@ -472,11 +472,25 @@ class SampleForm extends Form
 
         ///////////////////////////////////////////////////////
 
-        if ($objContent->IsEnabled == 1 ) {
+        // The goal is to identify the ancestor ID by clicking on the child ID of that ancestor.
+        // There are many ways to use the getAncestorId() function.
+        // Here it is detected through this function the IsEnabled status of the ancestor.
+        // See the getAncestorId() function from NestedSortableBase class, what it does...
+
+        $intAncestorId = $this->tblSorter->getAncestorId($objMenuArray, $intStatusId);
+        $intIdentifiedStatus = MenuContent::load($intAncestorId);
+
+        ///////////////////////////////////////////////////////
+
+        if ($objContent->IsEnabled == 1) {
             if ($objMenu->Right !== $objMenu->Left + 1) {
-                $this->modal1->showDialogBox();
+                if ($objMenu->Depth == 0 || $objMenu->Depth < 2) {
+                    $this->dlgModal1->showDialogBox();
+                } elseif ($objMenu->Depth > 1) {
+                    $this->dlgModal10->showDialogBox();
+                }
             } elseif (count($strValidArray) == 1) {
-                $this->modal3->showDialogBox();
+                $this->dlgModal3->showDialogBox();
             } else {
                 $objContent->setIsEnabled('0');
                 $objContent->save();
@@ -490,17 +504,22 @@ class SampleForm extends Form
             }
         } else {  // $objContent->IsEnabled == 0
             if ($objMenu->Right !== $objMenu->Left + 1) {
-                if ($objContent->ContentType && count($strSelectedInValues) == count(array_unique($strCalculatedArray))) {
-                    $this->modal2->showDialogBox();
+                if ($objContent->ContentType && count($this->strSelectedValues) == count(array_unique($strCalculatedArray))) {
+                    if (($objMenu->ParentId == null) ||
+                        ($objMenu->ParentId !== null &&
+                            $objMenu->Depth == 1 &&
+                            $intIdentifiedStatus->IsEnabled == 1)) {
+                        $this->dlgModal2->showDialogBox();
+                    } else {
+                        $this->dlgModal9->showDialogBox();
+                    }
                 } else {
-                    $this->modal8->showDialogBox();
+                    $this->dlgModal8->showDialogBox();
                 }
             }  elseif ($objContent->ContentType == null) {
-                $this->modal7->showDialogBox();
-            } elseif ($objMenu->ParentId !== null &&
-                $objMenu->Right == $objMenu->Left + 1 &&
-                count($strValidArray) < 1) {
-                $this->modal4->showDialogBox();
+                $this->dlgModal7->showDialogBox();
+            } elseif ($objMenu->ParentId !== null && $objMenu->Right == $objMenu->Left + 1 && count($strValidArray) < 1) {
+                $this->dlgModal4->showDialogBox();
             } else {
                 $objContent->setIsEnabled('1');
                 $objContent->save();
@@ -533,9 +552,9 @@ class SampleForm extends Form
         $objMenu = Menu::load($this->intDeleteId);
 
         if ($objMenu->ParentId == null && $objMenu->Right == $objMenu->Left + 1) {
-            $this->modal5->showDialogBox();
+            $this->dlgModal5->showDialogBox();
         } else {
-            $this->modal6->showDialogBox();
+            $this->dlgModal6->showDialogBox();
         }
         $this->intEditMenuId = null;
     }
@@ -545,18 +564,7 @@ class SampleForm extends Form
         $objMenu = Menu::load($this->intDeleteId);
         Application::executeJavaScript(sprintf("jQuery('#btnDelete{$this->intDeleteId}').closest('li').remove();"));
         $objMenu->delete();
-        $this->modal5->hideDialogBox();
-    }
-
-    public function ControllableValues($objArrays, $target)
-    {
-        $arrays = [];
-        foreach ($objArrays as $objArray) {
-            if ($objArray->$target !== null) {
-                $arrays[] = $objArray->$target;
-            }
-        }
-        return $arrays;
+        $this->dlgModal5->hideDialogBox();
     }
 
     public function DataClearing_Click()
@@ -566,7 +574,7 @@ class SampleForm extends Form
 
     public function HideAllItem_Click(ActionParams $params)
     {
-        foreach (array_unique($this->strSelectedValues) as $value) {
+        foreach ($this->strSelectedValues as $value) {
             if ($value !== null) {
                 $objContent = MenuContent::load($value);
                 $objContent->setIsEnabled('0');
@@ -579,12 +587,12 @@ class SampleForm extends Form
                 jQuery('#btnStatus{$value}').closest('div').removeClass('enabled').addClass('disabled');"));
             }
         }
-        $this->modal1->hideDialogBox();
+        $this->dlgModal1->hideDialogBox();
     }
 
     public function ShowAllItem_Click(ActionParams $params)
     {
-        foreach (array_unique($this->strSelectedValues) as $value) {
+        foreach ($this->strSelectedValues as $value) {
             if ($value !== null) {
                 $objContent = MenuContent::load($value);
                 $objContent->setIsEnabled('1');
@@ -597,7 +605,7 @@ class SampleForm extends Form
                 jQuery('#btnStatus{$value}').closest('div').removeClass('disabled').addClass('enabled');"));
             }
         }
-        $this->modal2->hideDialogBox();
+        $this->dlgModal2->hideDialogBox();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -624,12 +632,12 @@ class SampleForm extends Form
          * Please provide more better solutions!
          */
         if (!isset($arr) && empty($arr)) {
-            $modal = new Bs\Modal($this);
-            $modal->Text = t('<p><strong>Unfortunately</strong>, the order could not be edited or saved.</p>
+            $dlgModal = new Bs\Modal($this);
+            $dlgModal->Text = t('<p><strong>Unfortunately</strong>, the order could not be edited or saved.</p>
                               <p>Please try again or refresh your browser!</p>');
-            $modal->Title = t('Warning');
-            $modal->HeaderClasses = Bs\Bootstrap::BUTTON_DANGER;
-            $modal->Show = true;
+            $dlgModal->Title = t('Warning');
+            $dlgModal->HeaderClasses = Bs\Bootstrap::BUTTON_DANGER;
+            $dlgModal->Show = true;
         }
     }
 

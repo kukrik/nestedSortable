@@ -2,11 +2,6 @@
 <div class="form-horizontal">
     <div class="form-body">
         <div class="row">
-            <div class="col-md-12">
-                <?= _r($this->lblMessage); ?>
-            </div>
-        </div>
-        <div class="row">
             <div class="col-md-offset-3 col-md-9">
                 <?= _r($this->lblInfo); ?>
             </div>

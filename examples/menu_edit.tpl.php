@@ -1,6 +1,12 @@
-<?php // $strPageTitle = t('Page edit'); ?>
+<?php
 
-<?php $strPageTitle = ContentType::toTabsText($this->objMenuContent->ContentType); ?>
+if ($this->objMenuContent->ContentType) {
+    $strOn = ContentType::toTabsText($this->objMenuContent->ContentType);
+    $strNo = t('Configure page');
+    $strContentType = $this->objMenuContent->ContentType ? $strOn : $strNo;
+    $strPageTitle = $strContentType;
+}
+?>
 
 <?php require('header.inc.php'); ?>
 

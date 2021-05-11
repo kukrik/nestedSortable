@@ -1,16 +1,16 @@
 <?php
 require('qcubed.inc.php');
-require('../classes/PageEditPanel.class.php');
-require('../classes/PageMetaDataPanel.class.php');
-require ('../classes/ArticleEditPanel.class.php');
-require ('../classes/NewsEditPanel.class.php');
-//require (../classes/'GalleryEditPanel.class.php');
-//require ('../classes/EventsCalendarEditPanel.class.php');
-//require ('../classes/SportsCalendarEditPanel.class.php');
-require ('../classes/InternalPageEditPanel.class.php');
-require ('../classes/RedirectingEditPanel.class.php');
-require ('../classes/PlaceholderEditPanel.class.php');
-require ('../classes/ErrorPageEditPanel.class.php');
+require('classes/PageEditPanel.class.php');
+require('classes/PageMetaDataPanel.class.php');
+require ('classes/ArticleEditPanel.class.php');
+require ('classes/NewsEditPanel.class.php');
+//require (classes/'GalleryEditPanel.class.php');
+//require ('classes/EventsCalendarEditPanel.class.php');
+//require ('classes/SportsCalendarEditPanel.class.php');
+require ('classes/InternalPageEditPanel.class.php');
+require ('classes/RedirectingEditPanel.class.php');
+require ('classes/PlaceholderEditPanel.class.php');
+require ('classes/ErrorPageEditPanel.class.php');
 
 error_reporting(E_ALL); // Error engine - always ON!
 ini_set('display_errors', TRUE); // Error display - OFF in production env or real server
@@ -48,7 +48,7 @@ class SampleForm extends Form
 
         if ($this->objMenuContent->ContentType == null) {
             $this->pnlPage = new PageEditPanel($this->nav);
-            $this->pnlPage->Name = t('Content management');
+            $this->pnlPage->Name = t('Configure page');
         } else {
             $objPanelName = ContentType::toClassNames($this->objMenuContent->ContentType);
             $this->pnlContent = new $objPanelName($this->nav);

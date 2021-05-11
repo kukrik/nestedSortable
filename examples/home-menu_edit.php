@@ -1,7 +1,7 @@
 <?php
 require('qcubed.inc.php');
-require ('HomePageEditPanel.class.php');
-require ('HomePageMetaDataPanel.class.php');
+require ('classes/HomePageEditPanel.class.php');
+require ('classes/HomePageMetaDataPanel.class.php');
 
 use QCubed\Bootstrap as Bs;
 use QCubed\Project\Control\ControlBase;
@@ -21,7 +21,7 @@ class SampleForm extends Form
         $this->nav = new Bs\Tabs($this);
         $this->nav->addCssClass('tabbable tabbable-custom');
         $objPanel = new HomePageEditPanel($this->nav);
-        $objPanel->Name = t('Homepage edit');
+        $objPanel->Name = t('Edit homepage');
         $objPanel = new HomePageMetaDataPanel($this->nav);
         $objPanel->Name = t('Metadata');
 
@@ -29,5 +29,3 @@ class SampleForm extends Form
 }
 
 SampleForm::run('SampleForm');
-
-//https://stackoverflow.com/questions/812571/how-to-create-friendly-url-in-php

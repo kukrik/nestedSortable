@@ -12,19 +12,20 @@ use QCubed as Q;
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="Pragma" content="no-cache">
 	<meta http-equiv="Expires" content="-1">
-	<?php if (isset($strPageTitle)){ ?><title><?php _p($strPageTitle); ?></title>
-		<link href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,500,600,700&subset=all" rel="stylesheet"
-			  type="text/css"/>
-	<?php } ?><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
-	<link href="../assets/smartmenus-1.1.0/addons/bootstrap/jquery.smartmenus.bootstrap.css" rel="stylesheet"/>
+	<?php if (isset($strPageTitle)){ ?><title><?php _p($strPageTitle); ?></title><?php } ?>
+
+	<link href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,500,600,700&subset=all" rel="stylesheet" type="text/css"/>
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
 	<link href="../assets/css/font-awesome.min.css" rel="stylesheet"/>
 	<link href="../assets/css/style.css" rel="stylesheet"/>
+	<link href="../assets/css/toastr.css" rel="stylesheet"/>
+	<link href="../assets/css/toastr.fontawesome.css" rel="stylesheet"/>
 	<link href="../../select2/assets/css/select2.css" rel="stylesheet"/>
 	<link href="../../select2/assets/css/select2-bootstrap.css" rel="stylesheet"/>
 	<link href="../../select2/assets/css/select2-web-vauu.css" rel="stylesheet"/>
 	<link href="../assets/css/awesome-bootstrap-checkbox.css" rel="stylesheet"/>
-	<link href="../assets/css/menuexample.css" rel="stylesheet"/>
-	<link href="../../../qcubed/application/assets/css/jquery-ui.css" rel="stylesheet"/>
+	<link href="../../bootstrap-datetimepicker/assets/css/bootstrap-datetimepicker.css" rel="stylesheet" />
+	<!--<link href="../../../qcubed/application/assets/css/jquery-ui.css" rel="stylesheet"/>-->
 	<style>
 
 		.select2-container--web-vauu .select2-results > .select2-results__options {
@@ -32,28 +33,17 @@ use QCubed as Q;
 			max-height: none;
 			overflow-y: auto;
 		}
-		ol {
-			list-style-type: none;
-			counter-reset: item;
-			margin: 0;
-			padding: 0;
+		[type="search"]::-webkit-search-cancel-button,
+		[type="search"]::-webkit-search-decoration {
+			-webkit-appearance: none;
 		}
-		ol > li {
-			display: table;
-			counter-increment: item;
-		}
-		ol > li:before {
-			content: counters(item, ".") ". ";
-			display: table-cell;
-			padding-right: 0.6em;
-		}
-		li ol > li {
-			margin: 0;
-		}
-		li ol > li:before {
-			content: counters(item, ".") ". ";
-		}
-
 	</style>
+	<!--<script>
+		ckConfig = {
+			skin: 'moono',
+			width: '100%',
+			height: '350px'
+		};
+	</script>-->
 </head>
 	<body>

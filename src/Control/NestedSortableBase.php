@@ -24,19 +24,20 @@ use QCubed\Html;
  * will use the top level html objects inside the panel to decide what to sort. Make sure
  * they have ids so it can return the ids of the items in sort order.
  *
- * @property integer $Id ...
- * @property integer $ParentId ...
- * @property integer $Depth ...
- * @property integer $Left ...
- * @property integer $Right ...
- * @property string $MenuText ...
- * @property string $RedirectUrl ...
- * @property integer $IsRedirect ...
- * @property integer $SelectedPageId ...
+ * @property integer $Id
+ * @property integer $ParentId
+ * @property integer $Depth
+ * @property integer $Left
+ * @property integer $Right
+ * @property string $MenuText
+ * @property string $RedirectUrl
+ * @property integer $IsRedirect
+ * @property integer $SelectedPageId
  * @property string $ContentTypeObject
- * @property string $ContentType ...
- * @property integer $Status ...
- * @property string $SectionClass ...
+ * @property string $ContentType
+ * @property integer $Status
+ * @property string $SectionClass
+ * @property mixed $DataSource
  *
  * @property-read array $ItemArray List of ControlIds in sort orders.
  *
@@ -46,8 +47,6 @@ use QCubed\Html;
 class NestedSortableBase extends NestedSortableGen
 {
     use Q\Control\DataBinderTrait;
-
-    //protected $blnIsBlockElement = false;
 
     protected $aryItemArray = null;
 
@@ -93,7 +92,7 @@ class NestedSortableBase extends NestedSortableGen
     protected $intContentType;
     /** @var  int Status */
     protected $intStatus;
-
+    /** @var  boolean MenuItemAppend */
     protected $blnMenuItemAppend = false;
 
     public function __construct($objParentObject, $strControlId = null)
@@ -105,26 +104,17 @@ class NestedSortableBase extends NestedSortableGen
             throw $objExc;
         }
         $this->registerFiles();
+        $this->UseWrapper = false; // make sure we do not use a wrapper to draw!
     }
 
     protected function registerFiles()
     {
-        $this->addJavascriptFile(QCUBED_NESTEDSORTABLE_ASSETS_URL . "/js/jquery.mjs.nestedSortable.js"); // updated https://github.com/tfddev/nestedSortable
+        $this->addJavascriptFile(QCUBED_NESTEDSORTABLE_ASSETS_URL . "/js/jquery.mjs.nestedSortable.js");
         $this->AddCssFile(QCUBED_BOOTSTRAP_CSS); // make sure they know
         $this->AddCssFile(QCUBED_FONT_AWESOME_CSS); // make sure they know
         $this->addCssFile(QCUBED_NESTEDSORTABLE_ASSETS_URL . "/css/style.css");
         Bs\Bootstrap::loadJS($this);
     }
-
-    /**
-     * @return bool
-     */
-    public function validate() {return true;}
-
-    /**
-     *
-     */
-    public function parsePostData(){}
 
     /**
      * Set the node params callback. The callback should be of the form:
@@ -154,7 +144,9 @@ class NestedSortableBase extends NestedSortableGen
         $this->nodeParamsCallback = $callback;
     }
 
-    /** @param callable $callback */
+    /**
+     * @param callable $callback
+     */
     public function createRenderButtons(callable $callback)
     {
         $this->cellParamsCallback = $callback;
@@ -278,6 +270,7 @@ class NestedSortableBase extends NestedSortableGen
 
     /**
      * Returns the HTML for the control.
+     *
      * @return string
      */
     protected function getControlHtml()
@@ -286,10 +279,6 @@ class NestedSortableBase extends NestedSortableGen
 
         $this->strParams = [];
         $this->strObjects = [];
-
-        /*print '<pre>';
-        print_r($this->objDataSource);
-        print '</pre>';*/
 
         if ($this->objDataSource) {
             foreach ($this->objDataSource as $objObject) {
@@ -300,9 +289,9 @@ class NestedSortableBase extends NestedSortableGen
             }
         }
         $strHtml = $this->welcomeMessage();
-        $strOut = $this->renderMenuTree($this->strParams, $this->strObjects);
-        $strHtml .= $this->renderTag($this->TagName, null, null, $strOut);
 
+        $strOut = $this->renderMenuTree($this->strParams, $this->strObjects);
+        $strHtml .= $this->renderTag($this->ListType, null, null, $strOut);
         $this->objDataSource = null;
         return $strHtml;
     }
@@ -327,6 +316,7 @@ class NestedSortableBase extends NestedSortableGen
      * This is just a welcome message!
      * At the same time, the first menu item has been created!
      * Only the menu item title can be edited here.
+     *
      * @return string
      */
     public function welcomeMessage()
@@ -433,6 +423,9 @@ TMPL;
         }
     }
 
+    /**
+     * @return string
+     */
     protected function getMenuItemAppend()
     {
         $strHtml = _nl() . '<li id="' . $this->ControlId . '_' . $this->intId . '"';
@@ -469,6 +462,45 @@ TMPL;
     }
 
     /**
+     * This function finds your children in descending order by the ancestor you clicked, except for the ancestor itself.
+     * There are many ways to use the getFullChildren(...) function.
+     *
+     * @param $objMenuArray
+     * @param null $clickedId Event-based click
+     * @return array
+     */
+    public function getFullChildren($objMenuArray, $clickedId = null)
+    {
+        $objTempArray = [];
+        foreach ($objMenuArray as $objMenu) {
+            if ($objMenu->ParentId == $clickedId) {
+                $objTempArray[] = $objMenu->Id;
+                array_push($objTempArray, ...$this->getFullChildren($objMenuArray, $objMenu->Id));
+            }
+        }
+        return $objTempArray;
+    }
+
+    /**
+     * The goal is to identify the ancestor ID by clicking on the child ID of that ancestor.
+     * There are many ways to use the getAncestorId(...) function.
+     *
+     * @param $objMenuArray
+     * @param null $clickedId Event-based click
+     * @return null
+     */
+    public function getAncestorId($objMenuArray, $clickedId = null)
+    {
+        foreach($objMenuArray as $objMenu) {
+            if ($objMenu->Id == $clickedId) {
+                return $objMenu->ParentId == null &&
+                $objMenu->Right !== $objMenu->Left + 1 ? $objMenu->Id : $this->getAncestorId($objMenuArray, $objMenu->ParentId);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Generated method overrides the built-in Control method, causing it to not redraw completely. We restore
      * its functionality here.
      */
@@ -476,14 +508,6 @@ TMPL;
     {
         parent::refresh();
         ControlBase::refresh();
-    }
-
-    /**
-     * The purpose of this reload() function is to prevent the menu tree from collapsing
-     */
-    public function reload()
-    {
-        Application::executeJavaScript(sprintf("setInterval(function() {jQuery('#{$this->ControlId}').nestedSortable('enable');}, 2000)"));
     }
 
     public function getEndScript()
@@ -540,18 +564,16 @@ FUNC;
                 try {
                     $data = Type::cast($mixValue, Type::STRING);
                     $this->aryItemArray = $data;
-                    break;
                 } catch (InvalidCast $objExc) {
                     $objExc->incrementOffset();
                     throw $objExc;
                 }
-
+                break;
             case "Id":
                 try {
                     $this->blnModified = true;
                     $this->intId = Type::Cast($mixValue, Type::INTEGER);
                     $this->blnModified = true;
-                    break;
                 } catch (InvalidCast $objExc) {
                     $objExc->IncrementOffset();
                     throw $objExc;

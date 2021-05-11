@@ -1,14 +1,11 @@
 <style>
     select option[disabled] { color: #ff0000; font-weight: bold }
+    .select2-container--web-vauu .select2-results__option {
+        padding: 4px 12px; }
 </style>
 
 <div class="form-horizontal">
     <div class="form-body">
-        <div class="row">
-            <div class="col-md-12">
-                <?= _r($this->lblMessage); ?>
-            </div>
-        </div>
         <div class="row">
             <div class="col-md-12">
                 <div class="form-group">

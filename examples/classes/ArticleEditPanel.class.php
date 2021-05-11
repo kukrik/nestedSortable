@@ -10,12 +10,17 @@ use QCubed\Control\ListItem;
 use QCubed\Query\QQ;
 use QCubed\QString;
 use QCubed\Css;
+use QCubed\Js;
 
 class ArticleEditPanel extends Q\Control\Panel
 {
-    protected $lblMessage;
-    protected $modal1;
-    protected $modal2;
+    public $dlgModal1;
+    public $dlgModal2;
+
+    public $dlgToastr1;
+    public $dlgToastr2;
+    public $dlgToastr3;
+    public $dlgToastr4;
 
     public $lblExistingMenuText;
     public $txtExistingMenuText;
@@ -42,6 +47,12 @@ class ArticleEditPanel extends Q\Control\Panel
 
     public $lblPostUpdateDate;
     public $calPostUpdateDate;
+
+    public $lblAuthor;
+    public $txtAuthor;
+
+    public $lblUsersAsArticlesEditors;
+    public $txtUsersAsArticlesEditors;
 
     public $lblPicture;
     public $txtPicture;
@@ -71,6 +82,8 @@ class ArticleEditPanel extends Q\Control\Panel
     protected $objArticle;
     protected $objMetadata;
 
+    protected $intTemporaryId;
+
     protected $objCategoryCondition;
     protected $objCategoryClauses;
 
@@ -91,10 +104,23 @@ class ArticleEditPanel extends Q\Control\Panel
         $this->objArticle = Article::loadByIdFromContentId($this->intId);
         $this->objMetadata = Metadata::loadByIdFromContentId($this->intId);
 
-        $this->lblMessage = new Q\Plugin\Control\Alert($this);
-        $this->lblMessage->Display = false;
-        $this->lblMessage->FullEffect = true;
-        //$this->lblMessage->HalfEffect = true;
+        /**
+         * NOTE: if the user_id is stored in session (e.g. if a User is logged in), as well, for example:
+         * checking against user session etc.
+         *
+         * Must to save something here $this->objNews->setUserId(logged user session);
+         * or something similar...
+         *
+         * Options to do this are left to the developer.
+         **/
+
+        if (!$this->objArticle->getAssignedByUserObject()) {
+            // $this->intTemporaryId = $this->objArticle->setAssignedByUser($_SESSION['logged_user_id'])); // Approximately example here etc...
+            // For example, John Doe is a logged user with his session
+            $this->intTemporaryId = $this->objArticle->setAssignedByUser(12);
+        } else {
+            $this->intTemporaryId = $this->objArticle->getAssignedByUser();
+        }
 
         $this->lblExistingMenuText = new Q\Plugin\Control\Label($this);
         $this->lblExistingMenuText->Text = t('Existing menu text');
@@ -136,7 +162,6 @@ class ArticleEditPanel extends Q\Control\Panel
         $this->lstContentTypes->SelectedValue = $this->objMenuContent->ContentType;
         $this->lstContentTypes->addAction(new Q\Event\Change(), new Q\Action\AjaxControl($this,'lstClassNames_Change'));
 
-
         $this->lblTitle = new Q\Plugin\Control\Label($this);
         $this->lblTitle->Text = t('Title');
         $this->lblTitle->addCssClass('col-md-3');
@@ -171,6 +196,17 @@ class ArticleEditPanel extends Q\Control\Panel
         $this->lstCategory->AddAction(new Q\Event\EscapeKey(), new Q\Action\AjaxControl($this,'btnMenuCancel_Click'));
         $this->lstCategory->addAction(new Q\Event\EscapeKey(), new Q\Action\Terminate());
 
+        $objArticleOfCategoryArray = CategoryOfArticle::loadAll();
+        $intIdArray = [];
+        foreach ($objArticleOfCategoryArray as $objArticleOfCategory) {
+            if ($objArticleOfCategory->IsEnabled == 0) {
+                $intIdArray[] = $objArticleOfCategory->Id;
+            }
+        }
+        foreach ($intIdArray as $intId) {
+            $this->lstCategory->removeItem($intId);
+        }
+
         $this->lblTitleSlug = new Q\Plugin\Control\Label($this);
         $this->lblTitleSlug->Text = t('View');
         $this->lblTitleSlug->addCssClass('col-md-3');
@@ -184,20 +220,19 @@ class ArticleEditPanel extends Q\Control\Panel
             $this->txtTitleSlug->HtmlEntities = false;
             $this->txtTitleSlug->setCssStyle('font-weight', 400);
         } else {
-            $this->txtTitleSlug = new Bs\Label($this);
+            $this->txtTitleSlug = new Q\Plugin\Control\Label($this);
             $this->txtTitleSlug->Text = t('Uncompleted link...');
             $this->txtTitleSlug->setCssStyle('color', '#999;');
         }
 
         $this->txtContent = new Q\Plugin\CKEditor($this);
         $this->txtContent->Text = $this->objArticle->Content;
-        $this->txtContent->Rows = 10;
-        $this->txtContent->Columns = 80;
         $this->txtContent->Configuration = 'ckConfig';
-        $this->txtContent->AddAction(new Q\Event\EnterKey(), new Q\Action\AjaxControl($this,'btnMenuSave_Click'));
-        $this->txtContent->addAction(new Q\Event\EnterKey(), new Q\Action\Terminate());
-        $this->txtContent->AddAction(new Q\Event\EscapeKey(), new Q\Action\AjaxControl($this,'btnMenuCancel_Click'));
-        $this->txtContent->addAction(new Q\Event\EscapeKey(), new Q\Action\Terminate());
+        //$this->txtContent->AddAction(new Q\Event\EnterKey(), new Q\Action\AjaxControl($this,'btnMenuSave_Click'));
+        //$this->txtContent->addAction(new Q\Event\EnterKey(), new Q\Action\Terminate());
+        //$this->txtContent->AddAction(new Q\Event\EscapeKey(), new Q\Action\AjaxControl($this,'btnMenuCancel_Click'));
+        //$this->txtContent->addAction(new Q\Event\EscapeKey(), new Q\Action\Terminate());
+
 
         $this->lblPostDate = new Q\Plugin\Control\Label($this);
         $this->lblPostDate->Text = t('Published');
@@ -212,6 +247,27 @@ class ArticleEditPanel extends Q\Control\Panel
         $this->calPostUpdateDate = new Bs\Label($this);
         $this->calPostUpdateDate->Text = $this->objArticle->PostUpdateDate ? $this->objArticle->PostUpdateDate->qFormat('DD.MM.YYYY hhhh:mm:ss') : null;
         $this->calPostUpdateDate->setCssStyle('font-weight', 'bold');
+
+        $this->lblAuthor = new Q\Plugin\Control\Label($this);
+        $this->lblAuthor->Text = t('Author');
+
+        $this->txtAuthor  = new Bs\Label($this);
+        $this->txtAuthor->Text = $this->objArticle->Author;
+        $this->txtAuthor->setCssStyle('font-weight', 'bold');
+
+        $this->lblUsersAsArticlesEditors = new Q\Plugin\Control\Label($this);
+        $this->lblUsersAsArticlesEditors->Text = t('Editors');
+        $this->lblUsersAsArticlesEditors->setCssStyle('font-weight', 'bold');
+
+        $this->txtUsersAsArticlesEditors = new Bs\Label($this);
+        $this->txtUsersAsArticlesEditors->Text = implode(', ', $this->objArticle->GetUserAsArticlesEditorsArray());
+        $this->txtUsersAsArticlesEditors->LinkedNode = QQN::Article()->UserAsArticlesEditors;
+        $this->txtUsersAsArticlesEditors->setCssStyle('font-weight', 'normal');
+
+        if ($this->objArticle->countUsersAsArticlesEditors() === 0) {
+            $this->lblUsersAsArticlesEditors->Display = false;
+            $this->txtUsersAsArticlesEditors->Display = false;
+        }
 
         //$this->lblPicture;
         //$this->txtPicture;
@@ -245,12 +301,12 @@ class ArticleEditPanel extends Q\Control\Panel
         $this->lblStatus->Text = t('Status');
 
         $this->lstStatus = new Q\Plugin\Control\RadioList($this);
-        $this->lstStatus->addItems([1 => t('Published'), 0 => t('Hidden'), 2 => t('Draft')]);
+        $this->lstStatus->addItems([1 => t('Published'), 2 => t('Hidden'), 3 => t('Draft')]);
         $this->lstStatus->SelectedValue = $this->objMenuContent->IsEnabled;
         $this->lstStatus->ButtonGroupClass = 'radio radio-orange';
         $this->lstStatus->AddAction(new Q\Event\Click(), new Q\Action\AjaxControl($this,'lstStatus_Click'));
 
-        if ($this->objMenu->ParentId || $this->objMenu->Right !== $this->objMenu->Left + 1) {
+        if ($this->objMenu->ParentId || $this->objMenu->Right !== $this->objMenu->Left + 1 || $this->objArticle->getConfirmationAsking()) {
             $this->lstStatus->Enabled = false;
         }
 
@@ -259,30 +315,12 @@ class ArticleEditPanel extends Q\Control\Panel
 
         $this->chkConfirmationAsking = new Q\Plugin\Control\Checkbox($this);
         $this->chkConfirmationAsking->Checked = $this->objArticle->ConfirmationAsking;
-        $this->chkConfirmationAsking->LinkedNode = QQN::Article()->ConfirmationAsking;
         $this->chkConfirmationAsking->WrapperClass = 'checkbox checkbox-orange';
+        $this->chkConfirmationAsking->addAction(new Q\Event\Change(), new Q\Action\AjaxControl($this, 'gettingConfirmation_Click'));
 
         $this->createButtons();
-
-        $this->modal1 = new Bs\Modal($this);
-        $this->modal1->Text = t('<p style="line-height: 25px; margin-bottom: 2px;">Are you sure you want to permanently
-                                delete this menu content with specific metadata of this page?</p>
-                                <p style="line-height: 25px; margin-bottom: -3px;">Can\'t undo it afterwards!</p>');
-        $this->modal1->Title = t('Warning');
-        $this->modal1->HeaderClasses = 'btn-danger';
-        $this->modal1->addButton(t("I accept"), "pass", false, false, null,
-            ['class' => 'btn btn-orange']);
-        $this->modal1->addButton(t("I'll cancel"), "no-pass", false, false, null,
-            ['class' => 'btn btn-default']);
-        $this->modal1->addAction(new Q\Event\DialogButton(), new Q\Action\AjaxControl($this, 'changeItem_Click'));
-
-        $this->modal2 = new Bs\Modal($this);
-        $this->modal2->Text = t('<p style="line-height: 25px; margin-bottom: 2px;">Praegu on tegemist alammenüüdega seotud peamenüü kirjega või alammenüü kirjetega ja
-                                siin ei saa selle kirje staatust muuta.</p><p style="line-height: 25px; margin-bottom: -3px;">
-                                Selle kirje staatuse muutmiseks pead minema menüü haldurisse ja selle aktiveerima või deaktiveerima.</p>');
-        $this->modal2->Title = t("Tip");
-        $this->modal2->HeaderClasses = 'btn-darkblue';
-        $this->modal2->addButton(t("OK"), 'ok', false, false, null, ['data-dismiss'=>'modal', 'class' => 'btn btn-orange']);
+        $this->createToastr();
+        $this->createModals();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -323,6 +361,87 @@ class ArticleEditPanel extends Q\Control\Panel
         $this->btnCancel->addAction(new Q\Event\Click(), new Q\Action\AjaxControl($this,'btnMenuCancel_Click'));
     }
 
+    protected function createToastr()
+    {
+        $this->dlgToastr1 = new Q\Plugin\Toastr($this);
+        $this->dlgToastr1->AlertType = Q\Plugin\Toastr::TYPE_SUCCESS;
+        $this->dlgToastr1->PositionClass = Q\Plugin\Toastr::POSITION_TOP_CENTER;
+        $this->dlgToastr1->Message = t('<strong>Well done!</strong> The post has been saved or modified.');
+        $this->dlgToastr1->ProgressBar = true;
+
+        $this->dlgToastr2 = new Q\Plugin\Toastr($this);
+        $this->dlgToastr2->AlertType = Q\Plugin\Toastr::TYPE_ERROR;
+        $this->dlgToastr2->PositionClass = Q\Plugin\Toastr::POSITION_TOP_CENTER;
+        $this->dlgToastr2->Message = t('<strong>Sorry</strong>, the menu title or content title must exist!');
+        $this->dlgToastr2->ProgressBar = true;
+
+        $this->dlgToastr3 = new Q\Plugin\Toastr($this);
+        $this->dlgToastr3->AlertType = Q\Plugin\Toastr::TYPE_SUCCESS;
+        $this->dlgToastr3->PositionClass = Q\Plugin\Toastr::POSITION_TOP_CENTER;
+        $this->dlgToastr3->Message = t('<strong>Well done!</strong> The message has been sent to the editor-in-chief of the site for review, correction or approval!');
+        $this->dlgToastr3->ProgressBar = true;
+        $this->dlgToastr3->TimeOut = 10000;
+
+        $this->dlgToastr4 = new Q\Plugin\Toastr($this);
+        $this->dlgToastr4->AlertType = Q\Plugin\Toastr::TYPE_SUCCESS;
+        $this->dlgToastr4->PositionClass = Q\Plugin\Toastr::POSITION_TOP_CENTER;
+        $this->dlgToastr4->Message = t('<strong>Well done!</strong> A message has been sent to the editor-in-chief of the site to cancel the confirmation!');
+        $this->dlgToastr4->ProgressBar = true;
+
+    }
+
+    protected function createModals()
+    {
+        $this->dlgModal1 = new Bs\Modal($this);
+        $this->dlgModal1->Text = t('<p style="line-height: 25px; margin-bottom: 2px;">Are you sure you want to permanently
+                                delete this menu content with specific metadata of this page?</p>
+                                <p style="line-height: 25px; margin-bottom: -3px;">Can\'t undo it afterwards!</p>');
+        $this->dlgModal1->Title = t('Warning');
+        $this->dlgModal1->HeaderClasses = 'btn-danger';
+        $this->dlgModal1->addButton(t("I accept"), "pass", false, false, null,
+            ['class' => 'btn btn-orange']);
+        $this->dlgModal1->addButton(t("I'll cancel"), "no-pass", false, false, null,
+            ['class' => 'btn btn-default']);
+        $this->dlgModal1->addAction(new Q\Event\DialogButton(), new Q\Action\AjaxControl($this, 'changeItem_Click'));
+
+        $this->dlgModal2 = new Bs\Modal($this);
+        $this->dlgModal2->Text = t('<p style="line-height: 25px; margin-bottom: 2px;">Praegu on tegemist alammenüüdega seotud peamenüü kirjega või alammenüü kirjetega ja
+                                siin ei saa selle kirje staatust muuta.</p><p style="line-height: 25px; margin-bottom: -3px;">
+                                Selle kirje staatuse muutmiseks pead minema menüü haldurisse ja selle aktiveerima või deaktiveerima.</p>');
+        $this->dlgModal2->Title = t("Tip");
+        $this->dlgModal2->HeaderClasses = 'btn-darkblue';
+        $this->dlgModal2->addButton(t("OK"), 'ok', false, false, null,
+            ['data-dismiss'=>'modal', 'class' => 'btn btn-orange']);
+
+    }
+
+    protected function gettingConfirmation_Click(ActionParams $params)
+    {
+        // Add the code to send the message here.
+        // Options to do this are left to the developer.
+        //
+        // Note that a proper solution must be considered here.
+        // If the editor-in-chief needs to be reviewed, he should not receive messages...
+
+        if ($this->chkConfirmationAsking->Checked) {
+            $this->lstStatus->Enabled = false;
+            $this->lstStatus->SelectedValue = 2;
+
+            $this->objMenuContent->setIsEnabled(2);
+            $this->objArticle->setConfirmationAsking(1);
+
+            $this->dlgToastr3->notify();
+        } else {
+            $this->objArticle->setConfirmationAsking(0);
+            $this->lstStatus->Enabled = true;
+
+            $this->dlgToastr4->notify();
+        }
+
+        $this->objArticle->save();
+        $this->objMenuContent->save();
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     public function lstContentTypeObject_GetItems()
@@ -352,14 +471,14 @@ class ArticleEditPanel extends Q\Control\Panel
     public function lstStatus_Click(ActionParams $params)
     {
         if ($this->objMenu->ParentId || $this->objMenu->Right !== $this->objMenu->Left + 1) {
-            $this->modal2->showDialogBox();
+            $this->dlgModal2->showDialogBox();
         }
     }
 
     public function lstClassNames_Change(ActionParams $params)
     {
         if ($this->objMenuContent->getContentType() !== $this->lstContentTypes->SelectedValue) {
-            $this->modal1->showDialogBox();
+            $this->dlgModal1->showDialogBox();
         } else {
             $this->objMenuContent->setContentType($this->lstContentTypes->SelectedValue);
             $this->objMenuContent->save();
@@ -372,6 +491,7 @@ class ArticleEditPanel extends Q\Control\Panel
         if ($params->ActionParameter == "pass") {
             $this->objMenuContent->setContentType($this->lstContentTypes->SelectedValue);
             $this->objMenuContent->setRedirectUrl(null);
+            $this->objMenuContent->setHomelyUrl(null);
             $this->objMenuContent->setIsRedirect(null);
             if ($this->objMenuContent->getRedirectUrl()) {
                 $this->objMenuContent->setIsEnabled($this->lstStatus->SelectedValue);
@@ -398,11 +518,13 @@ class ArticleEditPanel extends Q\Control\Panel
         } else {
             // does nothing
         }
-        $this->modal1->hideDialogBox();
+        $this->dlgModal1->hideDialogBox();
     }
 
     public function btnMenuSave_Click(ActionParams $params)
     {
+        $this->renderActionsWithOrWithoutId();
+
         if ($this->txtMenuText->Text && $this->txtTitle->Text) {
 
             $this->objArticle->setTitle($this->txtTitle->Text);
@@ -410,34 +532,36 @@ class ArticleEditPanel extends Q\Control\Panel
             $this->objArticle->setTitleSlug(QString::sanitizeForUrl($this->txtTitle->Text));
             $this->objArticle->setContent($this->txtContent->Text);
             $this->objArticle->setPostUpdateDate(Q\QDateTime::Now());
+            $this->objArticle->setPictureDescription($this->txtPictureDescription->Text);
+            $this->objArticle->setAuthorSource($this->txtAuthorSource->Text);
+
             if ($this->chkConfirmationAsking->Checked) {
                 $this->objArticle->setConfirmationAsking(1);
             } else {
                 $this->objArticle->setConfirmationAsking(0);
             }
+
             $this->objArticle->save();
 
             $this->objMenuContent->setMenuText($this->txtMenuText->Text);
             $this->objMenuContent->setIsEnabled($this->lstStatus->SelectedValue);
+            $this->objMenuContent->setHomelyUrl(1);
             $this->objMenuContent->setContentType($this->lstContentTypes->SelectedValue);
             $this->objMenuContent->setRedirectUrl('/'. QString::sanitizeForUrl($this->objMenuContent->MenuText) .
                 '/' .  QString::sanitizeForUrl($this->objArticle->TitleSlug));
             $this->objMenuContent->save();
 
             $this->txtExistingMenuText->Text = $this->objMenuContent->getMenuText();
-            $this->txtExistingMenuText->refresh();
-
+            $this->txtAuthor->Text = $this->objArticle->getAuthor();
             $this->calPostUpdateDate->Text = $this->objArticle->getPostUpdateDate()->qFormat('DD.MM.YYYY hhhh:mm:ss');
 
             if ($this->txtTitle->Text) {
-                $this->txtTitleSlug = new Q\Plugin\Control\Label($this);
                 $url = (isset($_SERVER['HTTPS']) ? "https" : "http") . '://' . $_SERVER['HTTP_HOST'] . QCUBED_URL_PREFIX .
                     '/' . QString::sanitizeForUrl($this->objMenuContent->MenuText) . '/' . $this->objArticle->getTitleSlug();
                 $this->txtTitleSlug->Text = Q\Html::renderLink($url, $url, ["target" => "_blank"]);
                 $this->txtTitleSlug->HtmlEntities = false;
                 $this->txtTitleSlug->setCssStyle('font-weight', 400);
             } else {
-                $this->txtTitleSlug = new Q\Plugin\Control\Label($this);
                 $this->txtTitleSlug->Text = t('Uncompleted link...');
                 $this->txtTitleSlug->setCssStyle('color', '#999;');
             }
@@ -453,43 +577,42 @@ class ArticleEditPanel extends Q\Control\Panel
                 Application::executeJavaScript(sprintf("jQuery($this->strSaveButtonId).text('{$strSave_translate}');"));
                 Application::executeJavaScript(sprintf("jQuery($this->strSavingButtonId).text('{$strSaveAndClose_translate}');"));
             }
-
-            $this->lblMessage->Display = true;
-            $this->lblMessage->Dismissable = true;
-            $this->lblMessage->removeCssClass(Bs\Bootstrap::ALERT_WARNING);
-            $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_SUCCESS);
-            $this->lblMessage->Text = t('<strong>Well done!</strong> The post has been saved or modified.');
+            $this->dlgToastr1->notify();
         } else {
-            $this->lblMessage->Display = true;
-            $this->lblMessage->Dismissable = true;
-            $this->txtMenuText->focus();
-            $this->lblMessage->removeCssClass(Bs\Bootstrap::ALERT_SUCCESS);
-            $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_DANGER);
-            $this->lblMessage->Text = t('<strong>Sorry</strong>, the menu title and content title must exist!');
+            $this->dlgToastr2->notify();
         }
     }
 
     public function btnMenuSaveClose_Click(ActionParams $params)
     {
+        $this->renderActionsWithOrWithoutId();
+
         if ($this->txtMenuText->Text && $this->txtTitle->Text) {
             $this->objArticle->setTitle($this->txtTitle->Text);
             $this->objArticle->setCategoryId($this->lstCategory->SelectedValue);
             $this->objArticle->setTitleSlug(QString::sanitizeForUrl($this->txtTitle->Text));
             $this->objArticle->setContent($this->txtContent->Text);
             $this->objArticle->setPostUpdateDate(Q\QDateTime::Now());
+            $this->objArticle->setPictureDescription($this->txtPictureDescription->Text);
+            $this->objArticle->setAuthorSource($this->txtAuthorSource->Text);
+
             if ($this->chkConfirmationAsking->Checked) {
                 $this->objArticle->setConfirmationAsking(1);
             } else {
                 $this->objArticle->setConfirmationAsking(0);
             }
+
             $this->objArticle->save();
 
             $this->objMenuContent->setMenuText($this->txtMenuText->Text);
+            $this->objMenuContent->setHomelyUrl(1);
+
             if (is_null($this->objArticle->getTitle())) {
                 $this->objMenuContent->setIsEnabled(0);
             } else {
                 $this->objMenuContent->setIsEnabled($this->lstStatus->SelectedValue);
             }
+
             $this->objMenuContent->setContentType($this->lstContentTypes->SelectedValue);
             $this->objMenuContent->setRedirectUrl('/'. QString::sanitizeForUrl($this->objMenuContent->MenuText) .
                 '/' . $this->objArticle->getTitleSlug());
@@ -497,11 +620,39 @@ class ArticleEditPanel extends Q\Control\Panel
 
             $this->redirectToListPage();
         } else {
-            $this->lblMessage->Display = true;
-            $this->lblMessage->Dismissable = true;
-            $this->txtMenuText->focus();
-            $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_DANGER);
-            $this->lblMessage->Text = t('<strong>Sorry</strong>, the menu title and content title must exist!');
+            $this->dlgToastr2->notify();
+        }
+    }
+
+    public function renderActionsWithOrWithoutId()
+    {
+        if (strlen($this->intId)) {
+            if ($this->txtTitle->Text !== $this->objArticle->getTitle() ||
+                $this->lstCategory->SelectedValue !== $this->objArticle->getCategoryId() ||
+                $this->txtContent->Text !== $this->objArticle->getContent() ||
+                // $this->txtPicture->text !== $this->objArticle->getPicture() ||
+                $this->txtPictureDescription->Text !== $this->objArticle->getPictureDescription() ||
+                $this->txtAuthorSource->Text !== $this->objArticle->getAuthorSource() ||
+                $this->lstStatus->SelectedValue !== $this->objMenuContent->getIsEnabled() ||
+                $this->chkConfirmationAsking->Checked !== $this->objArticle->getConfirmationAsking()
+            ) {
+                // $this->objArticle->getAssignedEditorsNameById($_SESSION['logged_user_id'])); // Approximately example here etc...
+                // For example, John Doe is a logged user with his session
+                $this->objArticle->getAssignedEditorsNameById(12);
+
+                $this->txtUsersAsArticlesEditors->Text = implode(', ', $this->objArticle->GetUserAsArticlesEditorsArray());
+                $this->objArticle->setPostUpdateDate(Q\QDateTime::Now());
+                $this->calPostUpdateDate->Text = $this->objArticle->getPostUpdateDate()->qFormat('DD.MM.YYYY hhhh:mm:ss');
+
+                $this->lblUsersAsArticlesEditors->Display = true;
+                $this->txtUsersAsArticlesEditors->Display = true;
+            }
+        } else {
+            $this->objMenuContent->setIsEnabled(3);
+            $this->objArticle->setUserNameById($this->intTemporaryId);
+            $this->objArticle->setPostDate(Q\QDateTime::Now());
+            $this->objArticle->setPostUpdateDate(null);
+            $this->calPostDate->Text = $this->objArticle->getPostDate()->qFormat('DD.MM.YYYY hhhh:mm:ss');
         }
     }
 

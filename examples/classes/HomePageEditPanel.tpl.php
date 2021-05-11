@@ -1,10 +1,5 @@
 <div class="form-horizontal">
     <div class="form-body">
-        <div class="row">
-            <div class="col-md-12">
-                <?= _r($this->lblMessage); ?>
-            </div>
-        </div>
         <div class="form-group">
             <?= _r($this->lblExistingMenuText); ?>
             <div class="col-md-5">

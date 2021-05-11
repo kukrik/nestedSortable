@@ -10,7 +10,12 @@ use QCubed\Project\Application;
 class PlaceholderEditPanel extends Q\Control\Panel
 {
     public $lblInfo;
-    public $lblMessage;
+
+    public $dlgModal1;
+    public $dlgModal2;
+    
+    protected $dlgToastr1;
+    protected $dlgToastr2;
 
     public $lblExistingMenuText;
     public $txtExistingMenuText;
@@ -34,9 +39,6 @@ class PlaceholderEditPanel extends Q\Control\Panel
 
     protected $strSaveButtonId;
     protected $strSavingButtonId;
-
-    protected $modal1;
-    protected $modal2;
 
     protected $intId;
     protected $objMenuContent;
@@ -67,12 +69,6 @@ class PlaceholderEditPanel extends Q\Control\Panel
         $this->lblInfo->Text = t('This placeholder is not intended to direct or link a menu item. The purpose of this is
                                 to create a link "#" in the main menu, under which can move the submenus of the menu tree
                                 to a dropdown menu.');
-
-
-        $this->lblMessage = new Q\Plugin\Control\Alert($this);
-        $this->lblMessage->Display = false;
-        $this->lblMessage->FullEffect = true;
-        //$this->lblMessage->HalfEffect = true;
 
         $this->lblExistingMenuText = new Q\Plugin\Control\Label($this);
         $this->lblExistingMenuText->Text = t('Existing menu text');
@@ -141,27 +137,88 @@ class PlaceholderEditPanel extends Q\Control\Panel
         if ($this->objMenu->ParentId || $this->objMenu->Right !== $this->objMenu->Left + 1) {
             $this->lstStatus->Enabled = false;
         }
+        
+        $this->createButtons();
+        $this->createToastr();
+        $this->createModals();
+    }
 
-        $this->modal1 = new Bs\Modal($this);
-        $this->modal1->Text = t('<p style="line-height: 25px; margin-bottom: -3px;">Kas oled kindel, et soovid seda kohatäidet kustutada?</p>');
-        $this->modal1->Title = t('Warning');
-        $this->modal1->HeaderClasses = 'btn-danger';
-        $this->modal1->addButton(t("I accept"), "pass", false, false, null,
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
+    public function CreateButtons()
+    {
+        $this->btnSave = new Q\Plugin\Control\Button($this);
+        if ($this->objMenuContent->getRedirectUrl()) {
+            $this->btnSave->Text = t('Update');
+        } else {
+            $this->btnSave->Text = t('Save');
+        }
+        $this->btnSave->CssClass = 'btn btn-orange';
+        $this->btnSave->addWrapperCssClass('center-button');
+        $this->btnSave->PrimaryButton = true;
+        $this->btnSave->addAction(new Q\Event\Click(), new Q\Action\AjaxControl($this,'btnMenuSave_Click'));
+        // The variable below is being prepared for fast transmission
+        $this->strSaveButtonId = $this->btnSave->ControlId;
+
+        $this->btnSaving = new Q\Plugin\Control\Button($this);
+        if ($this->objMenuContent->getRedirectUrl()) {
+            $this->btnSaving->Text = t('Update and close');
+        } else {
+            $this->btnSaving->Text = t('Save and close');
+        }
+        $this->btnSaving->CssClass = 'btn btn-darkblue';
+        $this->btnSaving->addWrapperCssClass('center-button');
+        $this->btnSaving->PrimaryButton = true;
+        $this->btnSaving->addAction(new Q\Event\Click(), new Q\Action\AjaxControl($this,'btnMenuSaveClose_Click'));
+        // The variable below is being prepared for fast transmission
+        $this->strSavingButtonId = $this->btnSaving->ControlId;
+
+        $this->btnCancel = new Q\Plugin\Control\Button($this);
+        $this->btnCancel->Text = t('Cancel');
+        $this->btnCancel->CssClass = 'btn btn-default';
+        $this->btnCancel->addWrapperCssClass('center-button');
+        $this->btnCancel->CausesValidation = false;
+        $this->btnCancel->addAction(new Q\Event\Click(), new Q\Action\AjaxControl($this,'btnMenuCancel_Click'));
+    }
+
+    protected function createToastr()
+    {
+        $this->dlgToastr1 = new Q\Plugin\Toastr($this);
+        $this->dlgToastr1->AlertType = Q\Plugin\Toastr::TYPE_SUCCESS;
+        $this->dlgToastr1->PositionClass = Q\Plugin\Toastr::POSITION_TOP_CENTER;
+        $this->dlgToastr1->Message = t('<strong>Well done!</strong> The post has been saved or modified.');
+        $this->dlgToastr1->ProgressBar = true;
+
+        $this->dlgToastr2 = new Q\Plugin\Toastr($this);
+        $this->dlgToastr2->AlertType = Q\Plugin\Toastr::TYPE_ERROR;
+        $this->dlgToastr2->PositionClass = Q\Plugin\Toastr::POSITION_TOP_CENTER;
+        $this->dlgToastr2->Message = t('<strong>Sorry</strong>, the menu title must exist!');
+        $this->dlgToastr2->ProgressBar = true;
+    }
+    
+    public function createModals()
+    {
+        $this->dlgModal1 = new Bs\Modal($this);
+        $this->dlgModal1->Text = t('<p style="line-height: 25px; margin-bottom: -3px;">Kas oled kindel, et soovid seda kohatäidet kustutada?</p>');
+        $this->dlgModal1->Title = t('Warning');
+        $this->dlgModal1->HeaderClasses = 'btn-danger';
+        $this->dlgModal1->addButton(t("I accept"), "pass", false, false, null,
             ['class' => 'btn btn-orange']);
-        $this->modal1->addButton(t("I'll cancel"), "no-pass", false, false, null,
+        $this->dlgModal1->addButton(t("I'll cancel"), "no-pass", false, false, null,
             ['class' => 'btn btn-default']);
-        $this->modal1->addAction(new Q\Event\DialogButton(), new Q\Action\AjaxControl($this, 'changeItem_Click'));
+        $this->dlgModal1->addAction(new Q\Event\DialogButton(), new Q\Action\AjaxControl($this, 'changeItem_Click'));
 
-        $this->modal2 = new Bs\Modal($this);
-        $this->modal2->Text = t('<p style="line-height: 25px; margin-bottom: 2px;">Praegu on tegemist alammenüüdega seotud peamenüü kirjega või alammenüü kirjetega ja
+        $this->dlgModal2 = new Bs\Modal($this);
+        $this->dlgModal2->Text = t('<p style="line-height: 25px; margin-bottom: 2px;">Praegu on tegemist alammenüüdega seotud peamenüü kirjega või alammenüü kirjetega ja
                                 siin ei saa selle kirje staatust muuta.</p><p style="line-height: 25px; margin-bottom: -3px;">
                                 Selle kirje staatuse muutmiseks pead minema menüü haldurisse ja selle aktiveerima või deaktiveerima.</p>');
-        $this->modal2->Title = t("Tip");
-        $this->modal2->HeaderClasses = 'btn-darkblue';
-        $this->modal2->addButton(t("OK"), 'ok', false, false, null, ['data-dismiss'=>'modal', 'class' => 'btn btn-orange']);
-
-        $this->createButtons();
+        $this->dlgModal2->Title = t("Tip");
+        $this->dlgModal2->HeaderClasses = 'btn-darkblue';
+        $this->dlgModal2->addButton(t("OK"), 'ok', false, false, null,
+            ['data-dismiss'=>'modal', 'class' => 'btn btn-orange']);
     }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
 
     public function lstContentTypeObject_GetItems()
     {
@@ -173,14 +230,14 @@ class PlaceholderEditPanel extends Q\Control\Panel
     public function lstStatus_Click(ActionParams $params)
     {
         if ($this->objMenu->ParentId || $this->objMenu->Right !== $this->objMenu->Left + 1) {
-            $this->modal2->showDialogBox();
+            $this->dlgModal2->showDialogBox();
         }
     }
 
     protected function lstClassNames_Change(ActionParams $params)
     {
         if ($this->objMenuContent->getContentType() !== $this->lstContentTypes->SelectedValue) {
-            $this->modal1->showDialogBox();
+            $this->dlgModal1->showDialogBox();
         } else {
             $this->objMenuContent->setContentType($this->lstContentTypes->SelectedValue);
             $this->objMenuContent->save();
@@ -193,6 +250,7 @@ class PlaceholderEditPanel extends Q\Control\Panel
         if ($params->ActionParameter == "pass") {
             $this->objMenuContent->setContentType($this->lstContentTypes->SelectedValue);
             $this->objMenuContent->setRedirectUrl(null);
+            $this->objMenuContent->setHomelyUrl(null);
             if ($this->objMenuContent->getRedirectUrl()) {
                 $this->objMenuContent->setIsEnabled($this->lstStatus->SelectedValue);
             } else {
@@ -227,45 +285,7 @@ class PlaceholderEditPanel extends Q\Control\Panel
         } else {
             // does nothing
         }
-        $this->modal1->hideDialogBox();
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////
-
-    public function CreateButtons()
-    {
-        $this->btnSave = new Q\Plugin\Control\Button($this);
-        if ($this->objMenuContent->getRedirectUrl()) {
-            $this->btnSave->Text = t('Update');
-        } else {
-            $this->btnSave->Text = t('Save');
-        }
-        $this->btnSave->CssClass = 'btn btn-orange';
-        $this->btnSave->addWrapperCssClass('center-button');
-        $this->btnSave->PrimaryButton = true;
-        $this->btnSave->addAction(new Q\Event\Click(), new Q\Action\AjaxControl($this,'btnMenuSave_Click'));
-        // The variable below is being prepared for fast transmission
-        $this->strSaveButtonId = $this->btnSave->ControlId;
-
-        $this->btnSaving = new Q\Plugin\Control\Button($this);
-        if ($this->objMenuContent->getRedirectUrl()) {
-            $this->btnSaving->Text = t('Update and close');
-        } else {
-            $this->btnSaving->Text = t('Save and close');
-        }
-        $this->btnSaving->CssClass = 'btn btn-darkblue';
-        $this->btnSaving->addWrapperCssClass('center-button');
-        $this->btnSaving->PrimaryButton = true;
-        $this->btnSaving->addAction(new Q\Event\Click(), new Q\Action\AjaxControl($this,'btnMenuSaveClose_Click'));
-        // The variable below is being prepared for fast transmission
-        $this->strSavingButtonId = $this->btnSaving->ControlId;
-        
-        $this->btnCancel = new Q\Plugin\Control\Button($this);
-        $this->btnCancel->Text = t('Cancel');
-        $this->btnCancel->CssClass = 'btn btn-default';
-        $this->btnCancel->addWrapperCssClass('center-button');
-        $this->btnCancel->CausesValidation = false;
-        $this->btnCancel->addAction(new Q\Event\Click(), new Q\Action\AjaxControl($this,'btnMenuCancel_Click'));
+        $this->dlgModal1->hideDialogBox();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -275,20 +295,18 @@ class PlaceholderEditPanel extends Q\Control\Panel
         if ($this->txtMenuText->Text) {
             $this->objMenuContent->setMenuText($this->txtMenuText->Text);
             $this->objMenuContent->setRedirectUrl('#');
+            $this->objMenuContent->setHomelyUrl(1);
             $this->objMenuContent->setIsEnabled($this->lstStatus->SelectedValue);
             $this->objMenuContent->save();
 
             $this->txtExistingMenuText->Text = $this->objMenuContent->getMenuText();
-            $this->txtExistingMenuText->refresh();
 
             if ($this->objMenuContent->getRedirectUrl()) {
-                $this->txtTitleSlug = new Q\Plugin\Control\Label($this);
                 $url = $this->objMenuContent->getRedirectUrl();
                 $this->txtTitleSlug->Text = Q\Html::renderLink($url, $url, null);
                 $this->txtTitleSlug->HtmlEntities = false;
                 $this->txtTitleSlug->setCssStyle('font-weight', 400);
             } else {
-                $this->txtTitleSlug = new Q\Plugin\Control\Label($this);
                 $this->txtTitleSlug->Text = t('Uncompleted link...');
                 $this->txtTitleSlug->setCssStyle('color', '#999;');
             }
@@ -305,18 +323,9 @@ class PlaceholderEditPanel extends Q\Control\Panel
                 Application::executeJavaScript(sprintf("jQuery($this->strSavingButtonId).text('{$strUpdateAndClose_translate}');"));
             }
 
-            $this->lblMessage->Display = true;
-            $this->lblMessage->Dismissable = true;
-            $this->lblMessage->removeCssClass(Bs\Bootstrap::ALERT_WARNING);
-            $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_SUCCESS);
-            $this->lblMessage->Text = t('<strong>Well done!</strong> The post has been saved or modified.');
+            $this->dlgToastr1->notify();
         } else {
-            $this->lblMessage->Display = true;
-            $this->lblMessage->Dismissable = true;
-            $this->txtMenuText->focus();
-            $this->lblMessage->removeCssClass(Bs\Bootstrap::ALERT_SUCCESS);
-            $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_DANGER);
-            $this->lblMessage->Text = t('<strong>Sorry</strong>, the menu title must exist!');
+            $this->dlgToastr2->notify();
         }
     }
 
@@ -325,17 +334,13 @@ class PlaceholderEditPanel extends Q\Control\Panel
         if ($this->txtMenuText->Text) {
             $this->objMenuContent->setMenuText($this->txtMenuText->Text);
             $this->objMenuContent->setRedirectUrl('#');
+            $this->objMenuContent->setHomelyUrl(1);
             $this->objMenuContent->setIsEnabled($this->lstStatus->SelectedValue);
             $this->objMenuContent->save();
 
             $this->redirectToListPage();
         } else {
-            $this->lblMessage->Display = true;
-            $this->lblMessage->Dismissable = true;
-            $this->txtMenuText->focus();
-            $this->lblMessage->removeCssClass(Bs\Bootstrap::ALERT_SUCCESS);
-            $this->lblMessage->addCssClass(Bs\Bootstrap::ALERT_DANGER);
-            $this->lblMessage->Text = t('<strong>Sorry</strong>, the menu title must exist!');
+            $this->dlgToastr2->notify();
         }
     }
     

@@ -16,11 +16,12 @@ use QCubed\Exception\InvalidCast;
 use QCubed\Control\FormBase;
 use QCubed\Project\Application;
 use QCubed\Table\ColumnBase;
+use QCubed\Project\Control\ControlBase;
 use QCubed\Table\DataColumn;
 use QCubed\Table\DataGridCheckboxColumn;
 use QCubed\Type;
 use QCubed\QString;
-
+use QCubed\Html;
 
 if (!defined('QCUBED_FONT_AWESOME_CSS')) {
     define('QCUBED_FONT_AWESOME_CSS', 'https://opensource.keycdn.com/fontawesome/4.6.3/font-awesome.min.css');
@@ -39,6 +40,7 @@ if (!defined('QCUBED_FONT_AWESOME_CSS')) {
  * This class is NOT intended to support column filters, but a subclass could be created that could do so. Just don't
  * do that here.
  *
+ * @property boolean $RenderAsHeader if true, all cells in the column will be rendered with a <<th>> tag instead of <<td>>
  * @property-read  QQClause $OrderByClause The sorting clause based on the selected headers.
  * @property  string $SortColumnId The id of the currently sorted column. Does not change if columns are re-ordered.
  * @property  int $SortColumnIndex The index of the currently sorted column.
@@ -46,11 +48,16 @@ if (!defined('QCUBED_FONT_AWESOME_CSS')) {
  * @property  array $SortInfo An array containing the sort data, so you can save and restore it later if needed.
  * @package QCubed\Plugin\Control
  */
-class VauuTable extends Q\Control\TableBase
+class VauuTable extends \QCubed\Control\TableBase
 {
     /** Numbers than can be used to multiply against the results of comparison functions to reverse the order. */
     const SORT_ASCENDING = 1;
     const SORT_DESCENDING = -1;
+
+    /** @var boolean */
+    protected $blnHtmlEntities = true;
+    /** @var boolean */
+    protected $blnRenderAsHeader = false;
 
     /** @var int Couter to generate column ids for columns that do not have them. */
     protected $intLastColumnId = 0;
@@ -64,6 +71,7 @@ class VauuTable extends Q\Control\TableBase
 
     /**
      * VauuTable constructor.
+     *
      * @param ControlBase|FormBase $objParentObject
      * @param null|string $strControlId
      * @throws Caller
@@ -98,6 +106,7 @@ class VauuTable extends Q\Control\TableBase
 
     /**
      * Renders the given paginator in a span in the caption. If a caption already exists, it will add the caption.
+     *
      * @return string
      * @throws Caller
      */
@@ -353,6 +362,7 @@ class VauuTable extends Q\Control\TableBase
 
     /**
      * Returns the current state of the control to be able to restore it later.
+     *
      * @return mixed
      */
     public function getState()
@@ -370,6 +380,7 @@ class VauuTable extends Q\Control\TableBase
 
     /**
      * Restore the state of the control.
+     *
      * @param mixed $state Previously saved state as returned by GetState above.
      */
     public function putState($state)
@@ -448,7 +459,8 @@ class VauuTable extends Q\Control\TableBase
     public function __get($strName)
     {
         switch ($strName) {
-            // MISC
+            case 'HtmlEntities':
+                return $this->blnHtmlEntities;
             case "OrderByClause":
                 return $this->getOrderByInfo();
 
@@ -483,6 +495,15 @@ class VauuTable extends Q\Control\TableBase
     public function __set($strName, $mixValue)
     {
         switch ($strName) {
+            case "HtmlEntities":
+                try {
+                    $this->blnHtmlEntities = Type::cast($mixValue, Type::BOOLEAN);
+                    break;
+                } catch (InvalidCast $objExc) {
+                    $objExc->incrementOffset();
+                    throw $objExc;
+                }
+
             case "SortColumnId":
                 try {
                     $this->strSortColumnId = Type::cast($mixValue, Type::STRING);

@@ -8,9 +8,12 @@
  * @see NestedSortableBase
  */
 
-namespace QCubed\Plugin\Control;
+namespace QCubed\Plugin;
 
 
-class NestedSortable extends NestedSortableBase
+class NestedSortable extends \QCubed\Plugin\Control\NestedSortableBase
 {
+    /*public function  __construct($objParentObject, $strControlId = null) {
+        parent::__construct($objParentObject, $strControlId);
+    }*/
 }
